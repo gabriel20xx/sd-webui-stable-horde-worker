@@ -389,16 +389,6 @@ class StableHorde:
 
         has_nsfw = False
 
-        with call_queue.queue_lock:
-            if job.nsfw_censor:
-                x_image = np.array(processed.images[0])
-                image, has_nsfw = self.check_safety(x_image)
-                if has_nsfw:
-                    job.censored = True
-
-            else:
-                image = processed.images[0]
-
         if not has_nsfw and (
             "GFPGAN" in postprocessors or "CodeFormers" in postprocessors
         ):
@@ -440,43 +430,54 @@ class StableHorde:
 
             image = images[0]
 
-        # Saving image locally
-        infotext = (
-            processing.create_infotext(
-                p,
-                p.all_prompts,
-                p.all_seeds,
-                p.all_subseeds,
-                "Stable Horde",
-                0,
-                0,
+        with call_queue.queue_lock:
+            # Saving image locally
+            infotext = (
+                processing.create_infotext(
+                    p,
+                    p.all_prompts,
+                    p.all_seeds,
+                    p.all_subseeds,
+                    "Stable Horde",
+                    0,
+                    0,
+                )
+                if shared.opts.enable_pnginfo
+                else None
             )
-            if shared.opts.enable_pnginfo
-            else None
-        )
-        # workaround for model name and hash since webui
-        # uses shard.sd_model instead of local_model
-        infotext = sub(
-            "Model:(.*?),",
-            "Model: " + local_model.split(".")[0] + ",",
-            infotext,
-        )
-        infotext = sub(
-            "Model hash:(.*?),",
-            "Model hash: " + local_model_shorthash + ",",
-            infotext,
-        )
-        if self.config.save_images:
-            save_image(
-                image,
-                self.config.save_images_folder,
-                "",
-                job.seed,
-                job.prompt,
-                "png",
-                info=infotext,
-                p=p,
+            # workaround for model name and hash since webui
+            # uses shard.sd_model instead of local_model
+            infotext = sub(
+                "Model:(.*?),",
+                "Model: " + local_model.split(".")[0] + ",",
+                infotext,
             )
+            infotext = sub(
+                "Model hash:(.*?),",
+                "Model hash: " + local_model_shorthash + ",",
+                infotext,
+            )
+            if self.config.save_images:
+                save_image(
+                    image,
+                    self.config.save_images_folder,
+                    "",
+                    job.seed,
+                    job.prompt,
+                    "png",
+                    info=infotext,
+                    p=p,
+                )
+
+            if job.nsfw_censor:
+                x_image = np.array(processed.images[0])
+                image, has_nsfw = self.check_safety(x_image)
+                if has_nsfw:
+                    job.censored = True
+
+            else:
+                image = processed.images[0]
+
 
         self.state.id = job.id
         self.state.prompt = job.prompt

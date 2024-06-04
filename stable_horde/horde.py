@@ -459,7 +459,7 @@ class StableHorde:
             )
 
             if self.config.save_images:
-                image = np.array(processed.images[0])
+                image = processed.images[0]
                 save_image(
                     image,
                     self.config.save_images_folder,

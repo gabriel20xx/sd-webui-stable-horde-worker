@@ -5,29 +5,21 @@ from typing import Any, Dict, Optional
 from re import sub
 
 import aiohttp
+import numpy as np
+from PIL import Image
+from transformers.models.auto.feature_extraction_auto import AutoFeatureExtractor
+from diffusers.pipelines.stable_diffusion.safety_checker import (
+    StableDiffusionSafetyChecker
+)
+
 from .job import HordeJob
 from .config import StableHordeConfig
-import numpy as np
-from diffusers.pipelines.stable_diffusion.safety_checker import (
-    StableDiffusionSafetyChecker,
-)
-from PIL import Image
-from transformers.models.auto.feature_extraction_auto import (
-    AutoFeatureExtractor,
-)
-
 from modules.images import save_image
-from modules import (
-    shared,
-    call_queue,
-    processing,
-    sd_models,
-    sd_samplers,
+from modules import shared, call_queue, processing, sd_models, sd_samplers
+
+stable_horde_supported_models_url = (
+    "https://raw.githubusercontent.com/Haidra-Org/AI-Horde-image-model-reference/main/stable_diffusion.json"
 )
-
-# flake8: noqa: E501
-stable_horde_supported_models_url = "https://raw.githubusercontent.com/Haidra-Org/AI-Horde-image-model-reference/main/stable_diffusion.json"
-
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor = None
 safety_checker = None
@@ -70,96 +62,63 @@ class StableHorde:
         self.basedir = basedir
         self.config = config
         self.session: Optional[aiohttp.ClientSession] = None
-
-        self.sfw_request_censor = Image.open(
-            path.join(self.config.basedir, "assets", "nsfw_censor_sfw_request.png")
-        )
-
+        self.sfw_request_censor = Image.open(path.join(
+            self.config.basedir, "assets", "nsfw_censor_sfw_request.png"
+        ))
         self.supported_models = []
         self.current_models = {}
-
         self.state = State()
 
     async def get_supported_models(self):
-        attempts = 10
-        while attempts > 0:
-            attempts -= 1
-            async with aiohttp.ClientSession() as session:
-                try:
+        for attempt in range(10, 0, -1):
+            try:
+                async with aiohttp.ClientSession() as session:
                     async with session.get(stable_horde_supported_models_url) as resp:
                         if resp.status != 200:
                             raise aiohttp.ClientError()
-                        data = await resp.text()
-                        supported_models: Dict[str, Any] = json.loads(data)
-
-                        self.supported_models = list(supported_models.values())
+                        self.supported_models = list(
+                            json.loads(await resp.text()).values()
+                            )
                         return
-                except Exception:
-                    print(
-                        f"Failed to get supported models, retrying in 1 second... \
-                            ({attempts} attempts left"
-                    )
-                    await asyncio.sleep(1)
+            except Exception:
+                print(f"Failed to get supported models, retrying in 1 second... "
+                      f"({attempt} attempts left)")
+                await asyncio.sleep(1)
         raise Exception("Failed to get supported models after 10 attempts")
 
     def detect_current_model(self):
         model_checkpoint = shared.opts.sd_model_checkpoint
-        checkpoint_info = sd_models.checkpoints_list.get(model_checkpoint, None)
+        checkpoint_info = sd_models.checkpoints_list.get(model_checkpoint)
         if checkpoint_info is None:
             return f"Model checkpoint {model_checkpoint} not found"
 
         for model in self.supported_models:
-            try:
-                remote_hash = model["config"]["files"][0]["sha256sum"]
-            except KeyError:
-                continue
-
+            remote_hash = model.get("config", {}).get("files", [{}])[0].get("sha256sum")
             if shared.opts.sd_checkpoint_hash == remote_hash:
-                self.current_models = {model["name"]: checkpoint_info.name}
+                self.current_models[model["name"]] = checkpoint_info.name
 
-        if len(self.current_models) == 0:
+        if not self.current_models:
             return f"Current model {model_checkpoint} not found on StableHorde"
 
     def set_current_models(self, model_names: list):
-        """Set the current models in horde and config"""
-        remote_hashes = {}
-        self.current_models = {
-            k: v for k, v in self.current_models.items() if v in model_names
+        remote_hashes = {
+            model["config"]["files"][0]["sha256sum"].lower(): model["name"]
+            for model in self.supported_models if "sha256sum" in (
+                model["config"]["files"][0]
+            )
         }
-        # get the sha256 of all supported models
-        for model in self.supported_models:
-            try:
-                remote_hashes[model["config"]["files"][0]["sha256sum"].lower()] = model[
-                    "name"
-                ]
-            except KeyError:
-                continue
-        # get the sha256 of all local models and compare it to the remote hashes
-        # if the sha256 matches, add the model to the current models list
         for checkpoint in sd_models.checkpoints_list.values():
-            checkpoint: sd_models.CheckpointInfo
             if checkpoint.name in model_names:
-                # skip sha256 calculation if the model already has hash
-                if checkpoint.sha256 is None:
-                    local_hash = sd_models.hashes.sha256(
-                        checkpoint.filename, f"checkpoint/{checkpoint.name}"
-                    )
-                else:
-                    local_hash = checkpoint.sha256
-                if checkpoint.name in self.config.current_models.values():
-                    continue
-
+                local_hash = checkpoint.sha256 or sd_models.hashes.sha256(
+                    checkpoint.filename, f"checkpoint/{checkpoint.name}"
+                )
                 if local_hash in remote_hashes:
                     self.current_models[remote_hashes[local_hash]] = checkpoint.name
-                    print(
-                        f"sha256 for {checkpoint.name} is {local_hash} \
-                            and it's supported by StableHorde"
-                    )
+                    print(f"sha256 for {checkpoint.name} is {local_hash} and"
+                          f"it's supported by StableHorde")
                 else:
-                    print(
-                        f"sha256 for {checkpoint.name} is {local_hash} \
-                            but it's not supported by StableHorde"
-                    )
+                    print(f"sha256 for {checkpoint.name} is {local_hash} but"
+                          f"it's not supported by StableHorde")
 
         self.config.current_models = self.current_models
         self.config.save()
@@ -170,13 +129,9 @@ class StableHorde:
         self.current_models = self.config.current_models
 
         while True:
-            if len(self.current_models) == 0:
-                result = self.detect_current_model()
-                if result is not None:
-                    self.state.status = result
-                    # Wait 10 seconds before retrying to detect the current model
-                    # if the current model is not listed in the Stable Horde supported
-                    # models, we don't want to spam the server with requests
+            if not self.current_models:
+                self.state.status = self.detect_current_model()
+                if self.state.status:
                     await asyncio.sleep(10)
                     continue
 
@@ -184,106 +139,43 @@ class StableHorde:
 
             if self.config.enabled:
                 try:
-                    # Require a queue lock to prevent getting jobs when
-                    # there are generation jobs from webui.
                     with call_queue.queue_lock:
                         req = await HordeJob.get(
-                            await self.get_session(),
-                            self.config,
-                            list(self.current_models.keys()),
+                            await self.get_session(), self.config, list(
+                                self.current_models.keys()
+                            )
                         )
-                    if req is None:
-                        continue
-
-                    await self.handle_request(req)
-                except Exception:
-                    import traceback
-
-                    traceback.print_exc()
+                    if req:
+                        await self.handle_request(req)
+                except Exception as e:
+                    print(f"Error handling request: {e}")
 
     def patch_sampler_names(self):
-        """Add more samplers that the Stable Horde supports,
-        but are not included in the default sd_samplers module.
-        """
-        from modules import sd_samplers
-
         try:
-            # Old versions of webui put every samplers in `modules.sd_samplers`
-            # But the newer version split them into several files
-            # Happened in https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/4df63d2d197f26181758b5108f003f225fe84874 # noqa E501
             from modules.sd_samplers import KDiffusionSampler, SamplerData
         except ImportError:
             from modules.sd_samplers_kdiffusion import KDiffusionSampler
             from modules.sd_samplers_common import SamplerData
 
-        if sd_samplers.samplers_map.get("euler a karras"):
-            # already patched
+        if "euler a karras" in sd_samplers.samplers_map:
             return
 
         samplers = [
-            SamplerData(
-                "Euler a Karras",
-                lambda model, funcname="sample_euler_ancestral": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_euler_a_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "Euler Karras",
-                lambda model, funcname="sample_euler": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_euler_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "Heun Karras",
-                lambda model, funcname="sample_heun": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_heun_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "DPM adaptive Karras",
-                lambda model, funcname="sample_dpm_adaptive": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_dpm_ad_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "DPM fast Karras",
-                lambda model, funcname="sample_dpm_fast": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_dpm_fast_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "LMS Karras",
-                lambda model, funcname="sample_lms": KDiffusionSampler(funcname, model),
-                ["k_lms_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "DPM++ SDE Karras",
-                lambda model, funcname="sample_dpmpp_sde": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_dpmpp_sde_ka"],
-                {"scheduler": "karras"},
-            ),
-            SamplerData(
-                "DPM++ 2S a Karras",
-                lambda model, funcname="sample_dpmpp_2s_ancestral": KDiffusionSampler(
-                    funcname, model
-                ),
-                ["k_dpmpp_2s_a_ka"],
-                {"scheduler": "karras"},
-            ),
+            SamplerData(name, lambda model, fn=func: KDiffusionSampler(
+                fn, model
+            ), [alias], {"scheduler": "karras"})
+            for name, func, alias in [
+                ("Euler a Karras", "sample_euler_ancestral", "k_euler_a_ka"),
+                ("Euler Karras", "sample_euler", "k_euler_ka"),
+                ("Heun Karras", "sample_heun", "k_heun_ka"),
+                ("DPM adaptive Karras", "sample_dpm_adaptive", "k_dpm_ad_ka"),
+                ("DPM fast Karras", "sample_dpm_fast", "k_dpm_fast_ka"),
+                ("LMS Karras", "sample_lms", "k_lms_ka"),
+                ("DPM++ SDE Karras", "sample_dpmpp_sde", "k_dpmpp_sde_ka"),
+                ("DPM++ 2S a Karras", "sample_dpmpp_2s_ancestral", "k_dpmpp_2s_a_ka"),
+            ]
         ]
+
         sd_samplers.samplers.extend(samplers)
         sd_samplers.samplers_for_img2img.extend(samplers)
         sd_samplers.all_samplers_map.update({s.name: s for s in samplers})
@@ -294,36 +186,27 @@ class StableHorde:
 
     async def handle_request(self, job: HordeJob):
         self.patch_sampler_names()
-
-        self.state.status = f"Get popped generation request {job.id}, \
-            model {job.model}, sampler {job.sampler}"
-        sampler_name = job.sampler
-        if sampler_name == "k_dpm_adaptive":
-            sampler_name = "k_dpm_ad"
-        if sampler_name not in sd_samplers.samplers_map:
-            self.state.status = f"ERROR: Unknown sampler {sampler_name}"
-            return
+        self.state.status = f"Get popped generation request {job.id}, " + \
+                            f"model {job.model}, sampler {job.sampler}"
+        sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
         if job.karras:
             sampler_name += "_ka"
 
-        # Map model name to model
         local_model = self.current_models.get(job.model, shared.sd_model)
-        # Short hash for info text
         local_model_shorthash = None
         for checkpoint in sd_models.checkpoints_list.values():
-            checkpoint: sd_models.CheckpointInfo
             if checkpoint.name == local_model:
-                if not checkpoint.shorthash:
-                    checkpoint.calculate_shorthash()
-                local_model_shorthash = checkpoint.shorthash
+                local_model_shorthash = (
+                    checkpoint.shorthash or checkpoint.calculate_shorthash()
+                )
                 break
-        if local_model_shorthash is None:
+        if not local_model_shorthash:
             raise Exception(f"ERROR: Unknown model {local_model}")
 
-        sampler = sd_samplers.samplers_map.get(sampler_name, None)
-        if sampler is None:
+        sampler = sd_samplers.samplers_map.get(sampler_name)
+        if not sampler:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
-
+        
         postprocessors = job.postprocessors
 
         params = {
@@ -342,9 +225,7 @@ class StableHorde:
             "n_iter": job.n_iter,
             "do_not_save_samples": True,
             "do_not_save_grid": True,
-            "override_settings": {
-                "sd_model_checkpoint": local_model,
-            },
+            "override_settings": {"sd_model_checkpoint": local_model},
             "enable_hr": job.hires_fix,
             "hr_upscaler": self.config.hr_upscaler,
             "override_settings_restore_afterwards": self.config.restore_settings,
@@ -352,20 +233,18 @@ class StableHorde:
 
         if job.hires_fix:
             ar = job.width / job.height
-            params["firstphase_width"] = min(
-                self.config.hires_firstphase_resolution,
-                int(self.config.hires_firstphase_resolution * ar),
+            params["firstphase_width"] = (
+                min(self.config.hires_firstphase_resolution,
+                    int(self.config.hires_firstphase_resolution * ar))
             )
-            params["firstphase_height"] = min(
-                self.config.hires_firstphase_resolution,
-                int(self.config.hires_firstphase_resolution / ar),
+            params["firstphase_height"] = (
+                min(self.config.hires_firstphase_resolution, 
+                    int(self.config.hires_firstphase_resolution / ar))
             )
 
-        if job.source_image is not None:
+        if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(
-                init_images=[job.source_image],
-                mask=job.source_mask,
-                **params,
+                init_images=[job.source_image], mask=job.source_mask, **params
             )
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
@@ -443,7 +322,9 @@ class StableHorde:
                 "GFPGAN" in postprocessors or "CodeFormers" in postprocessors
             ):
                 model = "CodeFormer" if "CodeFormers" in postprocessors else "GFPGAN"
-                face_restorators = [x for x in shared.face_restorers if x.name() == model]
+                face_restorators = (
+                    [x for x in shared.face_restorers if x.name() == model]
+                )
                 if len(face_restorators) == 0:
                     print(f"ERROR: No face restorer for {model}")
 
@@ -479,7 +360,6 @@ class StableHorde:
                     )
 
                 image = images[0]
-
 
         self.state.id = job.id
         self.state.prompt = job.prompt

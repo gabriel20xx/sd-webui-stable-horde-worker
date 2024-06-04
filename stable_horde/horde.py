@@ -389,46 +389,7 @@ class StableHorde:
 
         has_nsfw = False
 
-        if not has_nsfw and (
-            "GFPGAN" in postprocessors or "CodeFormers" in postprocessors
-        ):
-            model = "CodeFormer" if "CodeFormers" in postprocessors else "GFPGAN"
-            face_restorators = [x for x in shared.face_restorers if x.name() == model]
-            if len(face_restorators) == 0:
-                print(f"ERROR: No face restorer for {model}")
-
-            else:
-                with call_queue.queue_lock:
-                    image = face_restorators[0].restore(np.array(image))
-                image = Image.fromarray(image)
-
-        if "RealESRGAN_x4plus" in postprocessors and not has_nsfw:
-            from modules.postprocessing import run_extras
-
-            with call_queue.queue_lock:
-                images, _info, _wtf = run_extras(
-                    image=image,
-                    extras_mode=0,
-                    resize_mode=0,
-                    show_extras_results=True,
-                    upscaling_resize=2,
-                    upscaling_resize_h=None,
-                    upscaling_resize_w=None,
-                    upscaling_crop=False,
-                    upscale_first=False,
-                    extras_upscaler_1="R-ESRGAN 4x+",  # 8 - RealESRGAN_x4plus
-                    extras_upscaler_2=None,
-                    extras_upscaler_2_visibility=0.0,
-                    gfpgan_visibility=0.0,
-                    codeformer_visibility=0.0,
-                    codeformer_weight=0.0,
-                    image_folder="",
-                    input_dir="",
-                    output_dir="",
-                    save_output=False,
-                )
-
-            image = images[0]
+        
 
         with call_queue.queue_lock:
             # Saving image locally
@@ -479,6 +440,47 @@ class StableHorde:
 
             else:
                 image = processed.images[0]
+
+            if not has_nsfw and (
+                "GFPGAN" in postprocessors or "CodeFormers" in postprocessors
+            ):
+                model = "CodeFormer" if "CodeFormers" in postprocessors else "GFPGAN"
+                face_restorators = [x for x in shared.face_restorers if x.name() == model]
+                if len(face_restorators) == 0:
+                    print(f"ERROR: No face restorer for {model}")
+
+                else:
+                    with call_queue.queue_lock:
+                        image = face_restorators[0].restore(np.array(image))
+                    image = Image.fromarray(image)
+
+            if "RealESRGAN_x4plus" in postprocessors and not has_nsfw:
+                from modules.postprocessing import run_extras
+
+                with call_queue.queue_lock:
+                    images, _info, _wtf = run_extras(
+                        image=image,
+                        extras_mode=0,
+                        resize_mode=0,
+                        show_extras_results=True,
+                        upscaling_resize=2,
+                        upscaling_resize_h=None,
+                        upscaling_resize_w=None,
+                        upscaling_crop=False,
+                        upscale_first=False,
+                        extras_upscaler_1="R-ESRGAN 4x+",  # 8 - RealESRGAN_x4plus
+                        extras_upscaler_2=None,
+                        extras_upscaler_2_visibility=0.0,
+                        gfpgan_visibility=0.0,
+                        codeformer_visibility=0.0,
+                        codeformer_weight=0.0,
+                        image_folder="",
+                        input_dir="",
+                        output_dir="",
+                        save_output=False,
+                    )
+
+                image = images[0]
 
 
         self.state.id = job.id

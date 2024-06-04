@@ -17,9 +17,9 @@ from .config import StableHordeConfig
 from modules.images import save_image
 from modules import shared, call_queue, processing, sd_models, sd_samplers
 
-stable_horde_supported_models_url = (
-    "https://raw.githubusercontent.com/Haidra-Org/AI-Horde-image-model-reference/main/stable_diffusion.json"
-)
+# flake8: noqa: E501
+stable_horde_supported_models_url = "https://raw.githubusercontent.com/Haidra-Org/AI-Horde-image-model-reference/main/stable_diffusion.json"
+
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor = None
 safety_checker = None

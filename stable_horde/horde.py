@@ -389,8 +389,6 @@ class StableHorde:
 
         has_nsfw = False
 
-        
-
         with call_queue.queue_lock:
             # Saving image locally
             infotext = (

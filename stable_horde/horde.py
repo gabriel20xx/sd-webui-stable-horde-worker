@@ -457,7 +457,9 @@ class StableHorde:
                 "Model hash: " + local_model_shorthash + ",",
                 infotext,
             )
+
             if self.config.save_images:
+                image = np.array(processed.images[0])
                 save_image(
                     image,
                     self.config.save_images_folder,

@@ -136,11 +136,10 @@ class StableHorde:
                         req = await HordeJob.get(await self.get_session(), self.config, list(self.current_models.keys()))
                     if req:
                         await self.handle_request(req)
-                except Exception as e:
+                except Exception:
                     import traceback
 
                     traceback.print_exc()
-
 
     def patch_sampler_names(self):
         try:
@@ -316,9 +315,19 @@ class StableHorde:
         if shared.opts.enable_pnginfo:
             try:
                 print("Step B")
+                # Debugging: Check attributes of the processed object
+                print(f"Attributes of processed: {dir(processed)}")
+
+                # Ensure required attributes are present before calling create_infotext
+                required_attrs = ['all_prompts', 'all_seeds', 'all_subseeds']
+                for attr in required_attrs:
+                    if not hasattr(processed, attr):
+                        raise AttributeError(f"Processed object missing required attribute: {attr}")
+
                 infotext = processing.create_infotext(
                     processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
                 print("Step C")
+
                 local_model = self.current_models.get(job.model, shared.sd_model)
                 print("Step D")
                 try:
@@ -326,6 +335,7 @@ class StableHorde:
                 except Exception as e:
                     print(f"Error: _get_model_shorthash {e}")
                 print("Step E")
+
                 infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
                 print("Step F")
                 infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)

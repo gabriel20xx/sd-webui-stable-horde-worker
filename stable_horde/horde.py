@@ -107,6 +107,7 @@ class StableHorde:
             for model in self.supported_models if "sha256sum" in model["config"]["files"][0]
         }
         for checkpoint in sd_models.checkpoints_list.values():
+            checkpoint: sd_models.CheckpointInfo
             if checkpoint.name in model_names:
                 local_hash = checkpoint.sha256 or sd_models.hashes.sha256(checkpoint.filename, f"checkpoint/{checkpoint.name}")
                 if local_hash in remote_hashes:
@@ -185,16 +186,17 @@ class StableHorde:
         local_model = self.current_models.get(job.model, shared.sd_model)
         try:
             local_model_shorthash = self._get_model_shorthash(local_model)
+            print(f"Local model shorthash 1: {local_model_shorthash}")
         except Exception as e:
             print(f"Error: _get_model_shorthash {e}")
-        if not local_model_shorthash:
+        if local_model_shorthash is None:
             raise Exception(f"ERROR: Unknown model {local_model}")
         sampler = sd_samplers.samplers_map.get(sampler_name)
-        if not sampler:
+        if sampler is None:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
         postprocessors = job.postprocessors
         try:
-            params = self._create_params(job, local_model, sampler, local_model_shorthash)
+            params = self._create_params(job, local_model, sampler)
         except Exception as e:
             print(f"Error: _create_params {e}")
         if job.source_image:
@@ -227,14 +229,19 @@ class StableHorde:
 
     def _get_model_shorthash(self, local_model: str) -> Optional[str]:
         print("Step U")
+        local_model_shorthash = None
         for checkpoint in sd_models.checkpoints_list.values():
+            checkpoint: sd_models.CheckpointInfo
             if checkpoint.name == local_model:
                 print("Step V")
-                return checkpoint.shorthash or checkpoint.calculate_shorthash()
+                if not checkpoint.shorthash:
+                    checkpoint.calculate_shorthash()
+                local_model_shorthash = checkpoint.shorthash
+                return local_model_shorthash
         print("Step Z")
         return None
 
-    def _create_params(self, job: HordeJob, local_model: str, sampler: str, local_model_shorthash: str) -> Dict[str, Any]:
+    def _create_params(self, job: HordeJob, local_model: str, sampler: str) -> Dict[str, Any]:
         params = {
             "sd_model": local_model,
             "prompt": job.prompt,
@@ -332,6 +339,7 @@ class StableHorde:
                 print("Step D")
                 try:
                     local_model_shorthash = self._get_model_shorthash(local_model)
+                    print(f"Local model shorthash 2: {local_model_shorthash}")
                 except Exception as e:
                     print(f"Error: _get_model_shorthash {e}")
                 print("Step E")

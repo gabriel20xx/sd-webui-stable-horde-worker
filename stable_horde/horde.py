@@ -161,6 +161,7 @@ class StableHorde:
                 ("Heun Karras", "sample_heun", "k_heun_ka"),
                 ("DPM adaptive Karras", "sample_dpm_adaptive", "k_dpm_ad_ka"),
                 ("DPM fast Karras", "sample_dpm_fast", "k_dpm_fast_ka"),
+                ("DPM 2 Karras", "sample_dpm_2", "k_dpm_2_ka")
                 ("LMS Karras", "sample_lms", "k_lms_ka"),
                 ("DPM++ SDE Karras", "sample_dpmpp_sde", "k_dpmpp_sde_ka"),
                 ("DPM++ 2S a Karras", "sample_dpmpp_2s_ancestral", "k_dpmpp_2s_a_ka"),
@@ -229,17 +230,15 @@ class StableHorde:
             self.state.status = f"Submission accepted, reward {res} received."
 
     def _get_model_shorthash(self, local_model: str) -> Optional[str]:
-        print("Step U")
         local_model_shorthash = None
         for checkpoint in sd_models.checkpoints_list.values():
             checkpoint: sd_models.CheckpointInfo
             if checkpoint.name == local_model:
-                print("Step V")
                 if not checkpoint.shorthash:
                     checkpoint.calculate_shorthash()
                 local_model_shorthash = checkpoint.shorthash
                 return local_model_shorthash
-        print("Step Z")
+
         return None
 
     def _create_params(self, job: HordeJob, local_model: str, sampler: str) -> Dict[str, Any]:
@@ -282,81 +281,59 @@ class StableHorde:
 
     def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
         has_nsfw = False
-        print("Step 1")
         try:
             infotext = self._generate_infotext(processed, job)
         except Exception as e:
             print(f"Error: _generate_infotext {e}")
-        print("Step 2")
+
+        already_processed = False
         if self.config.save_images:
             image = processed.images[0]
-            print("Step 2.1")
+            already_processed = True
             save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=processed)
-        print("Step 3")
+
         if job.nsfw_censor:
-            print("Step 3.1")
             x_image = np.array(processed.images[0])
-            print("Step 3.2")
             try:
                 image, has_nsfw = self.check_safety(x_image)
             except Exception as e:
                 print(f"Error: check_safety {e}")
-            print("Step 3.3")
+
             if has_nsfw:
                 job.censored = True
         else:
-            print("Step 3.B")
-            image = processed.images[0]
-        print("Step 4")
+            if not already_processed:
+                image = processed.images[0]
+
         if not has_nsfw:
-            print("Step 4.1")
             try:
                 image = self._apply_postprocessors(image, postprocessors)
-                print("Step 4.2")
             except Exception as e:
                 print(f"Error: _apply_postprocessors {e}")
-        print("Step 5")
+
         return image
 
     def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
-        print("Step A")
         if shared.opts.enable_pnginfo:
             try:
-                print("Step B")
-                # Debugging: Check attributes of the processed object
                 print(f"Attributes of processed: {dir(processed)}")
-
-                # Ensure required attributes are present before calling create_infotext
-                required_attrs = ['all_prompts', 'all_seeds', 'all_subseeds', 'scheduler']
-                for attr in required_attrs:
-                    if not hasattr(processed, attr):
-                        # Provide a default value for scheduler if it is missing
-                        if attr == 'scheduler':
-                            setattr(processed, attr, 'default_scheduler') # TODO: Replace with a real scheduler
-                        else:
-                            raise AttributeError(f"Processed object missing required attribute: {attr}")
 
                 infotext = processing.create_infotext(
                     processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
-                print("Step C")
-
                 local_model = self.current_models.get(job.model, shared.sd_model)
-                print("Step D")
                 try:
                     local_model_shorthash = self._get_model_shorthash(local_model)
                     print(f"Local model shorthash 2: {local_model_shorthash}")
                 except Exception as e:
                     print(f"Error: _get_model_shorthash {e}")
-                print("Step E")
 
                 infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
-                print("Step F")
                 infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
-                print("Step G")
+
                 return infotext
             except AttributeError as e:
-                print(f"Error generating infotext: {e}")
                 return None
+        
         return None
 
     def _apply_postprocessors(self, image: Image.Image, postprocessors: List[str]) -> Image.Image:

@@ -88,6 +88,7 @@ class StableHorde:
         model_checkpoint = shared.opts.sd_model_checkpoint
         checkpoint_info = sd_models.checkpoints_list.get(model_checkpoint)
         if checkpoint_info is None:
+            print(f"Model checkpoint {model_checkpoint} not found")
             return f"Model checkpoint {model_checkpoint} not found"
 
         for model in self.supported_models:
@@ -96,6 +97,7 @@ class StableHorde:
                 self.current_models[model["name"]] = checkpoint_info.name
 
         if not self.current_models:
+            print(f"Current model {model_checkpoint} not found on StableHorde")
             return f"Current model {model_checkpoint} not found on StableHorde"
         return None
 
@@ -205,10 +207,8 @@ class StableHorde:
                 shared.opts.CLIP_stop_at_last_layers = old_clip_skip
             shared.state.end()
 
-        has_nsfw = False
-
         with call_queue.queue_lock:
-            image, has_nsfw = self._handle_postprocessing(processed, job, postprocessors)
+            image = self._handle_postprocessing(processed, job, postprocessors)
 
         self._update_state(job, sampler_name, image)
 
@@ -260,7 +260,7 @@ class StableHorde:
             hijacked = True
         return hijacked, old_clip_skip
 
-    def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Tuple[Image.Image, bool]:
+    def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
         has_nsfw = False
         infotext = self._generate_infotext(processed, job)
 
@@ -279,7 +279,7 @@ class StableHorde:
         if not has_nsfw:
             image = self._apply_postprocessors(image, postprocessors)
 
-        return image, has_nsfw
+        return image
 
     def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:

@@ -283,13 +283,17 @@ class StableHorde:
 
     def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:
-            infotext = processing.create_infotext(
-                processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
-            local_model = self.current_models.get(job.model, shared.sd_model)
-            local_model_shorthash = self._get_model_shorthash(local_model)
-            infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
-            infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
-            return infotext
+            try:
+                infotext = processing.create_infotext(
+                    processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
+                local_model = self.current_models.get(job.model, shared.sd_model)
+                local_model_shorthash = self._get_model_shorthash(local_model)
+                infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
+                infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
+                return infotext
+            except AttributeError as e:
+                print(f"Error generating infotext: {e}")
+                return None
         return None
 
     def _apply_postprocessors(self, image: Image.Image, postprocessors: List[str]) -> Image.Image:

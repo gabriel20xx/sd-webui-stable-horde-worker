@@ -435,7 +435,8 @@ class StableHorde:
                     job.censored = True
 
             else:
-                image = processed.images[0]
+                if not self.config.save_images:
+                    image = processed.images[0]
 
 
         self.state.id = job.id

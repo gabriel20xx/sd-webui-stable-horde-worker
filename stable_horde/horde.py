@@ -174,14 +174,20 @@ class StableHorde:
                 sd_samplers.samplers_map[alias.lower()] = sampler.name
 
     async def handle_request(self, job: HordeJob):
-        self.patch_sampler_names()
+        try:
+            self.patch_sampler_names()
+        except Exception as e:
+            print(f"Error: patch_sampler_names {e}")
         self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
         if job.karras:
             sampler_name += "_ka"
 
         local_model = self.current_models.get(job.model, shared.sd_model)
-        local_model_shorthash = self._get_model_shorthash(local_model)
+        try:
+            local_model_shorthash = self._get_model_shorthash(local_model)
+        except Exception as e:
+            print(f"Error: _get_model_shorthash {e}")
 
         if not local_model_shorthash:
             raise Exception(f"ERROR: Unknown model {local_model}")
@@ -191,7 +197,10 @@ class StableHorde:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
 
         postprocessors = job.postprocessors
-        params = self._create_params(job, local_model, sampler, local_model_shorthash)
+        try:
+            params = self._create_params(job, local_model, sampler, local_model_shorthash)
+        except Exception as e:
+            print(f"Error: _create_params {e}")
 
         if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
@@ -200,7 +209,10 @@ class StableHorde:
 
         with call_queue.queue_lock:
             shared.state.begin()
-            hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
+            try:
+                hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
+            except Exception as e:
+                print(f"Error: _hijack_clip_skip {e}")
             processed = processing.process_images(p)
 
             if hijacked:
@@ -208,9 +220,15 @@ class StableHorde:
             shared.state.end()
 
         with call_queue.queue_lock:
-            image = self._handle_postprocessing(processed, job, postprocessors)
+            try:
+                image = self._handle_postprocessing(processed, job, postprocessors)
+            except Exception as e:
+                print(f"Error: _handle_postprocessing {e}")
 
-        self._update_state(job, sampler_name, image)
+        try:
+            self._update_state(job, sampler_name, image)
+        except Exception as e:
+                print(f"Error: _update_state {e}")
 
         res = await job.submit(image)
         if res:
@@ -262,7 +280,10 @@ class StableHorde:
 
     def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
         has_nsfw = False
-        infotext = self._generate_infotext(processed, job)
+        try:
+            infotext = self._generate_infotext(processed, job)
+        except Exception as e:
+            print(f"Error: _generate_infotext {e}")
 
         if self.config.save_images:
             image = processed.images[0]
@@ -270,14 +291,20 @@ class StableHorde:
 
         if job.nsfw_censor:
             x_image = np.array(processed.images[0])
-            image, has_nsfw = self.check_safety(x_image)
+            try:
+                image, has_nsfw = self.check_safety(x_image)
+            except Exception as e:
+                print(f"Error: check_safety {e}")
             if has_nsfw:
                 job.censored = True
         else:
             image = processed.images[0]
 
         if not has_nsfw:
-            image = self._apply_postprocessors(image, postprocessors)
+            try:
+                image = self._apply_postprocessors(image, postprocessors)
+            except Exception as e:
+                print(f"Error: _apply_postprocessors {e}")
 
         return image
 
@@ -287,7 +314,10 @@ class StableHorde:
                 infotext = processing.create_infotext(
                     processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
                 local_model = self.current_models.get(job.model, shared.sd_model)
-                local_model_shorthash = self._get_model_shorthash(local_model)
+                try:
+                    local_model_shorthash = self._get_model_shorthash(local_model)
+                except Exception as e:
+                    print(f"Error: _get_model_shorthash {e}")
                 infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
                 infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
                 return infotext

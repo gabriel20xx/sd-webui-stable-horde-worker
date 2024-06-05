@@ -132,6 +132,7 @@ class StableHorde:
 
             await asyncio.sleep(self.config.interval)
             if self.config.enabled:
+                self.state.status = "Waiting for a request"
                 try:
                     with call_queue.queue_lock:
                         req = await HordeJob.get(await self.get_session(), self.config, list(self.current_models.keys()))

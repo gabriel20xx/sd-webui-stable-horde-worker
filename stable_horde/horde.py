@@ -120,9 +120,10 @@ class StableHorde:
         return self.current_models
 
     async def run(self):
+        print("Step 1")
         await self.get_supported_models()
         self.current_models = self.config.current_models
-
+        print("Step 2")
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()
@@ -131,12 +132,14 @@ class StableHorde:
                     continue
 
             await asyncio.sleep(self.config.interval)
-
+            print("Step 3")
             if self.config.enabled:
                 try:
                     with call_queue.queue_lock:
+                        print("Step 4")
                         req = await HordeJob.get(await self.get_session(), self.config, list(self.current_models.keys()))
                     if req:
+                        print("Step 5")
                         await self.handle_request(req)
                 except Exception as e:
                     print(f"Error handling request: {e}")

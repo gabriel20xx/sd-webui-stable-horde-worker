@@ -227,9 +227,12 @@ class StableHorde:
             self.state.status = f"Submission accepted, reward {res} received."
 
     def _get_model_shorthash(self, local_model: str) -> Optional[str]:
+        print("Step U")
         for checkpoint in sd_models.checkpoints_list.values():
             if checkpoint.name == local_model:
+                print("Step V")
                 return checkpoint.shorthash or checkpoint.calculate_shorthash()
+        print("Step Z")
         return None
 
     def _create_params(self, job: HordeJob, local_model: str, sampler: str, local_model_shorthash: str) -> Dict[str, Any]:
@@ -309,17 +312,24 @@ class StableHorde:
         return image
 
     def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
+        print("Step A")
         if shared.opts.enable_pnginfo:
             try:
+                print("Step B")
                 infotext = processing.create_infotext(
                     processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
+                print("Step C")
                 local_model = self.current_models.get(job.model, shared.sd_model)
+                print("Step D")
                 try:
                     local_model_shorthash = self._get_model_shorthash(local_model)
                 except Exception as e:
                     print(f"Error: _get_model_shorthash {e}")
+                print("Step E")
                 infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
+                print("Step F")
                 infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
+                print("Step G")
                 return infotext
             except AttributeError as e:
                 print(f"Error generating infotext: {e}")

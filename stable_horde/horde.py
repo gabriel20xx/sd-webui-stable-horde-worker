@@ -120,10 +120,8 @@ class StableHorde:
         return self.current_models
 
     async def run(self):
-        print("Step 1")
         await self.get_supported_models()
         self.current_models = self.config.current_models
-        print("Step 2")
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()
@@ -132,14 +130,11 @@ class StableHorde:
                     continue
 
             await asyncio.sleep(self.config.interval)
-            print("Step 3")
             if self.config.enabled:
                 try:
                     with call_queue.queue_lock:
-                        print("Step 4")
                         req = await HordeJob.get(await self.get_session(), self.config, list(self.current_models.keys()))
                     if req:
-                        print("Step 5")
                         await self.handle_request(req)
                 except Exception as e:
                     print(f"Error handling request: {e}")
@@ -177,63 +172,74 @@ class StableHorde:
                 sd_samplers.samplers_map[alias.lower()] = sampler.name
 
     async def handle_request(self, job: HordeJob):
+        print("Step 1")
         try:
             self.patch_sampler_names()
         except Exception as e:
             print(f"Error: patch_sampler_names {e}")
+        print("Step 2")
         self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
+        print("Step 3")
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
+        print("Step 4")
         if job.karras:
             sampler_name += "_ka"
-
+        print("Step 5")
         local_model = self.current_models.get(job.model, shared.sd_model)
+        print("Step 6")
         try:
             local_model_shorthash = self._get_model_shorthash(local_model)
         except Exception as e:
             print(f"Error: _get_model_shorthash {e}")
-
+        print("Step 7")
         if not local_model_shorthash:
             raise Exception(f"ERROR: Unknown model {local_model}")
-
+        print("Step 8")
         sampler = sd_samplers.samplers_map.get(sampler_name)
         if not sampler:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
-
+        print("Step 9")
         postprocessors = job.postprocessors
+        print("Step 10")
         try:
             params = self._create_params(job, local_model, sampler, local_model_shorthash)
         except Exception as e:
             print(f"Error: _create_params {e}")
-
+        print("Step 11")
         if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
-
+        print("Step 12")
         with call_queue.queue_lock:
             shared.state.begin()
+            print("Step 13")
             try:
                 hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
             except Exception as e:
                 print(f"Error: _hijack_clip_skip {e}")
+            print("Step 14")
             processed = processing.process_images(p)
-
+            print("Step 15")
             if hijacked:
                 shared.opts.CLIP_stop_at_last_layers = old_clip_skip
+            print("Step 16")
             shared.state.end()
 
         with call_queue.queue_lock:
+            print("Step 17")
             try:
                 image = self._handle_postprocessing(processed, job, postprocessors)
             except Exception as e:
                 print(f"Error: _handle_postprocessing {e}")
-
+        print("Step 18")
         try:
             self._update_state(job, sampler_name, image)
         except Exception as e:
             print(f"Error: _update_state {e}")
-
+        print("Step 19")
         res = await job.submit(image)
+        print("Step 20")
         if res:
             self.state.status = f"Submission accepted, reward {res} received."
 

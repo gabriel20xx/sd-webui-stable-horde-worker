@@ -137,7 +137,10 @@ class StableHorde:
                     if req:
                         await self.handle_request(req)
                 except Exception as e:
-                    print(f"Error handling request: {e}")
+                    import traceback
+
+                    traceback.print_exc()
+
 
     def patch_sampler_names(self):
         try:
@@ -172,74 +175,54 @@ class StableHorde:
                 sd_samplers.samplers_map[alias.lower()] = sampler.name
 
     async def handle_request(self, job: HordeJob):
-        print("Step 1")
         try:
             self.patch_sampler_names()
         except Exception as e:
             print(f"Error: patch_sampler_names {e}")
-        print("Step 2")
         self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
-        print("Step 3")
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
-        print("Step 4")
         if job.karras:
             sampler_name += "_ka"
-        print("Step 5")
         local_model = self.current_models.get(job.model, shared.sd_model)
-        print("Step 6")
         try:
             local_model_shorthash = self._get_model_shorthash(local_model)
         except Exception as e:
             print(f"Error: _get_model_shorthash {e}")
-        print("Step 7")
         if not local_model_shorthash:
             raise Exception(f"ERROR: Unknown model {local_model}")
-        print("Step 8")
         sampler = sd_samplers.samplers_map.get(sampler_name)
         if not sampler:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
-        print("Step 9")
         postprocessors = job.postprocessors
-        print("Step 10")
         try:
             params = self._create_params(job, local_model, sampler, local_model_shorthash)
         except Exception as e:
             print(f"Error: _create_params {e}")
-        print("Step 11")
         if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
-        print("Step 12")
         with call_queue.queue_lock:
             shared.state.begin()
-            print("Step 13")
             try:
                 hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
             except Exception as e:
                 print(f"Error: _hijack_clip_skip {e}")
-            print("Step 14")
             processed = processing.process_images(p)
-            print("Step 15")
             if hijacked:
                 shared.opts.CLIP_stop_at_last_layers = old_clip_skip
-            print("Step 16")
             shared.state.end()
 
         with call_queue.queue_lock:
-            print("Step 17")
             try:
                 image = self._handle_postprocessing(processed, job, postprocessors)
             except Exception as e:
                 print(f"Error: _handle_postprocessing {e}")
-        print("Step 18")
         try:
             self._update_state(job, sampler_name, image)
         except Exception as e:
             print(f"Error: _update_state {e}")
-        print("Step 19")
         res = await job.submit(image)
-        print("Step 20")
         if res:
             self.state.status = f"Submission accepted, reward {res} received."
 
@@ -289,32 +272,40 @@ class StableHorde:
 
     def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
         has_nsfw = False
+        print("Step 1")
         try:
             infotext = self._generate_infotext(processed, job)
         except Exception as e:
             print(f"Error: _generate_infotext {e}")
-
+        print("Step 2")
         if self.config.save_images:
             image = processed.images[0]
+            print("Step 2.1")
             save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=processed)
-
+        print("Step 3")
         if job.nsfw_censor:
+            print("Step 3.1")
             x_image = np.array(processed.images[0])
+            print("Step 3.2")
             try:
                 image, has_nsfw = self.check_safety(x_image)
             except Exception as e:
                 print(f"Error: check_safety {e}")
+            print("Step 3.3")
             if has_nsfw:
                 job.censored = True
         else:
+            print("Step 3.B")
             image = processed.images[0]
-
+        print("Step 4")
         if not has_nsfw:
+            print("Step 4.1")
             try:
                 image = self._apply_postprocessors(image, postprocessors)
+                print("Step 4.2")
             except Exception as e:
                 print(f"Error: _apply_postprocessors {e}")
-
+        print("Step 5")
         return image
 
     def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:

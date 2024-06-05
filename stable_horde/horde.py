@@ -1,16 +1,14 @@
 import asyncio
 import json
 from os import path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from re import sub
 
 import aiohttp
 import numpy as np
 from PIL import Image
 from transformers.models.auto.feature_extraction_auto import AutoFeatureExtractor
-from diffusers.pipelines.stable_diffusion.safety_checker import (
-    StableDiffusionSafetyChecker
-)
+from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 
 from .job import HordeJob
 from .config import StableHordeConfig
@@ -24,8 +22,8 @@ stable_horde_supported_models_url = (
 )
 
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
-safety_feature_extractor = None
-safety_checker = None
+safety_feature_extractor: Optional[AutoFeatureExtractor] = None
+safety_checker: Optional[StableDiffusionSafetyChecker] = None
 
 
 class State:
@@ -40,16 +38,16 @@ class State:
         self.image: Optional[Image.Image] = None
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._status
 
     @status.setter
-    def status(self, value):
+    def status(self, value: str):
         self._status = value
         if shared.cmd_opts.nowebui:
             print(value)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "status": self.status,
             "prompt": self.prompt,
@@ -68,8 +66,8 @@ class StableHorde:
         self.sfw_request_censor = Image.open(path.join(
             self.config.basedir, "assets", "nsfw_censor_sfw_request.png"
         ))
-        self.supported_models = []
-        self.current_models = {}
+        self.supported_models: List[Dict[str, Any]] = []
+        self.current_models: Dict[str, str] = {}
         self.state = State()
 
     async def get_supported_models(self):
@@ -79,19 +77,14 @@ class StableHorde:
                     async with session.get(stable_horde_supported_models_url) as resp:
                         if resp.status != 200:
                             raise aiohttp.ClientError()
-                        self.supported_models = list(
-                            json.loads(await resp.text()).values()
-                            )
+                        self.supported_models = list(json.loads(await resp.text()).values())
                         return
-            except Exception:
-                print(
-                    f"Failed to get supported models, retrying in 1 second... "
-                    f"({attempt} attempts left)"
-                )
+            except Exception as e:
+                print(f"Failed to get supported models, retrying in 1 second... ({attempt} attempts left) Error: {e}")
                 await asyncio.sleep(1)
         raise Exception("Failed to get supported models after 10 attempts")
 
-    def detect_current_model(self):
+    def detect_current_model(self) -> Optional[str]:
         model_checkpoint = shared.opts.sd_model_checkpoint
         checkpoint_info = sd_models.checkpoints_list.get(model_checkpoint)
         if checkpoint_info is None:
@@ -104,30 +97,21 @@ class StableHorde:
 
         if not self.current_models:
             return f"Current model {model_checkpoint} not found on StableHorde"
+        return None
 
-    def set_current_models(self, model_names: list):
+    def set_current_models(self, model_names: List[str]) -> Dict[str, str]:
         remote_hashes = {
             model["config"]["files"][0]["sha256sum"].lower(): model["name"]
-            for model in self.supported_models if "sha256sum" in (
-                model["config"]["files"][0]
-            )
+            for model in self.supported_models if "sha256sum" in model["config"]["files"][0]
         }
         for checkpoint in sd_models.checkpoints_list.values():
             if checkpoint.name in model_names:
-                local_hash = checkpoint.sha256 or sd_models.hashes.sha256(
-                    checkpoint.filename, f"checkpoint/{checkpoint.name}"
-                )
+                local_hash = checkpoint.sha256 or sd_models.hashes.sha256(checkpoint.filename, f"checkpoint/{checkpoint.name}")
                 if local_hash in remote_hashes:
                     self.current_models[remote_hashes[local_hash]] = checkpoint.name
-                    print(
-                        f"sha256 for {checkpoint.name} is {local_hash} and"
-                        f"it's supported by StableHorde"
-                    )
+                    print(f"sha256 for {checkpoint.name} is {local_hash} and it's supported by StableHorde")
                 else:
-                    print(
-                        f"sha256 for {checkpoint.name} is {local_hash} but"
-                        f"it's not supported by StableHorde"
-                    )
+                    print(f"sha256 for {checkpoint.name} is {local_hash} but it's not supported by StableHorde")
 
         self.config.current_models = self.current_models
         self.config.save()
@@ -149,11 +133,7 @@ class StableHorde:
             if self.config.enabled:
                 try:
                     with call_queue.queue_lock:
-                        req = await HordeJob.get(
-                            await self.get_session(), self.config, list(
-                                self.current_models.keys()
-                            )
-                        )
+                        req = await HordeJob.get(await self.get_session(), self.config, list(self.current_models.keys()))
                     if req:
                         await self.handle_request(req)
                 except Exception as e:
@@ -170,9 +150,7 @@ class StableHorde:
             return
 
         samplers = [
-            SamplerData(name, lambda model, fn=func: KDiffusionSampler(
-                fn, model
-            ), [alias], {"scheduler": "karras"})
+            SamplerData(name, lambda model, fn=func: KDiffusionSampler(fn, model), [alias], {"scheduler": "karras"})
             for name, func, alias in [
                 ("Euler a Karras", "sample_euler_ancestral", "k_euler_a_ka"),
                 ("Euler Karras", "sample_euler", "k_euler_ka"),
@@ -195,31 +173,56 @@ class StableHorde:
 
     async def handle_request(self, job: HordeJob):
         self.patch_sampler_names()
-        self.state.status = (
-            f"Get popped generation request {job.id}, "
-            f"model {job.model}, sampler {job.sampler}"
-        )
+        self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
         if job.karras:
             sampler_name += "_ka"
 
         local_model = self.current_models.get(job.model, shared.sd_model)
-        local_model_shorthash = None
-        for checkpoint in sd_models.checkpoints_list.values():
-            if checkpoint.name == local_model:
-                local_model_shorthash = (
-                    checkpoint.shorthash or checkpoint.calculate_shorthash()
-                )
-                break
+        local_model_shorthash = self._get_model_shorthash(local_model)
+
         if not local_model_shorthash:
             raise Exception(f"ERROR: Unknown model {local_model}")
 
         sampler = sd_samplers.samplers_map.get(sampler_name)
         if not sampler:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
-        
-        postprocessors = job.postprocessors
 
+        postprocessors = job.postprocessors
+        params = self._create_params(job, local_model, sampler, local_model_shorthash)
+
+        if job.source_image:
+            p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
+        else:
+            p = processing.StableDiffusionProcessingTxt2Img(**params)
+
+        with call_queue.queue_lock:
+            shared.state.begin()
+            hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
+            processed = processing.process_images(p)
+
+            if hijacked:
+                shared.opts.CLIP_stop_at_last_layers = old_clip_skip
+            shared.state.end()
+
+        has_nsfw = False
+
+        with call_queue.queue_lock:
+            image, has_nsfw = self._handle_postprocessing(processed, job, postprocessors)
+
+        self._update_state(job, sampler_name, image)
+
+        res = await job.submit(image)
+        if res:
+            self.state.status = f"Submission accepted, reward {res} received."
+
+    def _get_model_shorthash(self, local_model: str) -> Optional[str]:
+        for checkpoint in sd_models.checkpoints_list.values():
+            if checkpoint.name == local_model:
+                return checkpoint.shorthash or checkpoint.calculate_shorthash()
+        return None
+
+    def _create_params(self, job: HordeJob, local_model: str, sampler: str, local_model_shorthash: str) -> Dict[str, Any]:
         params = {
             "sd_model": local_model,
             "prompt": job.prompt,
@@ -244,134 +247,90 @@ class StableHorde:
 
         if job.hires_fix:
             ar = job.width / job.height
-            params["firstphase_width"] = min(
-                self.config.hires_firstphase_resolution,
-                int(self.config.hires_firstphase_resolution * ar)
-            )
-            params["firstphase_height"] = min(
-                self.config.hires_firstphase_resolution,
-                int(self.config.hires_firstphase_resolution / ar)
-            )
+            params["firstphase_width"] = min(self.config.hires_firstphase_resolution, int(self.config.hires_firstphase_resolution * ar))
+            params["firstphase_height"] = min(self.config.hires_firstphase_resolution, int(self.config.hires_firstphase_resolution / ar))
 
-        if job.source_image:
-            p = processing.StableDiffusionProcessingImg2Img(
-                init_images=[job.source_image], mask=job.source_mask, **params
-            )
-        else:
-            p = processing.StableDiffusionProcessingTxt2Img(**params)
+        return params
 
-        with call_queue.queue_lock:
-            shared.state.begin()
-            # hijack clip skip
-            hijacked = False
-            old_clip_skip = shared.opts.CLIP_stop_at_last_layers
-            if (
-                job.clip_skip >= 1
-                and job.clip_skip != shared.opts.CLIP_stop_at_last_layers
-            ):
-                shared.opts.CLIP_stop_at_last_layers = job.clip_skip
-                hijacked = True
-            processed = processing.process_images(p)
+    def _hijack_clip_skip(self, clip_skip: int) -> Tuple[bool, Optional[int]]:
+        hijacked = False
+        old_clip_skip = shared.opts.CLIP_stop_at_last_layers
+        if clip_skip >= 1 and clip_skip != shared.opts.CLIP_stop_at_last_layers:
+            shared.opts.CLIP_stop_at_last_layers = clip_skip
+            hijacked = True
+        return hijacked, old_clip_skip
 
-            if hijacked:
-                shared.opts.CLIP_stop_at_last_layers = old_clip_skip
-            shared.state.end()
-
+    def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Tuple[Image.Image, bool]:
         has_nsfw = False
+        infotext = self._generate_infotext(processed, job)
 
-        with call_queue.queue_lock:
-            # Saving image locally
-            infotext = (
-                processing.create_infotext(
-                    p,
-                    p.all_prompts,
-                    p.all_seeds,
-                    p.all_subseeds,
-                    "Stable Horde",
-                    0,
-                    0,
-                )
-                if shared.opts.enable_pnginfo
-                else None
-            )
-            # workaround for model name and hash since webui
-            # uses shard.sd_model instead of local_model
-            infotext = sub(
-                "Model:(.*?),",
-                "Model: " + local_model.split(".")[0] + ",",
-                infotext,
-            )
-            infotext = sub(
-                "Model hash:(.*?),",
-                "Model hash: " + local_model_shorthash + ",",
-                infotext,
-            )
+        if self.config.save_images:
+            image = processed.images[0]
+            save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=processed)
 
-            if self.config.save_images:
-                image = processed.images[0]
-                save_image(
-                    image,
-                    self.config.save_images_folder,
-                    "",
-                    job.seed,
-                    job.prompt,
-                    "png",
-                    info=infotext,
-                    p=p,
-                )
+        if job.nsfw_censor:
+            x_image = np.array(processed.images[0])
+            image, has_nsfw = self.check_safety(x_image)
+            if has_nsfw:
+                job.censored = True
+        else:
+            image = processed.images[0]
 
-            if job.nsfw_censor:
-                x_image = np.array(processed.images[0])
-                image, has_nsfw = self.check_safety(x_image)
-                if has_nsfw:
-                    job.censored = True
+        if not has_nsfw:
+            image = self._apply_postprocessors(image, postprocessors)
 
-            else:
-                image = processed.images[0]
+        return image, has_nsfw
 
-            if not has_nsfw and (
-                "GFPGAN" in postprocessors or "CodeFormers" in postprocessors
-            ):
-                model = "CodeFormer" if "CodeFormers" in postprocessors else "GFPGAN"
-                face_restorators = (
-                    [x for x in shared.face_restorers if x.name() == model]
-                )
-                if len(face_restorators) == 0:
-                    print(f"ERROR: No face restorer for {model}")
+    def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
+        if shared.opts.enable_pnginfo:
+            infotext = processing.create_infotext(
+                processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
+            local_model = self.current_models.get(job.model, shared.sd_model)
+            local_model_shorthash = self._get_model_shorthash(local_model)
+            infotext = sub("Model:(.*?),", "Model: " + local_model.split(".")[0] + ",", infotext)
+            infotext = sub("Model hash:(.*?),", "Model hash: " + local_model_shorthash + ",", infotext)
+            return infotext
+        return None
 
-                else:
-                    with call_queue.queue_lock:
-                        image = face_restorators[0].restore(np.array(image))
-                    image = Image.fromarray(image)
-
-            if "RealESRGAN_x4plus" in postprocessors and not has_nsfw:
-                from modules.postprocessing import run_extras
-
+    def _apply_postprocessors(self, image: Image.Image, postprocessors: List[str]) -> Image.Image:
+        if "GFPGAN" in postprocessors or "CodeFormers" in postprocessors:
+            model = "CodeFormer" if "CodeFormers" in postprocessors else "GFPGAN"
+            face_restorators = [x for x in shared.face_restorers if x.name() == model]
+            if face_restorators:
                 with call_queue.queue_lock:
-                    images, _info, _wtf = run_extras(
-                        image=image,
-                        extras_mode=0,
-                        resize_mode=0,
-                        show_extras_results=True,
-                        upscaling_resize=2,
-                        upscaling_resize_h=None,
-                        upscaling_resize_w=None,
-                        upscaling_crop=False,
-                        upscale_first=False,
-                        extras_upscaler_1="R-ESRGAN 4x+",  # 8 - RealESRGAN_x4plus
-                        extras_upscaler_2=None,
-                        extras_upscaler_2_visibility=0.0,
-                        gfpgan_visibility=0.0,
-                        codeformer_visibility=0.0,
-                        codeformer_weight=0.0,
-                        image_folder="",
-                        input_dir="",
-                        output_dir="",
-                        save_output=False,
-                    )
+                    image = face_restorators[0].restore(np.array(image))
+                image = Image.fromarray(image)
+            else:
+                print(f"ERROR: No face restorer for {model}")
 
-                image = images[0]
+        if "RealESRGAN_x4plus" in postprocessors:
+            from modules.postprocessing import run_extras
+            with call_queue.queue_lock:
+                images, _info, _wtf = run_extras(
+                    image=image,
+                    extras_mode=0,
+                    resize_mode=0,
+                    show_extras_results=True,
+                    upscaling_resize=2,
+                    upscaling_resize_h=None,
+                    upscaling_resize_w=None,
+                    upscaling_crop=False,
+                    upscale_first=False,
+                    extras_upscaler_1="R-ESRGAN 4x+",
+                    extras_upscaler_2=None,
+                    extras_upscaler_2_visibility=0.0,
+                    gfpgan_visibility=0.0,
+                    codeformer_visibility=0.0,
+                    codeformer_weight=0.0,
+                    image_folder="",
+                    input_dir="",
+                    output_dir="",
+                    save_output=False,
+                )
+            image = images[0]
+        return image
 
+    def _update_state(self, job: HordeJob, sampler_name: str, image: Image.Image):
         self.state.id = job.id
         self.state.prompt = job.prompt
         self.state.negative_prompt = job.negative_prompt
@@ -380,30 +339,20 @@ class StableHorde:
         self.state.sampler = sampler_name
         self.state.image = image
 
-        res = await job.submit(image)
-        if res:
-            self.state.status = f"Submission accepted, reward {res} received."
-
     # check and replace nsfw content
-    def check_safety(self, x_image):
+    def check_safety(self, x_image: np.ndarray) -> Tuple[Image.Image, bool]:
         global safety_feature_extractor, safety_checker
 
         if safety_feature_extractor is None:
-            safety_feature_extractor = AutoFeatureExtractor.from_pretrained(
-                safety_model_id
-            )
-            safety_checker = StableDiffusionSafetyChecker.from_pretrained(
-                safety_model_id
-            )
+            safety_feature_extractor = AutoFeatureExtractor.from_pretrained(safety_model_id)
+            safety_checker = StableDiffusionSafetyChecker.from_pretrained(safety_model_id)
 
         safety_checker_input = safety_feature_extractor(x_image, return_tensors="pt")
-        image, has_nsfw_concept = safety_checker(
-            images=x_image, clip_input=safety_checker_input.pixel_values
-        )
+        image, has_nsfw_concept = safety_checker(images=x_image, clip_input=safety_checker_input.pixel_values)
 
         if has_nsfw_concept and any(has_nsfw_concept):
-            return self.sfw_request_censor, has_nsfw_concept
-        return Image.fromarray(image), has_nsfw_concept
+            return self.sfw_request_censor, True
+        return Image.fromarray(image), False
 
     async def get_session(self) -> aiohttp.ClientSession:
         if self.session is None:

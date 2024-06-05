@@ -332,6 +332,7 @@ class StableHorde:
 
                 return infotext
             except AttributeError as e:
+                print(f"Error in _generate_infotext: {e}")
                 return None
         
         return None

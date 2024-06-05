@@ -17,8 +17,11 @@ from .config import StableHordeConfig
 from modules.images import save_image
 from modules import shared, call_queue, processing, sd_models, sd_samplers
 
-# flake8: noqa: E501
-stable_horde_supported_models_url = "https://raw.githubusercontent.com/Haidra-Org/AI-Horde-image-model-reference/main/stable_diffusion.json"
+
+stable_horde_supported_models_url = (
+    "https://raw.githubusercontent.com/Haidra-Org/"
+    "AI-Horde-image-model-reference/main/stable_diffusion.json"
+)
 
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor = None
@@ -81,8 +84,10 @@ class StableHorde:
                             )
                         return
             except Exception:
-                print(f"Failed to get supported models, retrying in 1 second... "
-                      f"({attempt} attempts left)")
+                print(
+                    f"Failed to get supported models, retrying in 1 second... "
+                    f"({attempt} attempts left)"
+                )
                 await asyncio.sleep(1)
         raise Exception("Failed to get supported models after 10 attempts")
 
@@ -114,11 +119,15 @@ class StableHorde:
                 )
                 if local_hash in remote_hashes:
                     self.current_models[remote_hashes[local_hash]] = checkpoint.name
-                    print(f"sha256 for {checkpoint.name} is {local_hash} and"
-                          f"it's supported by StableHorde")
+                    print(
+                        f"sha256 for {checkpoint.name} is {local_hash} and"
+                        f"it's supported by StableHorde"
+                    )
                 else:
-                    print(f"sha256 for {checkpoint.name} is {local_hash} but"
-                          f"it's not supported by StableHorde")
+                    print(
+                        f"sha256 for {checkpoint.name} is {local_hash} but"
+                        f"it's not supported by StableHorde"
+                    )
 
         self.config.current_models = self.current_models
         self.config.save()
@@ -186,8 +195,10 @@ class StableHorde:
 
     async def handle_request(self, job: HordeJob):
         self.patch_sampler_names()
-        self.state.status = f"Get popped generation request {job.id}, " + \
-                            f"model {job.model}, sampler {job.sampler}"
+        self.state.status = (
+            f"Get popped generation request {job.id}, "
+            f"model {job.model}, sampler {job.sampler}"
+        )
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
         if job.karras:
             sampler_name += "_ka"
@@ -233,13 +244,13 @@ class StableHorde:
 
         if job.hires_fix:
             ar = job.width / job.height
-            params["firstphase_width"] = (
-                min(self.config.hires_firstphase_resolution,
-                    int(self.config.hires_firstphase_resolution * ar))
+            params["firstphase_width"] = min(
+                self.config.hires_firstphase_resolution,
+                int(self.config.hires_firstphase_resolution * ar)
             )
-            params["firstphase_height"] = (
-                min(self.config.hires_firstphase_resolution, 
-                    int(self.config.hires_firstphase_resolution / ar))
+            params["firstphase_height"] = min(
+                self.config.hires_firstphase_resolution,
+                int(self.config.hires_firstphase_resolution / ar)
             )
 
         if job.source_image:

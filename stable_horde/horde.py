@@ -228,7 +228,7 @@ class StableHorde:
         try:
             self._update_state(job, sampler_name, image)
         except Exception as e:
-                print(f"Error: _update_state {e}")
+            print(f"Error: _update_state {e}")
 
         res = await job.submit(image)
         if res:

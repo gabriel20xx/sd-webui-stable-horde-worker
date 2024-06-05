@@ -326,10 +326,14 @@ class StableHorde:
                 print(f"Attributes of processed: {dir(processed)}")
 
                 # Ensure required attributes are present before calling create_infotext
-                required_attrs = ['all_prompts', 'all_seeds', 'all_subseeds']
+                required_attrs = ['all_prompts', 'all_seeds', 'all_subseeds', 'scheduler']
                 for attr in required_attrs:
                     if not hasattr(processed, attr):
-                        raise AttributeError(f"Processed object missing required attribute: {attr}")
+                        # Provide a default value for scheduler if it is missing
+                        if attr == 'scheduler':
+                            setattr(processed, attr, 'default_scheduler') # TODO: Replace with a real scheduler
+                        else:
+                            raise AttributeError(f"Processed object missing required attribute: {attr}")
 
                 infotext = processing.create_infotext(
                     processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)

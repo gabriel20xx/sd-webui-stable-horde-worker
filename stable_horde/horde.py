@@ -332,9 +332,9 @@ class StableHorde:
     def _handle_postprocessing(
         self, p: Any, job: HordeJob, postprocessors: List[str]
     ) -> Image.Image:
-        infotext = self._generate_infotext(p, job)
-
         processed = processing.process_images(p)
+        infotext = self._generate_infotext(processed, job)
+
         image = processed.images[0]
 
         # Saving image locally
@@ -349,7 +349,7 @@ class StableHorde:
                 info=infotext,
                 p=p,
             )
-            
+
         has_nsfw = False
         if job.nsfw_censor:
             x_image = np.array(image)
@@ -362,10 +362,18 @@ class StableHorde:
 
         return image
 
-    def _generate_infotext(self, p: Any, job: HordeJob) -> Optional[str]:
+    def _generate_infotext(
+        self, processed: Any, job: HordeJob
+    ) -> Optional[str]:
         if shared.opts.enable_pnginfo:
             infotext = processing.create_infotext(
-                p, p.all_prompts, p.all_seeds, p.all_subseeds, "Stable Horde", 0, 0
+                processed,
+                processed.all_prompts,
+                processed.all_seeds,
+                processed.all_subseeds,
+                "Stable Horde",
+                0,
+                0,
             )
             # workaround for model name and hash since webui
             # uses shard.sd_model instead of local_model

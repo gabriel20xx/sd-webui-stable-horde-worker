@@ -85,7 +85,8 @@ class StableHorde:
                         return
             except Exception as e:
                 print(
-                    f"Failed to get supported models, retrying in 1 second... ({attempt} attempts left) Error: {e}"
+                    f"Failed to get supported models, retrying in 1 second... \
+                        ({attempt} attempts left) Error: {e}"
                 )
                 await asyncio.sleep(1)
         raise Exception("Failed to get supported models after 10 attempts")
@@ -120,11 +121,13 @@ class StableHorde:
                 if local_hash in remote_hashes:
                     self.current_models[remote_hashes[local_hash]] = checkpoint.name
                     print(
-                        f"sha256 for {checkpoint.name} is {local_hash} and it's supported by StableHorde"
+                        f"sha256 for {checkpoint.name} is {local_hash} \
+                            and it's supported by StableHorde"
                     )
                 else:
                     print(
-                        f"sha256 for {checkpoint.name} is {local_hash} but it's not supported by StableHorde"
+                        f"sha256 for {checkpoint.name} is {local_hash} \
+                            but it's not supported by StableHorde"
                     )
 
         self.config.current_models = self.current_models
@@ -201,7 +204,8 @@ class StableHorde:
     async def handle_request(self, job: HordeJob):
         self.patch_sampler_names()
 
-        self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
+        self.state.status = f"Get popped generation request {job.id}, \
+            model {job.model}, sampler {job.sampler}"
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
 
         if job.karras:
@@ -337,34 +341,24 @@ class StableHorde:
 
     def _generate_infotext(self, p: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:
-            try:
-                print(f"Attributes of processed: {dir(processed)}")
+            infotext = processing.create_infotext(
+                p, p.all_prompts, p.all_seeds, p.all_subseeds, "Stable Horde", 0, 0
+            )
+            local_model = self.current_models.get(job.model, shared.sd_model)
+            local_model_shorthash = self._get_model_shorthash(local_model)
 
-                infotext = processing.create_infotext(
-                    p, p.all_prompts, p.all_seeds, p.all_subseeds, "Stable Horde", 0, 0
-                )
-                local_model = self.current_models.get(job.model, shared.sd_model)
-                try:
-                    local_model_shorthash = self._get_model_shorthash(local_model)
-                    print(f"Local model shorthash 2: {local_model_shorthash}")
-                except Exception as e:
-                    print(f"Error: _get_model_shorthash {e}")
+            infotext = sub(
+                "Model:(.*?),",
+                "Model: " + local_model.split(".")[0] + ",",
+                infotext,
+            )
+            infotext = sub(
+                "Model hash:(.*?),",
+                "Model hash: " + local_model_shorthash + ",",
+                infotext,
+            )
 
-                infotext = sub(
-                    "Model:(.*?),",
-                    "Model: " + local_model.split(".")[0] + ",",
-                    infotext,
-                )
-                infotext = sub(
-                    "Model hash:(.*?),",
-                    "Model hash: " + local_model_shorthash + ",",
-                    infotext,
-                )
-
-                return infotext
-            except AttributeError as e:
-                print(f"Error in _generate_infotext: {e}")
-                return None
+            return infotext
 
         return None
 

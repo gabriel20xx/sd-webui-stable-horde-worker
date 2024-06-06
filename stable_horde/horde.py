@@ -198,18 +198,19 @@ class StableHorde:
         if local_model_shorthash is None:
             raise Exception(f"ERROR: Unknown model {local_model}")
         
-        sampler = sd_samplers.samplers_map.get(sampler_name)
-        
+        sampler = sd_samplers.samplers_map.get(sampler_name, None)
         if sampler is None:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
         
         postprocessors = job.postprocessors
+
         params = self._create_params(job, local_model, sampler)
 
         if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
+
         with call_queue.queue_lock:
             shared.state.begin()
 
@@ -221,7 +222,7 @@ class StableHorde:
             shared.state.end()
 
         with call_queue.queue_lock:
-            image = self._handle_postprocessing(processed, job, postprocessors)
+            image = self._handle_postprocessing(p, processed, job, postprocessors)
         self._update_state(job, sampler_name, image)
 
         res = await job.submit(image)
@@ -278,25 +279,19 @@ class StableHorde:
             hijacked = True
         return hijacked, old_clip_skip
 
-    def _handle_postprocessing(self, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
+    def _handle_postprocessing(self, p: Any, processed: Any, job: HordeJob, postprocessors: List[str]) -> Image.Image:
         has_nsfw = False
-        try:
-            infotext = self._generate_infotext(processed, job)
-        except Exception as e:
-            print(f"Error: _generate_infotext {e}")
+        infotext = self._generate_infotext(p, job)
 
         already_processed = False
         if self.config.save_images:
             image = processed.images[0]
             already_processed = True
-            save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=processed)
+            save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=p)
 
         if job.nsfw_censor:
             x_image = np.array(processed.images[0])
-            try:
-                image, has_nsfw = self.check_safety(x_image)
-            except Exception as e:
-                print(f"Error: check_safety {e}")
+            image, has_nsfw = self.check_safety(x_image)
 
             if has_nsfw:
                 job.censored = True
@@ -305,20 +300,17 @@ class StableHorde:
                 image = processed.images[0]
 
         if not has_nsfw:
-            try:
-                image = self._apply_postprocessors(image, postprocessors)
-            except Exception as e:
-                print(f"Error: _apply_postprocessors {e}")
+            image = self._apply_postprocessors(image, postprocessors)
 
         return image
 
-    def _generate_infotext(self, processed: Any, job: HordeJob) -> Optional[str]:
+    def _generate_infotext(self, p: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:
             try:
                 print(f"Attributes of processed: {dir(processed)}")
 
                 infotext = processing.create_infotext(
-                    processed, processed.all_prompts, processed.all_seeds, processed.all_subseeds, "Stable Horde", 0, 0)
+                    p, p.all_prompts, p.all_seeds, p.all_subseeds, "Stable Horde", 0, 0)
                 local_model = self.current_models.get(job.model, shared.sd_model)
                 try:
                     local_model_shorthash = self._get_model_shorthash(local_model)

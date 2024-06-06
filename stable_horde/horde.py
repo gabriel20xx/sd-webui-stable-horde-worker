@@ -107,14 +107,19 @@ class StableHorde:
         return None
 
     def set_current_models(self, model_names: List[str]) -> Dict[str, str]:
+        """Set the current models in horde and config"""
         remote_hashes = {
             model["config"]["files"][0]["sha256sum"].lower(): model["name"]
+            # get the sha256 of all supported models
             for model in self.supported_models
             if "sha256sum" in model["config"]["files"][0]
         }
+        # get the sha256 of all local models and compare it to the remote hashes
+        # if the sha256 matches, add the model to the current models list
         for checkpoint in sd_models.checkpoints_list.values():
             checkpoint: sd_models.CheckpointInfo
             if checkpoint.name in model_names:
+                # skip sha256 calculation if the model already has hash
                 local_hash = checkpoint.sha256 or sd_models.hashes.sha256(
                     checkpoint.filename, f"checkpoint/{checkpoint.name}"
                 )
@@ -141,6 +146,9 @@ class StableHorde:
             if not self.current_models:
                 self.state.status = self.detect_current_model()
                 if self.state.status:
+                    # Wait 10 seconds before retrying to detect the current model
+                    # if the current model is not listed in the Stable Horde supported
+                    # models, we don't want to spam the server with requests
                     await asyncio.sleep(10)
                     continue
 
@@ -148,6 +156,8 @@ class StableHorde:
             if self.config.enabled:
                 self.state.status = "Waiting for a request"
                 try:
+                    # Require a queue lock to prevent getting jobs when
+                    # there are generation jobs from webui.
                     with call_queue.queue_lock:
                         req = await HordeJob.get(
                             await self.get_session(),
@@ -162,13 +172,22 @@ class StableHorde:
                     traceback.print_exc()
 
     def patch_sampler_names(self):
+        """Add more samplers that the Stable Horde supports,
+        but are not included in the default sd_samplers module.
+        """
+        from modules import sd_samplers
+
         try:
+            # Old versions of webui put every samplers in `modules.sd_samplers`
+            # But the newer version split them into several files
+            # Happened in https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/4df63d2d197f26181758b5108f003f225fe84874 # noqa E501
             from modules.sd_samplers import KDiffusionSampler, SamplerData
         except ImportError:
             from modules.sd_samplers_kdiffusion import KDiffusionSampler
             from modules.sd_samplers_common import SamplerData
 
         if "euler a karras" in sd_samplers.samplers_map:
+            # already patched
             return
 
         samplers = [
@@ -211,6 +230,7 @@ class StableHorde:
         if job.karras:
             sampler_name += "_ka"
 
+        # Map model name to model
         local_model = self.current_models.get(job.model, shared.sd_model)
         local_model_shorthash = self._get_model_shorthash(local_model)
 
@@ -251,6 +271,7 @@ class StableHorde:
             self.state.status = f"Submission accepted, reward {res} received."
 
     def _get_model_shorthash(self, local_model: str) -> Optional[str]:
+        # Short hash for info text
         local_model_shorthash = None
         for checkpoint in sd_models.checkpoints_list.values():
             checkpoint: sd_models.CheckpointInfo
@@ -301,6 +322,7 @@ class StableHorde:
         return params
 
     def _hijack_clip_skip(self, clip_skip: int) -> Tuple[bool, Optional[int]]:
+        # hijack clip skip
         hijacked = False
         old_clip_skip = shared.opts.CLIP_stop_at_last_layers
         if clip_skip >= 1 and clip_skip != shared.opts.CLIP_stop_at_last_layers:
@@ -316,6 +338,7 @@ class StableHorde:
 
         image = processed.images[0]
 
+        # Saving image locally
         if self.config.save_images:
             save_image(
                 image,
@@ -344,6 +367,8 @@ class StableHorde:
             infotext = processing.create_infotext(
                 p, p.all_prompts, p.all_seeds, p.all_subseeds, "Stable Horde", 0, 0
             )
+            # workaround for model name and hash since webui
+            # uses shard.sd_model instead of local_model
             local_model = self.current_models.get(job.model, shared.sd_model)
             local_model_shorthash = self._get_model_shorthash(local_model)
 
@@ -389,7 +414,7 @@ class StableHorde:
                     upscaling_resize_w=None,
                     upscaling_crop=False,
                     upscale_first=False,
-                    extras_upscaler_1="R-ESRGAN 4x+",
+                    extras_upscaler_1="R-ESRGAN 4x+", # 8 - RealESRGAN_x4plus
                     extras_upscaler_2=None,
                     extras_upscaler_2_visibility=0.0,
                     gfpgan_visibility=0.0,

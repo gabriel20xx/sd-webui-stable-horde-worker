@@ -184,54 +184,46 @@ class StableHorde:
                 sd_samplers.samplers_map[alias.lower()] = sampler.name
 
     async def handle_request(self, job: HordeJob):
-        try:
-            self.patch_sampler_names()
-        except Exception as e:
-            print(f"Error: patch_sampler_names {e}")
+        self.patch_sampler_names()
+
         self.state.status = f"Get popped generation request {job.id}, model {job.model}, sampler {job.sampler}"
         sampler_name = job.sampler if job.sampler != "k_dpm_adaptive" else "k_dpm_ad"
+
         if job.karras:
             sampler_name += "_ka"
+
         local_model = self.current_models.get(job.model, shared.sd_model)
-        try:
-            local_model_shorthash = self._get_model_shorthash(local_model)
-            print(f"Local model shorthash 1: {local_model_shorthash}")
-        except Exception as e:
-            print(f"Error: _get_model_shorthash {e}")
+        local_model_shorthash = self._get_model_shorthash(local_model)
+
         if local_model_shorthash is None:
             raise Exception(f"ERROR: Unknown model {local_model}")
+        
         sampler = sd_samplers.samplers_map.get(sampler_name)
+        
         if sampler is None:
             raise Exception(f"ERROR: Unknown sampler {sampler_name}")
+        
         postprocessors = job.postprocessors
-        try:
-            params = self._create_params(job, local_model, sampler)
-        except Exception as e:
-            print(f"Error: _create_params {e}")
+        params = self._create_params(job, local_model, sampler)
+
         if job.source_image:
             p = processing.StableDiffusionProcessingImg2Img(init_images=[job.source_image], mask=job.source_mask, **params)
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
         with call_queue.queue_lock:
             shared.state.begin()
-            try:
-                hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
-            except Exception as e:
-                print(f"Error: _hijack_clip_skip {e}")
+
+            hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
+            
             processed = processing.process_images(p)
             if hijacked:
                 shared.opts.CLIP_stop_at_last_layers = old_clip_skip
             shared.state.end()
 
         with call_queue.queue_lock:
-            try:
-                image = self._handle_postprocessing(processed, job, postprocessors)
-            except Exception as e:
-                print(f"Error: _handle_postprocessing {e}")
-        try:
-            self._update_state(job, sampler_name, image)
-        except Exception as e:
-            print(f"Error: _update_state {e}")
+            image = self._handle_postprocessing(processed, job, postprocessors)
+        self._update_state(job, sampler_name, image)
+
         res = await job.submit(image)
         if res:
             self.state.status = f"Submission accepted, reward {res} received."

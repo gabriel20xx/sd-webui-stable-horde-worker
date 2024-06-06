@@ -256,14 +256,13 @@ class StableHorde:
             shared.state.begin()
 
             hijacked, old_clip_skip = self._hijack_clip_skip(job.clip_skip)
-            processed = processing.process_images(p)
 
             if hijacked:
                 shared.opts.CLIP_stop_at_last_layers = old_clip_skip
             shared.state.end()
 
         with call_queue.queue_lock:
-            image = self._handle_postprocessing(p, processed, job, postprocessors)
+            image = self._handle_postprocessing(p, job, postprocessors)
         self._update_state(job, sampler_name, image)
 
         res = await job.submit(image)
@@ -331,11 +330,11 @@ class StableHorde:
         return hijacked, old_clip_skip
 
     def _handle_postprocessing(
-        self, p: Any, processed: Any, job: HordeJob, postprocessors: List[str]
+        self, p: Any, job: HordeJob, postprocessors: List[str]
     ) -> Image.Image:
         has_nsfw = False
         infotext = self._generate_infotext(p, job)
-
+        processed = processing.process_images(p)
         image = processed.images[0]
 
         # Saving image locally

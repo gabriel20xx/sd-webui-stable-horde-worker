@@ -332,8 +332,8 @@ class StableHorde:
     def _handle_postprocessing(
         self, p: Any, job: HordeJob, postprocessors: List[str]
     ) -> Image.Image:
-        has_nsfw = False
         infotext = self._generate_infotext(p, job)
+
         processed = processing.process_images(p)
         image = processed.images[0]
 

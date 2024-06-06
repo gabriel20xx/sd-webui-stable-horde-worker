@@ -415,8 +415,9 @@ class StableHorde:
                 infotext,
             )
 
+            image = processed.images[0]
+
             if self.config.save_images:
-                image = processed.images[0]
                 save_image(
                     image,
                     self.config.save_images_folder,
@@ -429,15 +430,10 @@ class StableHorde:
                 )
 
             if job.nsfw_censor:
-                x_image = np.array(processed.images[0])
+                x_image = np.array(image)
                 image, has_nsfw = self.check_safety(x_image)
                 if has_nsfw:
                     job.censored = True
-
-            else:
-                if not self.config.save_images:
-                    image = processed.images[0]
-
 
         self.state.id = job.id
         self.state.prompt = job.prompt

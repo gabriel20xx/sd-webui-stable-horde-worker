@@ -414,7 +414,7 @@ class StableHorde:
                     upscaling_resize_w=None,
                     upscaling_crop=False,
                     upscale_first=False,
-                    extras_upscaler_1="R-ESRGAN 4x+", # 8 - RealESRGAN_x4plus
+                    extras_upscaler_1="R-ESRGAN 4x+",  # 8 - RealESRGAN_x4plus
                     extras_upscaler_2=None,
                     extras_upscaler_2_visibility=0.0,
                     gfpgan_visibility=0.0,

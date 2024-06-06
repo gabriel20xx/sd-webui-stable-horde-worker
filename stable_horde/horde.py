@@ -349,7 +349,8 @@ class StableHorde:
                 info=infotext,
                 p=p,
             )
-
+            
+        has_nsfw = False
         if job.nsfw_censor:
             x_image = np.array(image)
             image, has_nsfw = self.check_safety(x_image)

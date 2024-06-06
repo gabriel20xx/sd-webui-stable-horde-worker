@@ -283,21 +283,25 @@ class StableHorde:
         has_nsfw = False
         infotext = self._generate_infotext(p, job)
 
-        already_processed = False
+        image = processed.images[0]
+
         if self.config.save_images:
-            image = processed.images[0]
-            already_processed = True
-            save_image(image, self.config.save_images_folder, "", job.seed, job.prompt, "png", info=infotext, p=p)
+            save_image(
+                image,
+                self.config.save_images_folder,
+                "",
+                job.seed,
+                job.prompt,
+                "png",
+                info=infotext,
+                p=p,
+            )
 
         if job.nsfw_censor:
-            x_image = np.array(processed.images[0])
+            x_image = np.array(image)
             image, has_nsfw = self.check_safety(x_image)
-
             if has_nsfw:
                 job.censored = True
-        else:
-            if not already_processed:
-                image = processed.images[0]
 
         if not has_nsfw:
             image = self._apply_postprocessors(image, postprocessors)

@@ -183,8 +183,8 @@ class StableHorde:
             # Happened in https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/4df63d2d197f26181758b5108f003f225fe84874 # noqa E501
             from modules.sd_samplers import KDiffusionSampler, SamplerData
         except ImportError:
-            from modules.sd_samplers_kdiffusion import KDiffusionSampler
             from modules.sd_samplers_common import SamplerData
+            from modules.sd_samplers_kdiffusion import KDiffusionSampler
 
         if "euler a karras" in sd_samplers.samplers_map:
             # already patched

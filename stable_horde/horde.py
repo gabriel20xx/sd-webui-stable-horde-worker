@@ -14,6 +14,8 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 
 from .job import HordeJob
 from .config import StableHordeConfig
+from .user import HordeUser
+from .utils import HordeRequestSession
 from modules.images import save_image
 from modules import shared, call_queue, processing, sd_models, sd_samplers
 
@@ -38,6 +40,7 @@ class State:
         self.steps: Optional[int] = None
         self.sampler: Optional[str] = None
         self.image: Optional[Image.Image] = None
+        self.user: Optional[HordeUser] = None
 
     @property
     def status(self) -> str:
@@ -71,6 +74,16 @@ class StableHorde:
         self.supported_models: List[Dict[str, Any]] = []
         self.current_models: Dict[str, str] = {}
         self.state = State()
+        self.inited = False
+
+    def init(self):
+        if self.config.apikey:
+            self.state.user = HordeUser(self.get_session())
+
+        self.get_supported_models()
+        self.current_models = self.config.current_models
+
+        self.inited = True
 
     async def get_supported_models(self):
         for attempt in range(10, 0, -1):
@@ -140,8 +153,8 @@ class StableHorde:
         return self.current_models
 
     async def run(self):
-        await self.get_supported_models()
-        self.current_models = self.config.current_models
+        if not self.inited:
+            self.init()
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()
@@ -465,6 +478,7 @@ class StableHorde:
                 "Content-Type": "application/json",
             }
             self.session = aiohttp.ClientSession(self.config.endpoint, headers=headers)
+            self.session = HordeRequestSession(self.config.endpoint, headers)
         # check if apikey has changed
         elif self.session.headers["apikey"] != self.config.apikey:
             await self.session.close()

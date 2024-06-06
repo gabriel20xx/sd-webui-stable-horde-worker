@@ -1,14 +1,14 @@
 from typing import Optional
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 import gradio as gr
 import asyncio
-import requests
-from threading import Thread
 
-from modules import scripts, script_callbacks, sd_models, shared
+from modules import scripts, script_callbacks, sd_models
 
 from stable_horde import StableHorde, StableHordeConfig
+from stable_horde.user import HordeWorker
 
 basedir = scripts.basedir()
 config = StableHordeConfig(basedir)
@@ -16,26 +16,33 @@ horde = StableHorde(basedir, config)
 
 
 def on_app_started(demo: Optional[gr.Blocks], app: FastAPI):
-    started = False
+    class PostData(BaseModel):
+        maintenance: Optional[bool]
+        maintenance_msg: Optional[str]
+        paused: Optional[bool]
+        info: Optional[str]
+        name: Optional[str]
+        team: Optional[str]
 
-    @app.on_event("startup")
-    @app.get("/horde/startup-events")
-    async def startup_event():
-        nonlocal started
-        if not started:
-            thread = Thread(daemon=True, target=horde_thread)
-            thread.start()
-            started = True
+    @app.put("/stable-horde/workers/{worker_id}")
+    def put_workers(worker_id: str, post_data: PostData):
+        return (
+            horde.get_session()
+            .put(
+                "/api/v2/workers/" + worker_id,
+                json={
+                    "maintenance": post_data.maintenance,
+                    "maintenance_msg": post_data.maintenance_msg,
+                    "paused": post_data.paused,
+                    "info": post_data.info,
+                    "name": post_data.name,
+                    "team": post_data.team,
+                },
+            )
+            .json()
+        )
 
-    # This is a hack to make sure the startup event is
-    # called even it is not in an async scope
-    # fix https://github.com/sdwebui-w-horde/sd-webui-stable-horde-worker/issues/109
-    if demo is None:
-        # flake8: noqa: E501
-        local_url = f"http://localhost:{shared.cmd_opts.port if shared.cmd_opts.port else 7861}/"
-    else:
-        local_url = demo.local_url
-    requests.get(f"{local_url}horde/startup-events")
+    horde.run()
 
 
 def horde_thread():
@@ -82,10 +89,12 @@ def apply_stable_horde_settings(
     )
 
 
-def on_ui_tabs():
-    tab_prefix = "stable-horde-"
-    with gr.Blocks() as demo:
-        with gr.Column(elem_id="stable-horde"):
+tab_prefix = "stable-horde-"
+
+
+def get_worker_ui():
+    with gr.Blocks() as worker_ui:
+        with gr.Column():
             with gr.Row():
                 status = gr.Textbox(
                     f'Status: {"Running" if config.enabled else "Stopped"}',
@@ -103,8 +112,6 @@ def on_ui_tabs():
                 apply_settings = gr.Button(
                     "Apply Settings", elem_id=tab_prefix + "apply-settings"
                 )
-            with gr.Row():
-                state = gr.Textbox("", label="", readonly=True)
             with gr.Row(equal_height=False):
                 with gr.Column():
                     with gr.Box(scale=2):
@@ -225,6 +232,7 @@ def on_ui_tabs():
                         visible=False,
                         elem_id=tab_prefix + "refresh-image",
                     )
+                    state = gr.Textbox("", label="", readonly=True)
 
                     current_id = gr.Textbox(
                         "Current ID: ",
@@ -240,20 +248,32 @@ def on_ui_tabs():
                         columns=4,
                     )
 
-                    def on_refresh(image=False, show_images=config.show_image_preview):
-                        cid = f"Current ID: {horde.state.id}"
-                        html = "".join(
-                            map(
-                                lambda x: f"<p>{x[0]}: {x[1]}</p>",
-                                horde.state.to_dict().items(),
+                    async def on_refresh(
+                        image=True, show_images=config.show_image_preview
+                    ):
+                        cid = horde.state.id
+                        images = []
+
+                        while True:
+                            await asyncio.sleep(1.5)
+
+                            if not config.enabled:
+                                yield "Current ID: null", "", "Stopped", []
+
+                            cid = horde.state.id
+                            html = "".join(
+                                map(
+                                    lambda x: f"<p>{x[0]}: {x[1]}</p>",
+                                    horde.state.to_dict().items(),
+                                )
                             )
-                        )
-                        images = (
-                            [horde.state.image] if horde.state.image is not None else []
-                        )
-                        if image and show_images:
-                            return cid, html, horde.state.status, images
-                        return cid, html, horde.state.status
+                            if image and show_images:
+                                images = (
+                                    [horde.state.image]
+                                    if horde.state.image is not None
+                                    else []
+                                )
+                            yield f"Current ID: {cid}", html, horde.state.status, images
 
                     with gr.Row():
                         log = gr.HTML(elem_id=tab_prefix + "log")
@@ -264,7 +284,7 @@ def on_ui_tabs():
                         show_progress=False,
                     )
                     refresh_image.click(
-                        fn=lambda: on_refresh(True),
+                        fn=on_refresh,
                         outputs=[current_id, log, state, preview],
                         show_progress=False,
                     )
@@ -289,6 +309,101 @@ def on_ui_tabs():
             ],
             outputs=[status, running_type],
         )
+
+        return worker_ui
+
+
+def get_user_ui():
+    with gr.Blocks() as user_ui:
+        with gr.Row():
+            with gr.Column(scale=1):
+                user_update = gr.Button("Update", elem_id=f"{tab_prefix}user-update")
+            with gr.Column(scale=4):
+                user_welcome = gr.Markdown(
+                    "**Try click update button to fetch the user info**",
+                    elem_id=f"{tab_prefix}user-webcome",
+                )
+        with gr.Column():
+            workers = gr.HTML("No Worker")
+
+        def update_user_info():
+            if horde.state.user is None:
+                return (
+                    "**Try click update button to fetch the user info**",
+                    "No Worker",
+                )
+
+            def map_worker_detail(worker: HordeWorker):
+                return "\n".join(
+                    map(
+                        lambda x: f"<td>{x}</td>",
+                        [
+                            worker.id,
+                            worker.name,
+                            worker.maintenance_mode,
+                            '<button onclick="'
+                            + f"stableHordeSwitchMaintenance('{worker.id}')\">"
+                            + "Switch Maintenance</button>",
+                        ],
+                    )
+                )
+
+            workers_table_cells = map(
+                lambda x: f"<tr>{map_worker_detail(x)}</tr>",
+                horde.state.user.workers,
+            )
+
+            workers_html = (
+                """
+                <table>
+                <thead>
+                <tr>
+                <th>Worker ID</th>
+                <th>Worker Name</th>
+                <th>Maintenance Mode ?</th>
+                <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                """
+                + "".join(workers_table_cells)
+                + """
+                </tbody>
+                </table>
+                """
+            )
+
+            return (
+                f"Welcome Back, **{horde.state.user.username}** !",
+                workers_html,
+            )
+
+        user_update.click(fn=update_user_info, outputs=[user_welcome, workers])
+
+        return user_ui
+
+
+def on_ui_tabs():
+    with gr.Blocks() as demo:
+        with gr.Row():
+            apikey = gr.Textbox(
+                config.apikey,
+                label="Stable Horde API Key",
+                elem_id=tab_prefix + "apikey",
+            )
+            save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
+
+            def save_apikey_fn(apikey: str):
+                config.apikey = apikey
+                config.save()
+
+            save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+
+        with gr.Tab("Worker"):
+            get_worker_ui()
+
+        with gr.Tab("User"):
+            get_user_ui()
 
     return ((demo, "Stable Horde Worker", "stable-horde"),)
 

@@ -203,6 +203,7 @@ class StableHorde:
                     print(f"Maintenance: {worker_info.get('maintenance_mode')}")
                     print(f"Trusted: {worker_info.get('trusted')}")
                     print(f"Flagged: {worker_info.get('flagged')}")
+                    break
 
         while True:
             if not self.current_models:

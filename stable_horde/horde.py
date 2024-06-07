@@ -169,7 +169,7 @@ class StableHorde:
 
     async def get_worker_info(
         self, session: aiohttp.ClientSession, apikey: str, worker_id: str
-    ) -> str:
+    ) -> tuple[str, list[str], bool, bool, bool]:
         """
         Get worker info
         """
@@ -183,7 +183,11 @@ class StableHorde:
         req = await r.json()
         if r.status == 200:
             name = req.get("name")
-            return name
+            models = req.get("models")
+            maintenance_mode = req.get("maintenance_mode")
+            trusted = req.get("trusted")
+            flagged = req.get("flagged")
+            return name, models, maintenance_mode, trusted, flagged
         else:
             raise Exception(f"Error: {req.get('message')}")
 
@@ -201,16 +205,16 @@ class StableHorde:
             print(f"Worker IDs: {self.worker_ids}")
 
             for worker in self.worker_ids:
-                self.name = await self.get_worker_info(
+                self.name, self.models, self.maintenance_mode, self.trusted, self.flagged = await self.get_worker_info(
                     session, self.config.apikey, worker
                 )
                 print(f"Worker name: {self.name}")
                 if self.name == self.config.name:
                     print(f"Worker name: {self.name}")
-                    print(f"Worker models: {worker_info.get('models')}")
-                    print(f"Maintenance: {worker_info.get('maintenance_mode')}")
-                    print(f"Trusted: {worker_info.get('trusted')}")
-                    print(f"Flagged: {worker_info.get('flagged')}")
+                    print(f"Worker models: {self.models}")
+                    print(f"Maintenance: {self.maintenance_mode}")
+                    print(f"Trusted: {self.trusted}")
+                    print(f"Flagged: {self.flagged}")
                     break
 
         while True:

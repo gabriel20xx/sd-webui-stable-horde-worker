@@ -144,18 +144,19 @@ class StableHorde:
         self.config.save()
         return self.current_models
 
-    async def get_username_and_id(self, session: aiohttp.ClientSession, apikey: str) -> tuple[str, str, list[str]]:
+    async def get_username_and_id(
+        self, session: aiohttp.ClientSession, apikey: str
+    ) -> tuple[str, str, list[str]]:
         """
         Get the username, user id, and worker ids from the apikey
         """
         headers = {
             "Authorization": f"Bearer {apikey}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         r = await session.get(
-            "https://stablehorde.net/api/v2/find_user",
-            headers=headers
+            "https://stablehorde.net/api/v2/find_user", headers=headers
         )
         req = await r.json()
         if r.status == 200:
@@ -165,18 +166,19 @@ class StableHorde:
             return username, user_id, worker_ids
         else:
             raise Exception(f"Error: {req.get('message')}")
-        
-    async def get_worker_info(self, session: aiohttp.ClientSession, apikey: str, worker_id: str) -> dict:
+
+    async def get_worker_info(
+        self, session: aiohttp.ClientSession, apikey: str, worker_id: str
+    ) -> dict:
         """
         Get worker info
         """
         headers = {
             "Authorization": f"Bearer {apikey}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         r = await session.get(
-            f"https://stablehorde.net/api/v2/workers/{worker_id}",
-            headers=headers
+            f"https://stablehorde.net/api/v2/workers/{worker_id}", headers=headers
         )
         req = await r.json()
         if r.status == 200:
@@ -190,15 +192,19 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         async with aiohttp.ClientSession() as session:
-            self.username, self.id, self.worker_ids = await self.get_username_and_id(session, self.config.apikey)
+            self.username, self.id, self.worker_ids = await self.get_username_and_id(
+                session, self.config.apikey
+            )
             print(f"Username: {self.username}")
             print(f"User ID: {self.id}")
             print(f"Worker IDs: {self.worker_ids}")
 
             for worker in self.worker_ids:
-                worker_info = await self.get_worker_info(session, self.config.apikey, worker)
+                worker_info = await self.get_worker_info(
+                    session, self.config.apikey, worker
+                )
 
-                if worker_info.get('name') == self.config.name:
+                if worker_info.get("name") == self.config.name:
                     print(f"Worker models: {worker_info.get('models')}")
                     print(f"Maintenance: {worker_info.get('maintenance_mode')}")
                     print(f"Trusted: {worker_info.get('trusted')}")
@@ -425,9 +431,7 @@ class StableHorde:
 
         return image
 
-    def _generate_infotext(
-        self, p: Any, job: HordeJob
-    ) -> Optional[str]:
+    def _generate_infotext(self, p: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:
             infotext = processing.create_infotext(
                 p,

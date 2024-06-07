@@ -205,8 +205,8 @@ class StableHorde:
                     session, self.config.apikey, worker
                 )
                 print(f"Worker name: {self.name}")
-
                 if self.name == self.config.name:
+                    print(f"Worker name: {self.name}")
                     print(f"Worker models: {worker_info.get('models')}")
                     print(f"Maintenance: {worker_info.get('maintenance_mode')}")
                     print(f"Trusted: {worker_info.get('trusted')}")

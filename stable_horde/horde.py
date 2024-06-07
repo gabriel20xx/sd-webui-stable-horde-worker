@@ -102,6 +102,11 @@ class StableHorde:
             if shared.opts.sd_checkpoint_hash == remote_hash:
                 self.current_models[model["name"]] = checkpoint_info.name
 
+        # Print all matching models
+        print("Matching Models:")
+        for model_name in self.current_models.keys():
+            print(model_name)
+
         if not self.current_models:
             return f"Current model {model_checkpoint} not found on StableHorde"
         return None
@@ -142,6 +147,7 @@ class StableHorde:
     async def run(self):
         await self.get_supported_models()
         self.current_models = self.config.current_models
+        print(f"Available Models: {list(self.current_models.keys())}")
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()

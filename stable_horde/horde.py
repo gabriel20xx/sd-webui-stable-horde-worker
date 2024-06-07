@@ -151,8 +151,8 @@ class StableHorde:
         Get the username, user id, and worker ids from the apikey
         """
         headers = {
-            "Authorization": f"Bearer {apikey}",
-            "Content-Type": "application/json",
+            "accept": "application/json",
+            "apikey": apikey,
         }
 
         r = await session.get(
@@ -174,8 +174,8 @@ class StableHorde:
         Get worker info
         """
         headers = {
-            "Authorization": f"Bearer {apikey}",
-            "Content-Type": "application/json",
+            "accept": "application/json",
+            "apikey": apikey,
         }
         r = await session.get(
             f"https://stablehorde.net/api/v2/workers/{worker_id}", headers=headers

@@ -182,7 +182,8 @@ class StableHorde:
         )
         req = await r.json()
         if r.status == 200:
-            return req
+            name = req.get("name")
+            return name
         else:
             raise Exception(f"Error: {req.get('message')}")
 
@@ -200,11 +201,12 @@ class StableHorde:
             print(f"Worker IDs: {self.worker_ids}")
 
             for worker in self.worker_ids:
-                worker_info = await self.get_worker_info(
+                self.name = await self.get_worker_info(
                     session, self.config.apikey, worker
                 )
+                print(f"Worker name: {self.name}")
 
-                if worker_info.get("name") == self.config.name:
+                if self.name == self.config.name:
                     print(f"Worker models: {worker_info.get('models')}")
                     print(f"Maintenance: {worker_info.get('maintenance_mode')}")
                     print(f"Trusted: {worker_info.get('trusted')}")

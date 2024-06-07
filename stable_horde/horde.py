@@ -147,7 +147,7 @@ class StableHorde:
     async def run(self):
         await self.get_supported_models()
         self.current_models = self.config.current_models
-        print(f"Available Models: {list(self.current_models.keys())}")
+        print(f"Available Models: {list(sorted(self.current_models.keys()))}")
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()

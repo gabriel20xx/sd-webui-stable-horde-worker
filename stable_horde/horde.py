@@ -200,6 +200,9 @@ class StableHorde:
 
                 if worker_info.get('name') == self.config.name:
                     print(f"Worker models: {worker_info.get('models')}")
+                    print(f"Maintenance: {worker_info.get('maintenance_mode')}")
+                    print(f"Trusted: {worker_info.get('trusted')}")
+                    print(f"Flagged: {worker_info.get('flagged')}")
 
         while True:
             if not self.current_models:

@@ -197,8 +197,10 @@ class StableHorde:
 
             for worker in self.worker_ids:
                 worker_info = await self.get_worker_info(session, self.config.apikey, worker)
-                print(f"Worker models: {worker_info.get('models')}")
-                
+
+                if worker_info.get('name') == self.config.name:
+                    print(f"Worker models: {worker_info.get('models')}")
+
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()

@@ -205,9 +205,13 @@ class StableHorde:
             print(f"Worker IDs: {self.worker_ids}")
 
             for worker in self.worker_ids:
-                self.name, self.models, self.maintenance_mode, self.trusted, self.flagged = await self.get_worker_info(
-                    session, self.config.apikey, worker
-                )
+                (
+                    self.name,
+                    self.models,
+                    self.maintenance_mode,
+                    self.trusted,
+                    self.flagged,
+                ) = await self.get_worker_info(session, self.config.apikey, worker)
                 print(f"Worker name: {self.name}, id: {worker}")
                 if self.name == self.config.name:
                     print(f"Worker name: {self.name}")

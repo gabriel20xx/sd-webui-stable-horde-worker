@@ -333,7 +333,7 @@ class StableHorde:
         self, p: Any, job: HordeJob, postprocessors: List[str]
     ) -> Image.Image:
         processed = processing.process_images(p)
-        infotext = self._generate_infotext(processed, job)
+        infotext = self._generate_infotext(p, job)
 
         image = processed.images[0]
 
@@ -363,14 +363,14 @@ class StableHorde:
         return image
 
     def _generate_infotext(
-        self, processed: Any, job: HordeJob
+        self, p: Any, job: HordeJob
     ) -> Optional[str]:
         if shared.opts.enable_pnginfo:
             infotext = processing.create_infotext(
-                processed,
-                processed.all_prompts,
-                processed.all_seeds,
-                processed.all_subseeds,
+                p,
+                p.all_prompts,
+                p.all_seeds,
+                p.all_subseeds,
                 "Stable Horde",
                 0,
                 0,

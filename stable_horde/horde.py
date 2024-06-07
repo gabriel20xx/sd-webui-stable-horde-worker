@@ -208,14 +208,13 @@ class StableHorde:
                 self.name, self.models, self.maintenance_mode, self.trusted, self.flagged = await self.get_worker_info(
                     session, self.config.apikey, worker
                 )
-                print(f"Worker name: {self.name}")
+                print(f"Worker name: {self.name}, id: {worker}")
                 if self.name == self.config.name:
                     print(f"Worker name: {self.name}")
                     print(f"Worker models: {self.models}")
                     print(f"Maintenance: {self.maintenance_mode}")
                     print(f"Trusted: {self.trusted}")
                     print(f"Flagged: {self.flagged}")
-                    break
 
         while True:
             if not self.current_models:

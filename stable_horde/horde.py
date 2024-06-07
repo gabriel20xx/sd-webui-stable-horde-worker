@@ -169,7 +169,7 @@ class StableHorde:
 
     async def get_worker_info(
         self, session: aiohttp.ClientSession, apikey: str, worker_id: str
-    ) -> dict:
+    ) -> str:
         """
         Get worker info
         """

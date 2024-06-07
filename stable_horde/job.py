@@ -222,8 +222,8 @@ class HordeJob:
 
         if r.status != 200:
             # Log the response text if the status code is not 200
-            text = await r.text()
             print(f"Error: Received status code {r.status}")
+            text = await r.text()
             print(f"Response text: {text}")
             raise Exception(f"Failed to get job: {req.get('message')}")
 

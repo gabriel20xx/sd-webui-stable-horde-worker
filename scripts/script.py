@@ -433,9 +433,9 @@ def on_ui_tabs():
                 readonly=True,
                 )
             
-        async def call_apis(session, apikey):
-            user_info = await HordeUser.get_user_info(session, apikey) 
-            worker_info = await HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
+        def call_apis(session, apikey):
+            user_info = HordeUser.get_user_info(session, apikey) 
+            worker_info = HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
             return user_info, worker_info
 
         user_info, worker_info = call_apis(session, apikey)

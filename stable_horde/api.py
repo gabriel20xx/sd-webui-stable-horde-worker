@@ -3,7 +3,7 @@ import aiohttp
 
 class HordeUser:
     @staticmethod
-    async def get_user_info(session: aiohttp.ClientSession, apikey: str):
+    def get_user_info(session: aiohttp.ClientSession, apikey: str):
         """
         Get user info
         """
@@ -12,10 +12,10 @@ class HordeUser:
             "apikey": apikey,
         }
 
-        r = await session.get(
+        r = session.get(
             "https://stablehorde.net/api/v2/find_user", headers=headers
         )
-        json = await r.json()
+        json = r.json()
         if r.status == 200:
             return json
         else:
@@ -24,7 +24,7 @@ class HordeUser:
 
 class HordeWorker:
     @staticmethod
-    async def get_worker_info(
+    def get_worker_info(
         session: aiohttp.ClientSession, apikey: str, worker_id: str
     ):
         """
@@ -34,10 +34,10 @@ class HordeWorker:
             "accept": "application/json",
             "apikey": apikey,
         }
-        r = await session.get(
+        r = session.get(
             f"https://stablehorde.net/api/v2/workers/{worker_id}", headers=headers
         )
-        json = await r.json()
+        json = r.json()
         if r.status == 200:
             return json
         else:

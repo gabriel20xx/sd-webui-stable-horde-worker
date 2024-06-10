@@ -100,6 +100,9 @@ class StableHorde:
 
         for model in self.supported_models:
             remote_hash = model.get("config", {}).get("files", [{}])[0].get("sha256sum")
+            print(
+                f"Local hash: {shared.opts.sd_checkpoint_hash}, remote: {remote_hash}"
+            )
             if shared.opts.sd_checkpoint_hash == remote_hash:
                 self.current_models[model["name"]] = checkpoint_info.name
 

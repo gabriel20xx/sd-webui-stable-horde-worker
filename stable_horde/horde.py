@@ -154,7 +154,8 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         async with aiohttp.ClientSession() as session:
-            user_info = await HordeUser.get_user_info(session, self.config.apikey)
+            horde_user = HordeUser()
+            user_info = await horde_user.get_user_info(session, self.config.apikey)
             username = user_info["username"]
             id = user_info["id"]
             worker_ids = user_info["worker_ids"]
@@ -164,7 +165,8 @@ class StableHorde:
             print(f"Worker IDs: {worker_ids}")
 
             for worker in worker_ids:
-                worker_info = await HordeWorker.get_worker_info(
+                horde_worker = HordeWorker()
+                worker_info = await horde_worker.get_worker_info(
                     session, self.config.apikey, worker
                 )
                 worker_name = worker_info["name"]

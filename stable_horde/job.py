@@ -185,6 +185,7 @@ class HordeJob:
                 await asyncio.sleep(self.retry_interval)
                 continue
 
+    @classmethod
     async def pop_request(
         self, session: aiohttp.ClientSession, endpoint: str, post_data: dict
     ) -> dict:
@@ -198,6 +199,7 @@ class HordeJob:
             raise Exception(f"Failed to get job: {req.get('message')}")
         return req
 
+    @classmethod
     async def image_request(
         cls,
         session: aiohttp.ClientSession,
@@ -279,6 +281,7 @@ class HordeJob:
             return_control_map=payload.get("return_control_map", False),
         )
 
+    @classmethod
     async def interrogate_request(
         cls, session: aiohttp.ClientSession, config: StableHordeConfig, post_data: dict
     ):

@@ -307,6 +307,7 @@ class StableHorde:
         res = await job.submit(image)
         if res:
             self.state.status = f"Submission accepted, reward {res} received."
+            print(f"Submission accepted, reward {res} received.")
 
     def _get_model_shorthash(self, local_model: str) -> Optional[str]:
         # Short hash for info text

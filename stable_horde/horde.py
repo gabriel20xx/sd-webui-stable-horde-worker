@@ -14,6 +14,7 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 
 from .job import HordeJob
 from .config import StableHordeConfig
+from .api import HordeUser, HordeWorker
 from modules.images import save_image
 from modules import shared, call_queue, processing, sd_models, sd_samplers
 
@@ -144,83 +145,39 @@ class StableHorde:
         self.config.save()
         return self.current_models
 
-    async def get_username_and_id(
-        self, session: aiohttp.ClientSession, apikey: str
-    ) -> tuple[str, str, list[str]]:
-        """
-        Get the username, user id, and worker ids from the apikey
-        """
-        headers = {
-            "accept": "application/json",
-            "apikey": apikey,
-        }
-
-        r = await session.get(
-            "https://stablehorde.net/api/v2/find_user", headers=headers
-        )
-        req = await r.json()
-        if r.status == 200:
-            username = req.get("username")
-            user_id = req.get("id")
-            worker_ids = req.get("worker_ids", [])
-            return username, user_id, worker_ids
-        else:
-            raise Exception(f"Error: {req.get('message')}")
-
-    async def get_worker_info(
-        self, session: aiohttp.ClientSession, apikey: str, worker_id: str
-    ) -> tuple[str, str, list[str], bool, bool, bool]:
-        """
-        Get worker info
-        """
-        headers = {
-            "accept": "application/json",
-            "apikey": apikey,
-        }
-        r = await session.get(
-            f"https://stablehorde.net/api/v2/workers/{worker_id}", headers=headers
-        )
-        req = await r.json()
-        if r.status == 200:
-            id = req.get("id")
-            name = req.get("name")
-            models = req.get("models")
-            maintenance_mode = req.get("maintenance_mode")
-            trusted = req.get("trusted")
-            flagged = req.get("flagged")
-            return id, name, models, maintenance_mode, trusted, flagged
-        else:
-            raise Exception(f"Error: {req.get('message')}")
-
     async def run(self):
         await self.get_supported_models()
         self.current_models = self.config.current_models
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         async with aiohttp.ClientSession() as session:
-            self.username, self.id, self.worker_ids = await self.get_username_and_id(
-                session, self.config.apikey
-            )
-            print(f"Username: {self.username}")
-            print(f"User ID: {self.id}")
-            print(f"Worker IDs: {self.worker_ids}")
+            user_info = await HordeUser.get_user_info(session, self.config.apikey)
+            username = user_info["username"]
+            id = user_info["id"]
+            worker_ids = user_info["worker_ids"]
 
-            for worker in self.worker_ids:
-                (
-                    self.id,
-                    self.name,
-                    self.models,
-                    self.maintenance_mode,
-                    self.trusted,
-                    self.flagged,
-                ) = await self.get_worker_info(session, self.config.apikey, worker)
-                print(f"Worker name: {self.name}, id: {self.id}")
-                if self.name == self.config.name:
-                    print(f"Worker name: {self.name}, id: {self.id}")
-                    print(f"Worker models: {self.models}")
-                    print(f"Maintenance: {self.maintenance_mode}")
-                    print(f"Trusted: {self.trusted}")
-                    print(f"Flagged: {self.flagged}")
+            print(f"Username: {username}")
+            print(f"User ID: {id}")
+            print(f"Worker IDs: {worker_ids}")
+
+            for worker in worker_ids:
+                worker_info = await HordeWorker.get_worker_info(
+                    session, self.config.apikey, worker
+                )
+                worker_name = worker_info["name"]
+                worker_id = worker_info["id"]
+                models = worker_info["models"]
+                maintenance_mode = worker_info["maintenance_mode"]
+                trusted = worker_info["trusted"]
+                flagged = worker_info["flagged"]
+
+                print(f"Worker name: {worker_name}, id: {worker_id}")
+                if worker_name == self.config.name:
+                    print(f"Worker name: {worker_name}, id: {worker_id}")
+                    print(f"Worker models: {models}")
+                    print(f"Maintenance: {maintenance_mode}")
+                    print(f"Trusted: {trusted}")
+                    print(f"Flagged: {flagged}")
 
         while True:
             if not self.current_models:

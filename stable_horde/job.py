@@ -46,11 +46,15 @@ class HordeJob:
         postprocessors: List[str],
         nsfw_censor: bool = False,
         clip_skip: int = 0,
+        require_upfront_kudos: bool = False,
         source_image: Optional[Image.Image] = None,
         source_processing: Optional[str] = "img2img",
         source_mask: Optional[Image.Image] = None,
+        extra_source_images: Optional[Image.Image] = None,
         r2_upload: Optional[str] = None,
+        r2_uploads: Optional[str] = None,
         hires_fix: bool = False,
+        return_control_map: bool = False,
     ):
         self.status: JobStatus = JobStatus.PENDING
         self.session = session
@@ -72,13 +76,17 @@ class HordeJob:
         self.postprocessors = postprocessors
         self.nsfw_censor = nsfw_censor
         self.clip_skip = clip_skip
+        self.require_upfront_kudos = require_upfront_kudos
         self.source_image = source_image
         self.source_processing = (
             source_processing  # "img2img", "inpainting", "outpainting"
         )
         self.source_mask = source_mask
+        self.extra_source_images = extra_source_images
         self.r2_upload = r2_upload
+        self.r2_uploads = r2_uploads
         self.hires_fix = hires_fix
+        self.return_control_map = return_control_map
 
     async def submit(self, image: Image.Image):
         self.status = JobStatus.SUBMITTING
@@ -177,83 +185,68 @@ class HordeJob:
                 await asyncio.sleep(self.retry_interval)
                 continue
 
-    @classmethod
-    async def get(
-        cls,
-        session: aiohttp.ClientSession,
-        config: StableHordeConfig,
-        models: List[str],
-    ):
-        # Stable Horde uses a bridge version to differentiate between different
-        # bridge agents which is used to determine the bridge agent's capabilities.
-        # We should increment the version number when we add new features to the bridge
-        # agent.
-        #
-        # When we increment the version number, we should also update the AI-Horde side:
-        # https://github.com/db0/AI-Horde/blob/main/horde/bridge_reference.py
-        #
-        # 1 - img2img, inpainting, karras, r2, CodeFormers
-        # 2 - tiling
-        # 3 - r2 source
-        # 4 - hires_fix, clip_skip
-        version = 4
-        name = "SD-WebUI Stable Horde Worker Bridge"
-        repo = "https://github.com/sdwebui-w-horde/sd-webui-stable-horde-worker"
-        # https://stablehorde.net/api/
-        post_data = {
-            "name": config.name,
-            "priority_usernames": [],
-            "nsfw": config.nsfw,
-            "blacklist": [],
-            "models": models,
-            # TODO: add support for bridge version 14 (r2_source)
-            "bridge_version": 13,
-            "bridge_agent": f"{name}:{version}:{repo}",
-            "threads": 1,
-            "max_pixels": config.max_pixels,
-            "allow_img2img": config.allow_img2img,
-            "allow_painting": config.allow_painting,
-            "allow_unsafe_ipaddr": config.allow_unsafe_ipaddr,
-        }
-
-        r = await session.post("/api/v2/generate/pop", json=post_data)
-
+    async def pop_request(
+        self, session: aiohttp.ClientSession, endpoint: str, post_data: dict
+    ) -> dict:
+        r = await session.post(endpoint, json=post_data)
         req = await r.json()
 
         if r.status != 200:
-            # Log the response text if the status code is not 200
             print(f"Error: Received status code {r.status}")
             text = await r.text()
             print(f"Response text: {text}")
             raise Exception(f"Failed to get job: {req.get('message')}")
+        return req
+
+    async def image_request(
+        cls,
+        session: aiohttp.ClientSession,
+        config: StableHordeConfig,
+        models: List[str],
+        post_data: dict,
+    ) -> dict:
+        post_data.update(
+            {
+                "nsfw": config.nsfw,
+                "models": models,
+                "bridge_version": 13,
+                "require_upfront_kudos": False,
+                "max_pixels": config.max_pixels,
+                "blacklist": [],
+                "allow_img2img": config.allow_img2img,
+                "allow_painting": config.allow_painting,
+                "allow_unsafe_ipaddr": config.allow_unsafe_ipaddr,
+                "allow_post_processing": True,
+                "allow_controlnet": True,
+                "allow_sdxl_controlnet": True,
+                "allow_lora": True,
+            }
+        )
+        endpoint = "/api/v2/generate/pop"
+
+        req = await cls.pop_request(session, endpoint, post_data)
 
         if not req.get("id"):
             return
 
         payload = req.get("payload")
-        prompt = payload.get("prompt")
+        prompt = payload.get("prompt", "")
+        negative = ""
         if "###" in prompt:
             prompt, negative = map(lambda x: x.strip(), prompt.rsplit("###", 1))
-        else:
-            negative = ""
 
         async def to_image(base64str: Optional[str]) -> Optional[Image.Image]:
             if not base64str:
                 return None
-            # support for r2 source, which is a url rather than a base64 string
             if base64str.startswith("http"):
                 async with aiohttp.ClientSession() as session:
-                    attempts = 10
-                    while attempts > 0:
+                    for _ in range(10):
                         try:
                             r = await session.get(base64str)
                             return Image.open(await r.read())
                         except aiohttp.ClientConnectorError:
-                            attempts -= 1
                             await asyncio.sleep(1)
-                            continue
                     raise Exception("Failed to download source image")
-
             return Image.open(base64.b64decode(base64str))
 
         return cls(
@@ -279,6 +272,70 @@ class HordeJob:
             source_image=await to_image(req.get("source_image")),
             source_processing=req.get("source_processing"),
             source_mask=await to_image(req.get("source_mask")),
+            extra_source_images=await to_image(req.get("extra_source_images")),
             r2_upload=req.get("r2_upload"),
+            r2_uploads=req.get("r2_uploads"),
             hires_fix=payload.get("hires_fix", False),
+            return_control_map=payload.get("return_control_map", False),
         )
+
+    async def interrogate_request(
+        cls, session: aiohttp.ClientSession, config: StableHordeConfig, post_data: dict
+    ):
+        post_data.update({"forms": [], "max_tiles": 16})
+        endpoint = "/api/v2/interrogate/pop"
+
+        req = await cls.pop_request(session, endpoint, post_data)
+
+        return cls(
+            session=session,
+            forms=[
+                {
+                    "id": form["id"],
+                    "form": form["form"],
+                    "payload": form["payload"],
+                    "source_image": form["source_image"],
+                    "r2_upload": form["r2_upload"],
+                }
+                for form in req["forms"]
+            ],
+            skipped=req["skipped"],
+        )
+
+    @classmethod
+    async def get_request(
+        self,
+        session: aiohttp.ClientSession,
+        config: StableHordeConfig,
+        type: str,
+        models: List[str],
+    ):
+        # Stable Horde uses a bridge version to differentiate between different
+        # bridge agents which is used to determine the bridge agent's capabilities.
+        # We should increment the version number when we add new features to the bridge
+        # agent.
+        #
+        # When we increment the version number, we should also update the AI-Horde side:
+        # https://github.com/db0/AI-Horde/blob/main/horde/bridge_reference.py
+        #
+        # 1 - img2img, inpainting, karras, r2, CodeFormers
+        # 2 - tiling
+        # 3 - r2 source
+        # 4 - hires_fix, clip_skip
+        version = 4
+        name = "SD-WebUI Stable Horde Worker Bridge"
+        repo = "https://github.com/sdwebui-w-horde/sd-webui-stable-horde-worker"
+
+        post_data = {
+            "name": config.name,
+            "priority_usernames": [],
+            "bridge_agent": f"{name}:{version}:{repo}",
+            "threads": 1,
+            "amount": 1,
+        }
+
+        if type == "interrogate":
+            cls = await self.interrogate_request(session, config, post_data)
+        else:
+            cls = await self.image_request(session, config, models, post_data)
+        return cls

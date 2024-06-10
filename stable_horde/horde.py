@@ -196,9 +196,11 @@ class StableHorde:
                     # Require a queue lock to prevent getting jobs when
                     # there are generation jobs from webui.
                     with call_queue.queue_lock:
-                        req = await HordeJob.get(
+                        self.type = None
+                        req = await HordeJob.get_request(
                             await self.get_session(),
                             self.config,
+                            self.type,
                             list(self.current_models.keys()),
                         )
                     if req:

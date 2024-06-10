@@ -147,9 +147,9 @@ async def get_generator_ui(state):
 
     return (generator_ui)
 
-async def get_worker_ui():
+async def get_worker_ui(apikey):
     async with aiohttp.ClientSession() as session:
-        user_info = await HordeUser.get_user_info(session, config.apikey)
+        user_info = await HordeUser.get_user_info(session, apikey)
         worker_info = await HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
         with gr.Blocks() as worker_ui:
             with gr.Row():
@@ -197,8 +197,8 @@ async def get_worker_ui():
     return worker_ui
 
 
-async def get_user_ui():
-    user_info = await HordeUser.get_user_info(session, config.apikey)
+async def get_user_ui(apikey):
+    user_info = await HordeUser.get_user_info(session, apikey)
     with gr.Blocks() as user_ui:
         with gr.Row():
             with gr.Column(scale=1):
@@ -441,10 +441,10 @@ def on_ui_tabs():
             get_generator_ui(status)
 
         with gr.Tab("Worker"):
-            get_worker_ui()
+            get_worker_ui(apikey)
 
         with gr.Tab("User"):
-            get_user_ui()
+            get_user_ui(apikey)
 
         with gr.Tab("Settings"):
             get_settings_ui(status, running_type)

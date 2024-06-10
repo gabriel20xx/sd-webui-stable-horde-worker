@@ -3,16 +3,18 @@ from typing import Optional
 from fastapi import FastAPI
 import gradio as gr
 import asyncio
+import aiohttp
 import requests
 from threading import Thread
 
 from modules import scripts, script_callbacks, sd_models, shared
 
-from stable_horde import StableHorde, StableHordeConfig
+from stable_horde import StableHorde, StableHordeConfig, HordeUser, HordeWorker
 
 basedir = scripts.basedir()
 config = StableHordeConfig(basedir)
 horde = StableHorde(basedir, config)
+session: Optional[aiohttp.ClientSession] = None
 
 
 def on_app_started(demo: Optional[gr.Blocks], app: FastAPI):
@@ -81,30 +83,11 @@ def apply_stable_horde_settings(
         "Running Type: Image Generation",
     )
 
+tab_prefix = "stable-horde-"
 
-def on_ui_tabs():
-    tab_prefix = "stable-horde-"
-    with gr.Blocks() as demo:
+async def get_generator_ui():
+    with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
-            with gr.Row():
-                status = gr.Textbox(
-                    f'Status: {"Running" if config.enabled else "Stopped"}',
-                    label="",
-                    elem_id=tab_prefix + "status",
-                    readonly=True,
-                )
-                running_type = gr.Textbox(
-                    "Running Type: Image Generation",
-                    label="",
-                    elem_id=tab_prefix + "running-type",
-                    readonly=True,
-                )
-
-                apply_settings = gr.Button(
-                    "Apply Settings", elem_id=tab_prefix + "apply-settings"
-                )
-            with gr.Row():
-                state = gr.Textbox("", label="", readonly=True)
             with gr.Row(equal_height=False):
                 with gr.Column():
                     with gr.Box(scale=2):
@@ -289,6 +272,170 @@ def on_ui_tabs():
             ],
             outputs=[status, running_type],
         )
+
+    return (generator_ui)
+
+async def get_worker_ui():
+    async with aiohttp.ClientSession() as session:
+        user_info = await HordeUser.get_user_info(session, config.apikey)
+        worker_info = await HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
+        with gr.Blocks() as worker_ui:
+            with gr.Row():
+                gr.Markdown("## Worker Details")
+            with gr.Row():
+                gr.Label(f"Type: {worker_info['type']}")
+                gr.Label(f"Name: {worker_info['name']}")
+                gr.Label(f"ID: {worker_info['id']}")
+                gr.Label(f"Online: {worker_info['online']}")
+                gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
+                gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
+                gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
+                gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
+                gr.Label(f"Performance: {worker_info['performance']}")
+                gr.Label(f"Threads: {worker_info['threads']}")
+                gr.Label(f"Uptime: {worker_info['uptime']}")
+                gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
+                gr.Label(f"Paused: {worker_info['paused']}")
+                gr.Label(f"Info: {worker_info['info']}")
+                gr.Label(f"NSFW: {worker_info['nsfw']}")
+                gr.Label(f"Owner: {worker_info['owner']}")
+                gr.Label(f"IP Address: {worker_info['ipaddr']}")
+                gr.Label(f"Trusted: {worker_info['trusted']}")
+                gr.Label(f"Flagged: {worker_info['flagged']}")
+                gr.Label(f"Suspicious: {worker_info['suspicious']}")
+                gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
+                gr.Label(f"Models: {', '.join(worker_info['models'])}")
+                gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
+                gr.Label(f"Team Name: {worker_info['team']['name']}")
+                gr.Label(f"Team ID: {worker_info['team']['id']}")
+                gr.Label(f"Contact: {worker_info['contact']}")
+                gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
+                gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
+                gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
+                gr.Label(f"Img2Img: {worker_info['img2img']}")
+                gr.Label(f"Painting: {worker_info['painting']}")
+                gr.Label(f"Post-Processing: {worker_info['post-processing']}")
+                gr.Label(f"Lora: {worker_info['lora']}")
+                gr.Label(f"Controlnet: {worker_info['controlnet']}")
+                gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
+                gr.Label(f"Max Length: {worker_info['max_length']}")
+                gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
+                gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+    
+    return worker_ui
+
+
+async def get_user_ui():
+    user_info = await HordeUser.get_user_info()
+    with gr.Blocks() as user_ui:
+        with gr.Row():
+            with gr.Column(scale=1):
+                user_update = gr.Button("Update", elem_id=f"{tab_prefix}user-update")
+            with gr.Column(scale=4):
+                user_welcome = gr.Markdown(
+                    "**Try click update button to fetch the user info**",
+                    elem_id=f"{tab_prefix}user-webcome",
+                )
+        with gr.Column():
+            workers = gr.HTML("No Worker")
+
+        def update_user_info():
+            if horde.state.user is None:
+                return (
+                    "**Try click update button to fetch the user info**",
+                    "No Worker",
+                )
+
+            def map_worker_detail(worker: HordeWorker):
+                return "\n".join(
+                    map(
+                        lambda x: f"<td>{x}</td>",
+                        [
+                            worker.id,
+                            worker.name,
+                            worker.maintenance_mode,
+                            '<button onclick="'
+                            + f"stableHordeSwitchMaintenance('{worker.id}')\">"
+                            + "Switch Maintenance</button>",
+                        ],
+                    )
+                )
+
+            workers_table_cells = map(
+                lambda x: f"<tr>{map_worker_detail(x)}</tr>",
+                horde.state.user.workers,
+            )
+
+            workers_html = (
+                """
+                <table>
+                <thead>
+                <tr>
+                <th>Worker ID</th>
+                <th>Worker Name</th>
+                <th>Maintenance Mode ?</th>
+                <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                """
+                + "".join(workers_table_cells)
+                + """
+                </tbody>
+                </table>
+                """
+            )
+
+            return (
+                f"Welcome Back, **{horde.state.user.username}** !",
+                workers_html,
+            )
+
+        user_update.click(fn=update_user_info, outputs=[user_welcome, workers])
+
+        return user_ui
+
+
+def on_ui_tabs():
+    with gr.Blocks() as demo:
+        with gr.Row():
+            apikey = gr.Textbox(
+                config.apikey,
+                label="Stable Horde API Key",
+                elem_id=tab_prefix + "apikey",
+            )
+            save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
+
+            def save_apikey_fn(apikey: str):
+                config.apikey = apikey
+                config.save()
+
+            save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+        
+        with gr.Row():
+            status = gr.Textbox(
+                f'Status: {"Running" if config.enabled else "Stopped"}',
+                label="",
+                elem_id=tab_prefix + "status",
+                readonly=True,
+            )
+            running_type = gr.Textbox(
+                "Running Type: Image Generation",
+                label="",
+                elem_id=tab_prefix + "running-type",
+                readonly=True,
+                )
+        with gr.Row():
+            state = gr.Textbox("", label="", readonly=True)
+
+        with gr.Tab("Generation"):
+            get_generator_ui()
+
+        with gr.Tab("Worker"):
+            get_worker_ui()
+
+        with gr.Tab("User"):
+            get_user_ui()
 
     return ((demo, "Stable Horde Worker", "stable-horde"),)
 

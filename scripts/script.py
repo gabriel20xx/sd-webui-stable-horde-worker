@@ -436,11 +436,9 @@ def on_ui_tabs():
                 elem_id=tab_prefix + "running-type",
                 readonly=True,
                 )
-        with gr.Row():
-            state = gr.Textbox("", label="", readonly=True)
 
         with gr.Tab("Generation"):
-            get_generator_ui(state)
+            get_generator_ui(status)
 
         with gr.Tab("Worker"):
             get_worker_ui()

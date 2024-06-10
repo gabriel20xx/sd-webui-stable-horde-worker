@@ -378,7 +378,7 @@ def get_settings_ui(status, running_type):
                     )
                 apply_settings = gr.Button(
                     "Apply Settings",
-                    visible=False,
+                    visible=True,
                     elem_id=tab_prefix + "apply-settings",
                 )
 

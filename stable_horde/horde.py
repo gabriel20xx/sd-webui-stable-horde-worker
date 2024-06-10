@@ -260,6 +260,10 @@ class StableHorde:
                 sd_samplers.samplers_map[alias.lower()] = sampler.name
 
     async def handle_request(self, job: HordeJob):
+        """
+        Handle a popped generation request
+        """
+        # Patch sampler names
         self.patch_sampler_names()
 
         self.state.status = f"Get popped generation request {job.id}, \
@@ -282,6 +286,7 @@ class StableHorde:
 
         postprocessors = job.postprocessors
 
+        # Create params
         params = self._create_params(job, local_model, sampler)
 
         if job.source_image:
@@ -291,6 +296,7 @@ class StableHorde:
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
 
+        # Hijack clip skip if needed
         with call_queue.queue_lock:
             shared.state.begin()
 
@@ -301,9 +307,39 @@ class StableHorde:
             shared.state.end()
 
         with call_queue.queue_lock:
-            image = self._handle_postprocessing(p, job, postprocessors)
+            # Generating infotext
+            infotext = self._generate_infotext(p, job)
+
+            processed = processing.process_images(p)
+            image = processed.images[0]
+
+            # Saving image locally
+            if self.config.save_images:
+                save_image(
+                    image,
+                    self.config.save_images_folder,
+                    "",
+                    job.seed,
+                    job.prompt,
+                    "png",
+                    info=infotext,
+                    p=p,
+                )
+
+            # Checking safety
+            has_nsfw = False
+            if job.nsfw_censor:
+                x_image = np.array(image)
+                image, has_nsfw = self.check_safety(x_image)
+                if has_nsfw:
+                    job.censored = True
+
+            # Apply postprocessors
+            if not has_nsfw:
+                image = self._apply_postprocessors(image, postprocessors)
         self._update_state(job, sampler_name, image)
 
+        # Submit image
         res = await job.submit(image)
         if res:
             self.state.status = f"Submission accepted, reward {res} received."
@@ -368,39 +404,6 @@ class StableHorde:
             shared.opts.CLIP_stop_at_last_layers = clip_skip
             hijacked = True
         return hijacked, old_clip_skip
-
-    def _handle_postprocessing(
-        self, p: Any, job: HordeJob, postprocessors: List[str]
-    ) -> Image.Image:
-        processed = processing.process_images(p)
-        infotext = self._generate_infotext(p, job)
-
-        image = processed.images[0]
-
-        # Saving image locally
-        if self.config.save_images:
-            save_image(
-                image,
-                self.config.save_images_folder,
-                "",
-                job.seed,
-                job.prompt,
-                "png",
-                info=infotext,
-                p=p,
-            )
-
-        has_nsfw = False
-        if job.nsfw_censor:
-            x_image = np.array(image)
-            image, has_nsfw = self.check_safety(x_image)
-            if has_nsfw:
-                job.censored = True
-
-        if not has_nsfw:
-            image = self._apply_postprocessors(image, postprocessors)
-
-        return image
 
     def _generate_infotext(self, p: Any, job: HordeJob) -> Optional[str]:
         if shared.opts.enable_pnginfo:

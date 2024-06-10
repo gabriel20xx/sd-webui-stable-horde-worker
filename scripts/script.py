@@ -147,58 +147,54 @@ async def get_generator_ui(state):
 
     return (generator_ui)
 
-async def get_worker_ui(apikey):
-    async with aiohttp.ClientSession() as session:
-        user_info = await HordeUser.get_user_info(session, apikey)
-        worker_info = await HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
-        with gr.Blocks() as worker_ui:
-            with gr.Row():
-                gr.Markdown("## Worker Details")
-            with gr.Row():
-                gr.Label(f"Type: {worker_info['type']}")
-                gr.Label(f"Name: {worker_info['name']}")
-                gr.Label(f"ID: {worker_info['id']}")
-                gr.Label(f"Online: {worker_info['online']}")
-                gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
-                gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
-                gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
-                gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
-                gr.Label(f"Performance: {worker_info['performance']}")
-                gr.Label(f"Threads: {worker_info['threads']}")
-                gr.Label(f"Uptime: {worker_info['uptime']}")
-                gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
-                gr.Label(f"Paused: {worker_info['paused']}")
-                gr.Label(f"Info: {worker_info['info']}")
-                gr.Label(f"NSFW: {worker_info['nsfw']}")
-                gr.Label(f"Owner: {worker_info['owner']}")
-                gr.Label(f"IP Address: {worker_info['ipaddr']}")
-                gr.Label(f"Trusted: {worker_info['trusted']}")
-                gr.Label(f"Flagged: {worker_info['flagged']}")
-                gr.Label(f"Suspicious: {worker_info['suspicious']}")
-                gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
-                gr.Label(f"Models: {', '.join(worker_info['models'])}")
-                gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
-                gr.Label(f"Team Name: {worker_info['team']['name']}")
-                gr.Label(f"Team ID: {worker_info['team']['id']}")
-                gr.Label(f"Contact: {worker_info['contact']}")
-                gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
-                gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
-                gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
-                gr.Label(f"Img2Img: {worker_info['img2img']}")
-                gr.Label(f"Painting: {worker_info['painting']}")
-                gr.Label(f"Post-Processing: {worker_info['post-processing']}")
-                gr.Label(f"Lora: {worker_info['lora']}")
-                gr.Label(f"Controlnet: {worker_info['controlnet']}")
-                gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
-                gr.Label(f"Max Length: {worker_info['max_length']}")
-                gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
-                gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+def get_worker_ui(worker_info):
+    with gr.Blocks() as worker_ui:
+        with gr.Row():
+            gr.Markdown("## Worker Details")
+        with gr.Row():
+            gr.Label(f"Type: {worker_info['type']}")
+            gr.Label(f"Name: {worker_info['name']}")
+            gr.Label(f"ID: {worker_info['id']}")
+            gr.Label(f"Online: {worker_info['online']}")
+            gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
+            gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
+            gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
+            gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
+            gr.Label(f"Performance: {worker_info['performance']}")
+            gr.Label(f"Threads: {worker_info['threads']}")
+            gr.Label(f"Uptime: {worker_info['uptime']}")
+            gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
+            gr.Label(f"Paused: {worker_info['paused']}")
+            gr.Label(f"Info: {worker_info['info']}")
+            gr.Label(f"NSFW: {worker_info['nsfw']}")
+            gr.Label(f"Owner: {worker_info['owner']}")
+            gr.Label(f"IP Address: {worker_info['ipaddr']}")
+            gr.Label(f"Trusted: {worker_info['trusted']}")
+            gr.Label(f"Flagged: {worker_info['flagged']}")
+            gr.Label(f"Suspicious: {worker_info['suspicious']}")
+            gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
+            gr.Label(f"Models: {', '.join(worker_info['models'])}")
+            gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
+            gr.Label(f"Team Name: {worker_info['team']['name']}")
+            gr.Label(f"Team ID: {worker_info['team']['id']}")
+            gr.Label(f"Contact: {worker_info['contact']}")
+            gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
+            gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
+            gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
+            gr.Label(f"Img2Img: {worker_info['img2img']}")
+            gr.Label(f"Painting: {worker_info['painting']}")
+            gr.Label(f"Post-Processing: {worker_info['post-processing']}")
+            gr.Label(f"Lora: {worker_info['lora']}")
+            gr.Label(f"Controlnet: {worker_info['controlnet']}")
+            gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
+            gr.Label(f"Max Length: {worker_info['max_length']}")
+            gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
+            gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
     
     return worker_ui
 
 
-async def get_user_ui(apikey):
-    user_info = await HordeUser.get_user_info(session, apikey)
+def get_user_ui(user_info):
     with gr.Blocks() as user_ui:
         with gr.Row():
             with gr.Column(scale=1):
@@ -407,7 +403,7 @@ def get_settings_ui(status, running_type):
     return settings_ui
 
 
-async def on_ui_tabs():
+def on_ui_tabs():
     with gr.Blocks() as ui_tabs:
         with gr.Row():
             apikey = gr.Textbox(
@@ -436,18 +432,25 @@ async def on_ui_tabs():
                 elem_id=tab_prefix + "running-type",
                 readonly=True,
                 )
+            
+        async def call_apis(session, apikey):
+            user_info = await HordeUser.get_user_info(session, apikey) 
+            worker_info = await HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
+            return user_info, worker_info
+
+        user_info, worker_info = call_apis(session, apikey)
 
         with gr.Tab("Generation"):
-            await get_generator_ui(status)
+            get_generator_ui(status)
 
         with gr.Tab("Worker"):
-            await get_worker_ui(apikey)
+            get_worker_ui(worker_info)
 
         with gr.Tab("User"):
-            await get_user_ui(apikey)
+            get_user_ui(user_info)
 
         with gr.Tab("Settings"):
-            await get_settings_ui(status, running_type)
+            get_settings_ui(status, running_type)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

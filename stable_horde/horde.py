@@ -176,7 +176,6 @@ class StableHorde:
                 trusted = worker_info["trusted"]
                 flagged = worker_info["flagged"]
 
-                print(f"Worker name: {worker_name}, id: {worker_id}")
                 if worker_name == self.config.name:
                     print(f"Worker name: {worker_name}, id: {worker_id}")
                     print(f"Worker models: {models}")

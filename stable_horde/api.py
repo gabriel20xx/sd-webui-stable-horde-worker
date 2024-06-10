@@ -2,7 +2,8 @@ import aiohttp
 
 
 class HordeUser:
-    async def get_user_info(self, session: aiohttp.ClientSession, apikey: str):
+    @staticmethod
+    async def get_user_info(session: aiohttp.ClientSession, apikey: str):
         """
         Get user info
         """
@@ -22,8 +23,9 @@ class HordeUser:
 
 
 class HordeWorker:
+    @staticmethod
     async def get_worker_info(
-        self, session: aiohttp.ClientSession, apikey: str, worker_id: str
+        session: aiohttp.ClientSession, apikey: str, worker_id: str
     ):
         """
         Get worker info

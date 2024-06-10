@@ -437,17 +437,21 @@ def on_ui_tabs():
                 readonly=True,
                 )
 
-        with gr.Tab("Generation"):
-            get_generator_ui(status)
+        async def setup_tabs():
+            with gr.Tab("Generation"):
+                await get_generator_ui(status)
 
-        with gr.Tab("Worker"):
-            get_worker_ui(apikey)
+            with gr.Tab("Worker"):
+                await get_worker_ui(apikey)
 
-        with gr.Tab("User"):
-            get_user_ui(apikey)
+            with gr.Tab("User"):
+                await get_user_ui(apikey)
 
-        with gr.Tab("Settings"):
-            get_settings_ui(status, running_type)
+            with gr.Tab("Settings"):
+                await get_settings_ui(status, running_type)
+
+        # Run the setup_tabs coroutine
+        asyncio.run(setup_tabs())
 
     return ((demo, "Stable Horde Worker", "stable-horde"),)
 

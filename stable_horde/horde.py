@@ -295,6 +295,7 @@ class StableHorde:
         params = self._create_params(job, local_model, sampler)
 
         if job.source_image:
+            # Save source image
             p = processing.StableDiffusionProcessingImg2Img(
                 init_images=[job.source_image], mask=job.source_mask, **params
             )

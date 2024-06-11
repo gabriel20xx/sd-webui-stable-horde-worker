@@ -443,7 +443,7 @@ def on_ui_tabs():
                 worker_name = worker_info["name"]
                 
                 worker_info = horde_worker.get_worker_info(
-                    session, config.apikey, worker
+                    session, apikey, worker
                 )
                 if worker_name == config.name:
                     print(f"Current Worker: {worker_name}")
@@ -452,7 +452,7 @@ def on_ui_tabs():
             return user_info, worker_info
 
         session = requests.Session()
-        user_info, worker_info = call_apis(session, apikey)
+        user_info, worker_info = call_apis(session, config.apikey)
 
         with gr.Tab("Generation"):
             get_generator_ui(status)

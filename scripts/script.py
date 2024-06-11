@@ -89,37 +89,7 @@ def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
             with gr.Row(equal_height=False):
-                with gr.Column():
-                    def on_refresh(image=False, show_images=config.show_image_preview):
-                        cid = f"Current ID: {horde.state.id}"
-                        html = "".join(
-                            map(
-                                lambda x: f"<p>{x[0]}: {x[1]}</p>",
-                                horde.state.to_dict().items(),
-                            )
-                        )
-                        images = (
-                            [horde.state.image] if horde.state.image is not None else []
-                        )
-                        if image and show_images:
-                            return cid, html, horde.state.status, images
-                        return cid, html, horde.state.status
-
-                    with gr.Row():
-                        log = gr.HTML(elem_id=tab_prefix + "log")
-
-                    refresh.click(
-                        fn=lambda: on_refresh(),
-                        outputs=[current_id, log, state],
-                        show_progress=False,
-                    )
-                    refresh_image.click(
-                        fn=lambda: on_refresh(True),
-                        outputs=[current_id, log, state, preview],
-                        show_progress=False,
-                    )
-
-                with gr.Column():
+                with gr.Column() as refresh_column:
                     refresh = gr.Button(
                         "Refresh",
                         visible=False,
@@ -145,7 +115,37 @@ def get_generator_ui(state):
                         columns=4,
                     )
 
+                    def on_refresh(image=False, show_images=config.show_image_preview):
+                        cid = f"Current ID: {horde.state.id}"
+                        html = "".join(
+                            map(
+                                lambda x: f"<p>{x[0]}: {x[1]}</p>",
+                                horde.state.to_dict().items(),
+                            )
+                        )
+                        images = (
+                            [horde.state.image] if horde.state.image is not None else []
+                        )
+                        if image and show_images:
+                            return cid, html, horde.state.status, images
+                        return cid, html, horde.state.status
+
+                    refresh.click(
+                        fn=lambda: on_refresh(),
+                        outputs=[current_id, log, state],
+                        show_progress=False,
+                    )
+                    refresh_image.click(
+                        fn=lambda: on_refresh(True),
+                        outputs=[current_id, log, state, preview],
+                        show_progress=False,
+                    )
+
+                with gr.Column():
+                    log = gr.HTML(elem_id=tab_prefix + "log")
+
     return generator_ui
+
 
 def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:

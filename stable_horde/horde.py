@@ -315,9 +315,8 @@ class StableHorde:
 
         with call_queue.queue_lock:
             # Generating infotext
-            infotext = self._generate_infotext(p, job)
-
             processed = processing.process_images(p)
+            infotext = self._generate_infotext(p, job)
             image = processed.images[0]
 
             # Saving image locally

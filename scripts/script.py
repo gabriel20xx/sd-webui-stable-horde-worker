@@ -89,6 +89,7 @@ def get_generator_ui(state):
     current_id = None
     log = None
     state = None
+    preview = None
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
             with gr.Row(equal_height=False):
@@ -132,6 +133,9 @@ def get_generator_ui(state):
                         if image and show_images:
                             return cid, html, horde.state.status, images
                         return cid, html, horde.state.status
+                    
+                    with gr.Column():
+                        log = gr.HTML(elem_id=tab_prefix + "log")
 
                     refresh.click(
                         fn=lambda: on_refresh(),
@@ -142,10 +146,7 @@ def get_generator_ui(state):
                         fn=lambda: on_refresh(True),
                         outputs=[current_id, log, state, preview],
                         show_progress=False,
-                    )
-
-                with gr.Column():
-                    log = gr.HTML(elem_id=tab_prefix + "log")
+                    )      
 
     return generator_ui
 

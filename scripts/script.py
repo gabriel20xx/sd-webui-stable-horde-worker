@@ -328,11 +328,6 @@ def get_settings_ui(status, running_type):
         with gr.Row():
             with gr.Column():
                 with gr.Box(scale=2):
-                    enable = gr.Checkbox(
-                        config.enabled,
-                        label="Enable",
-                        elem_id=tab_prefix + "enable",
-                    )
                     name = gr.Textbox(
                         config.name,
                         label="Worker Name",
@@ -438,7 +433,7 @@ def get_settings_ui(status, running_type):
             apply_settings.click(
                 fn=apply_stable_horde_settings,
                 inputs=[
-                    enable,
+                    config.enabled,
                     name,
                     apikey,
                     allow_img2img,

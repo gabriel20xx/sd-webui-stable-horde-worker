@@ -151,83 +151,120 @@ def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:
         with gr.Row():
             gr.Markdown("## Worker Details")
-        with gr.Row():
             if 'type' in worker_info:
-                gr.Label(f"Type: {worker_info['type']}")
+                with gr.Row():
+                    gr.Label(f"Type: {worker_info['type']}")
             if 'name' in worker_info:
-                gr.Label(f"Name: {worker_info['name']}")
+                with gr.Row():
+                    gr.Label(f"Name: {worker_info['name']}")
             if 'id' in worker_info:
-                gr.Label(f"ID: {worker_info['id']}")
+                with gr.Row():
+                    gr.Label(f"ID: {worker_info['id']}")
             if 'online' in worker_info:
-                gr.Label(f"Online: {worker_info['online']}")
+                with gr.Row():
+                    gr.Label(f"Online: {worker_info['online']}")
             if 'requests_fulfilled' in worker_info:
-                gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
+                with gr.Row():
+                    gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
             if 'kudos_rewards' in worker_info:
-                gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
+                with gr.Row():
+                    gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
             if 'kudos_details' in worker_info and 'generated' in worker_info['kudos_details']:
-                gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
+                with gr.Row():
+                    gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
             if 'kudos_details' in worker_info and 'uptime' in worker_info['kudos_details']:
-                gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
+                with gr.Row():
+                    gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
             if 'performance' in worker_info:
-                gr.Label(f"Performance: {worker_info['performance']}")
+                with gr.Row():
+                    gr.Label(f"Performance: {worker_info['performance']}")
             if 'threads' in worker_info:
-                gr.Label(f"Threads: {worker_info['threads']}")
+                with gr.Row():
+                    gr.Label(f"Threads: {worker_info['threads']}")
             if 'uptime' in worker_info:
-                gr.Label(f"Uptime: {worker_info['uptime']}")
+                with gr.Row():
+                    gr.Label(f"Uptime: {worker_info['uptime']}")
             if 'maintenance_mode' in worker_info:
-                gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
+                with gr.Row():
+                    gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
             if 'paused' in worker_info:
-                gr.Label(f"Paused: {worker_info['paused']}")
+                with gr.Row():
+                    gr.Label(f"Paused: {worker_info['paused']}")
             if 'info' in worker_info:
-                gr.Label(f"Info: {worker_info['info']}")
+                with gr.Row():
+                    gr.Label(f"Info: {worker_info['info']}")
             if 'nsfw' in worker_info:
-                gr.Label(f"NSFW: {worker_info['nsfw']}")
+                with gr.Row():
+                    gr.Label(f"NSFW: {worker_info['nsfw']}")
             if 'owner' in worker_info:
-                gr.Label(f"Owner: {worker_info['owner']}")
+                with gr.Row():
+                    gr.Label(f"Owner: {worker_info['owner']}")
             if 'ipaddr' in worker_info:
-                gr.Label(f"IP Address: {worker_info['ipaddr']}")
+                with gr.Row():
+                    gr.Label(f"IP Address: {worker_info['ipaddr']}")
             if 'trusted' in worker_info:
-                gr.Label(f"Trusted: {worker_info['trusted']}")
+                with gr.Row():
+                    gr.Label(f"Trusted: {worker_info['trusted']}")
             if 'flagged' in worker_info:
-                gr.Label(f"Flagged: {worker_info['flagged']}")
+                with gr.Row():
+                    gr.Label(f"Flagged: {worker_info['flagged']}")
             if 'suspicious' in worker_info:
-                gr.Label(f"Suspicious: {worker_info['suspicious']}")
+                with gr.Row():
+                    gr.Label(f"Suspicious: {worker_info['suspicious']}")
             if 'uncompleted_jobs' in worker_info:
-                gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
+                with gr.Row():
+                    gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
             if 'models' in worker_info:
-                gr.Label(f"Models: {', '.join(worker_info['models'])}")
+                with gr.Row():
+                    gr.Label(f"Models: {', '.join(worker_info['models'])}")
             if 'forms' in worker_info:
-                gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
+                with gr.Row():
+                    gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
             if 'team' in worker_info and 'name' in worker_info['team']:
-                gr.Label(f"Team Name: {worker_info['team']['name']}")
+                with gr.Row():
+                    gr.Label(f"Team Name: {worker_info['team']['name']}")
             if 'team' in worker_info and 'id' in worker_info['team']:
-                gr.Label(f"Team ID: {worker_info['team']['id']}")
+                with gr.Row():
+                    gr.Label(f"Team ID: {worker_info['team']['id']}")
             if 'contact' in worker_info:
-                gr.Label(f"Contact: {worker_info['contact']}")
+                with gr.Row():
+                    gr.Label(f"Contact: {worker_info['contact']}")
             if 'bridge_agent' in worker_info:
-                gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
+                with gr.Row():
+                    gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
             if 'max_pixels' in worker_info:
-                gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
+                with gr.Row():
+                    gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
             if 'megapixelsteps_generated' in worker_info:
-                gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
+                with gr.Row():
+                    gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
             if 'img2img' in worker_info:
-                gr.Label(f"Img2Img: {worker_info['img2img']}")
+                with gr.Row():
+                    gr.Label(f"Img2Img: {worker_info['img2img']}")
             if 'painting' in worker_info:
-                gr.Label(f"Painting: {worker_info['painting']}")
+                with gr.Row():
+                    gr.Label(f"Painting: {worker_info['painting']}")
             if 'post-processing' in worker_info:
-                gr.Label(f"Post-Processing: {worker_info['post-processing']}")
+                with gr.Row():
+                    gr.Label(f"Post-Processing: {worker_info['post-processing']}")
             if 'lora' in worker_info:
-                gr.Label(f"Lora: {worker_info['lora']}")
+                with gr.Row():
+                    gr.Label(f"Lora: {worker_info['lora']}")
             if 'controlnet' in worker_info:
-                gr.Label(f"Controlnet: {worker_info['controlnet']}")
+                with gr.Row():
+                    gr.Label(f"Controlnet: {worker_info['controlnet']}")
             if 'sdxl_controlnet' in worker_info:
-                gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
+                with gr.Row():
+                    gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
             if 'max_length' in worker_info:
-                gr.Label(f"Max Length: {worker_info['max_length']}")
+                with gr.Row():
+                    gr.Label(f"Max Length: {worker_info['max_length']}")
             if 'max_context_length' in worker_info:
-                gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
+                with gr.Row():
+                    gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
             if 'tokens_generated' in worker_info:
-                gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+                with gr.Row():
+                    gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
     
     return worker_ui
 

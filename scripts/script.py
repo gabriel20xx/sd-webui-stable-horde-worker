@@ -434,8 +434,10 @@ def on_ui_tabs():
                 )
             
         def call_apis(session, apikey):
-            user_info = HordeUser.get_user_info(session, apikey) 
-            worker_info = HordeWorker.get_worker_info(session, config.apikey, user_info["id"])
+            horde_user = HordeUser()
+            user_info = horde_user.get_user_info(session, apikey) 
+            horde_worker = HordeWorker()
+            worker_info = horde_worker.get_worker_info(session, config.apikey, user_info["id"])
             return user_info, worker_info
 
         user_info, worker_info = call_apis(session, apikey)

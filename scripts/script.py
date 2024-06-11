@@ -161,94 +161,83 @@ def get_generator_ui(state):
 
 def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:
-        with gr.Column():
-            gr.Markdown("## Worker Details")
-            if "type" in worker_info:
-                gr.Label(f"Type: {worker_info['type']}")
-            if "name" in worker_info:
-                gr.Label(f"Name: {worker_info['name']}")
-            if "id" in worker_info:
-                gr.Label(f"ID: {worker_info['id']}")
-            if "online" in worker_info:
-                gr.Label(f"Online: {worker_info['online']}")
-            if "requests_fulfilled" in worker_info:
-                gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
-            if "kudos_rewards" in worker_info:
-                gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
-            if (
-                "kudos_details" in worker_info
-                and "generated" in worker_info["kudos_details"]
-            ):
-                gr.Label(
-                    f"Kudos Generated: {worker_info['kudos_details']['generated']}"
-                )
-            if (
-                "kudos_details" in worker_info
-                and "uptime" in worker_info["kudos_details"]
-            ):
-                gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
-            if "performance" in worker_info:
-                gr.Label(f"Performance: {worker_info['performance']}")
-            if "threads" in worker_info:
-                gr.Label(f"Threads: {worker_info['threads']}")
-            if "uptime" in worker_info:
-                gr.Label(f"Uptime: {worker_info['uptime']}")
-            if "maintenance_mode" in worker_info:
-                gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
-            if "paused" in worker_info:
-                gr.Label(f"Paused: {worker_info['paused']}")
-            if "info" in worker_info:
-                gr.Label(f"Info: {worker_info['info']}")
-            if "nsfw" in worker_info:
-                gr.Label(f"NSFW: {worker_info['nsfw']}")
-            if "owner" in worker_info:
-                gr.Label(f"Owner: {worker_info['owner']}")
-            if "ipaddr" in worker_info:
-                gr.Label(f"IP Address: {worker_info['ipaddr']}")
-            if "trusted" in worker_info:
-                gr.Label(f"Trusted: {worker_info['trusted']}")
-            if "flagged" in worker_info:
-                gr.Label(f"Flagged: {worker_info['flagged']}")
-            if "suspicious" in worker_info:
-                gr.Label(f"Suspicious: {worker_info['suspicious']}")
-            if "uncompleted_jobs" in worker_info:
-                gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
-            if "models" in worker_info:
-                gr.Label(f"Models: {', '.join(worker_info['models'])}")
-            if "forms" in worker_info:
-                gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
-            if "team" in worker_info and "name" in worker_info["team"]:
-                gr.Label(f"Team Name: {worker_info['team']['name']}")
-            if "team" in worker_info and "id" in worker_info["team"]:
-                gr.Label(f"Team ID: {worker_info['team']['id']}")
-            if "contact" in worker_info:
-                gr.Label(f"Contact: {worker_info['contact']}")
-            if "bridge_agent" in worker_info:
-                gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
-            if "max_pixels" in worker_info:
-                gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
-            if "megapixelsteps_generated" in worker_info:
-                gr.Label(
-                    f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}"
-                )
-            if "img2img" in worker_info:
-                gr.Label(f"Img2Img: {worker_info['img2img']}")
-            if "painting" in worker_info:
-                gr.Label(f"Painting: {worker_info['painting']}")
-            if "post-processing" in worker_info:
-                gr.Label(f"Post-Processing: {worker_info['post-processing']}")
-            if "lora" in worker_info:
-                gr.Label(f"Lora: {worker_info['lora']}")
-            if "controlnet" in worker_info:
-                gr.Label(f"Controlnet: {worker_info['controlnet']}")
-            if "sdxl_controlnet" in worker_info:
-                gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
-            if "max_length" in worker_info:
-                gr.Label(f"Max Length: {worker_info['max_length']}")
-            if "max_context_length" in worker_info:
-                gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
-            if "tokens_generated" in worker_info:
-                gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+        gr.Markdown("## Worker Details")
+        if "type" in worker_info:
+            gr.Textbox(f"Type: {worker_info['type']}", interactive=False, lines=1)
+        if "name" in worker_info:
+            gr.Textbox(f"Name: {worker_info['name']}", interactive=False, lines=1)
+        if "id" in worker_info:
+            gr.Textbox(f"ID: {worker_info['id']}", interactive=False, lines=1)
+        if "online" in worker_info:
+            gr.Textbox(f"Online: {worker_info['online']}", interactive=False, lines=1)
+        if "requests_fulfilled" in worker_info:
+            gr.Textbox(f"Requests Fulfilled: {worker_info['requests_fulfilled']}", interactive=False, lines=1)
+        if "kudos_rewards" in worker_info:
+            gr.Textbox(f"Kudos Rewards: {worker_info['kudos_rewards']}", interactive=False, lines=1)
+        if "kudos_details" in worker_info and "generated" in worker_info["kudos_details"]:
+            gr.Textbox(f"Kudos Generated: {worker_info['kudos_details']['generated']}", interactive=False, lines=1)
+        if "kudos_details" in worker_info and "uptime" in worker_info["kudos_details"]:
+            gr.Textbox(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}", interactive=False, lines=1)
+        if "performance" in worker_info:
+            gr.Textbox(f"Performance: {worker_info['performance']}", interactive=False, lines=1)
+        if "threads" in worker_info:
+            gr.Textbox(f"Threads: {worker_info['threads']}", interactive=False, lines=1)
+        if "uptime" in worker_info:
+            gr.Textbox(f"Uptime: {worker_info['uptime']}", interactive=False, lines=1)
+        if "maintenance_mode" in worker_info:
+            gr.Textbox(f"Maintenance Mode: {worker_info['maintenance_mode']}", interactive=False, lines=1)
+        if "paused" in worker_info:
+            gr.Textbox(f"Paused: {worker_info['paused']}", interactive=False, lines=1)
+        if "info" in worker_info:
+            gr.Textbox(f"Info: {worker_info['info']}", interactive=False, lines=1)
+        if "nsfw" in worker_info:
+            gr.Textbox(f"NSFW: {worker_info['nsfw']}", interactive=False, lines=1)
+        if "owner" in worker_info:
+            gr.Textbox(f"Owner: {worker_info['owner']}", interactive=False, lines=1)
+        if "ipaddr" in worker_info:
+            gr.Textbox(f"IP Address: {worker_info['ipaddr']}", interactive=False, lines=1)
+        if "trusted" in worker_info:
+            gr.Textbox(f"Trusted: {worker_info['trusted']}", interactive=False, lines=1)
+        if "flagged" in worker_info:
+            gr.Textbox(f"Flagged: {worker_info['flagged']}", interactive=False, lines=1)
+        if "suspicious" in worker_info:
+            gr.Textbox(f"Suspicious: {worker_info['suspicious']}", interactive=False, lines=1)
+        if "uncompleted_jobs" in worker_info:
+            gr.Textbox(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}", interactive=False, lines=1)
+        if "models" in worker_info:
+            gr.Textbox(f"Models: {', '.join(worker_info['models'])}", interactive=False, lines=1)
+        if "forms" in worker_info:
+            gr.Textbox(f"Forms: {', '.join(worker_info['forms'])}", interactive=False, lines=1)
+        if "team" in worker_info and "name" in worker_info["team"]:
+            gr.Textbox(f"Team Name: {worker_info['team']['name']}", interactive=False, lines=1)
+        if "team" in worker_info and "id" in worker_info["team"]:
+            gr.Textbox(f"Team ID: {worker_info['team']['id']}", interactive=False, lines=1)
+        if "contact" in worker_info:
+            gr.Textbox(f"Contact: {worker_info['contact']}", interactive=False, lines=1)
+        if "bridge_agent" in worker_info:
+            gr.Textbox(f"Bridge Agent: {worker_info['bridge_agent']}", interactive=False, lines=1)
+        if "max_pixels" in worker_info:
+            gr.Textbox(f"Max Pixels: {worker_info['max_pixels']}", interactive=False, lines=1)
+        if "megapixelsteps_generated" in worker_info:
+            gr.Textbox(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}", interactive=False, lines=1)
+        if "img2img" in worker_info:
+            gr.Textbox(f"Img2Img: {worker_info['img2img']}", interactive=False, lines=1)
+        if "painting" in worker_info:
+            gr.Textbox(f"Painting: {worker_info['painting']}", interactive=False, lines=1)
+        if "post-processing" in worker_info:
+            gr.Textbox(f"Post-Processing: {worker_info['post-processing']}", interactive=False, lines=1)
+        if "lora" in worker_info:
+            gr.Textbox(f"Lora: {worker_info['lora']}", interactive=False, lines=1)
+        if "controlnet" in worker_info:
+            gr.Textbox(f"Controlnet: {worker_info['controlnet']}", interactive=False, lines=1)
+        if "sdxl_controlnet" in worker_info:
+            gr.Textbox(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}", interactive=False, lines=1)
+        if "max_length" in worker_info:
+            gr.Textbox(f"Max Length: {worker_info['max_length']}", interactive=False, lines=1)
+        if "max_context_length" in worker_info:
+            gr.Textbox(f"Max Context Length: {worker_info['max_context_length']}", interactive=False, lines=1)
+        if "tokens_generated" in worker_info:
+            gr.Textbox(f"Tokens Generated: {worker_info['tokens_generated']}", interactive=False, lines=1)
 
     return worker_ui
 
@@ -462,6 +451,7 @@ def on_ui_tabs():
                 config.apikey,
                 label="Stable Horde API Key",
                 elem_id=tab_prefix + "apikey",
+                resizeable=False,
             )
             save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
 

@@ -735,7 +735,7 @@ def get_settings_ui(status, running_type):
                 )
                 gr.Markdown("Once you select a model it will take some time to load.")
 
-            apply_settings = gr.Button(
+            """ apply_settings = gr.Button(
                 "Apply Settings",
                 visible=True,
                 elem_id=tab_prefix + "apply-settings",
@@ -761,7 +761,7 @@ def get_settings_ui(status, running_type):
                     save_images_folder,
                 ],
                 outputs=[status, running_type],
-            )
+            ) """
 
     return settings_ui
 

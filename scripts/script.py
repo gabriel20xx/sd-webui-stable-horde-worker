@@ -271,7 +271,7 @@ def get_news_ui(news_info, horde_status):
                 )
                 gr.Textbox(
                     horde_status["invite_only_mode"],
-                    label="iIvite only mode",
+                    label="Invite only mode",
                     elem_id=tab_prefix + "status_invite_only_mode",
                     visible=True,
                 )

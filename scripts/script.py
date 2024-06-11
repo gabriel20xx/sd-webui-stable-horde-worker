@@ -263,18 +263,36 @@ def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
             with gr.Box(scale=2):
-                status = gr.Textbox(
-                    horde_status["title"],
-                    label="Title",
-                    elem_id=tab_prefix + "news_title",
-                    visible=False,
+                gr.Textbox(
+                    horde_status["maintenance_mode"],
+                    label="Maintenance mode",
+                    elem_id=tab_prefix + "status_maintenance_mode",
+                    visible=True,
+                )
+                gr.Textbox(
+                    horde_status["invite_only_mode"],
+                    label="iIvite only mode",
+                    elem_id=tab_prefix + "status_invite_only_mode",
+                    visible=True,
+                )
+                gr.Textbox(
+                    horde_status["raid_mode"],
+                    label="Raid mode",
+                    elem_id=tab_prefix + "status_raid_mode",
+                    visible=True,
                 )
             with gr.Box(scale=2):
-                news = gr.Textbox(
+                gr.Textbox(
                     news_info["title"],
                     label="Title",
                     elem_id=tab_prefix + "news_title",
-                    visible=False,
+                    visible=True,
+                )
+                gr.Textbox(
+                    news_info["newspiece"],
+                    label="Newspiece",
+                    elem_id=tab_prefix + "news_newspiece",
+                    visible=True,
                 )
     return news_ui
 

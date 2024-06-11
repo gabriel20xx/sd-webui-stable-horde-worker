@@ -2,6 +2,7 @@ import requests
 
 
 class HordeUser:
+    @staticmethod
     def get_user_info(session: requests.Session, apikey: str):
         """
         Get user info
@@ -20,6 +21,7 @@ class HordeUser:
 
 
 class HordeWorker:
+    @staticmethod
     def get_worker_info(session: requests.Session, apikey: str, worker_id: str):
         """
         Get worker info

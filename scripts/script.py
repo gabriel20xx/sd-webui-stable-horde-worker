@@ -446,7 +446,6 @@ def get_settings_ui(status, running_type):
 
 def on_ui_tabs():
     with gr.Blocks() as ui_tabs:
-        with gr.Column():
             with gr.Row():
                 with gr.Column():
                     apikey = gr.Textbox(
@@ -487,30 +486,30 @@ def on_ui_tabs():
                         """
                     )
 
-                toggle_running = gr.Button(
-                    "Disable",
-                    elem_id=f"{tab_prefix}disable",
-                    css_classes=["enabled-button"],
-                )
+                    toggle_running = gr.Button(
+                        "Disable",
+                        elem_id=f"{tab_prefix}disable",
+                        css_classes=["enabled-button"],
+                    )
 
-                def toggle_running_fn():
-                    if config.enabled:
-                        config.enabled = False
-                        status.update("Status: Stopped")
-                        running_type.update("Running Type: Image Generation")
-                        toggle_running.update(
-                            value="Enable", css_classes=["disabled-button"]
-                        )
-                    else:
-                        config.enabled = True
-                        status.update("Status: Running")
-                        toggle_running.update(
-                            value="Disable", css_classes=["disabled-button"]
-                        )
-                    config.save()
+                    def toggle_running_fn():
+                        if config.enabled:
+                            config.enabled = False
+                            status.update("Status: Stopped")
+                            running_type.update("Running Type: Image Generation")
+                            toggle_running.update(
+                                value="Enable", css_classes=["disabled-button"]
+                            )
+                        else:
+                            config.enabled = True
+                            status.update("Status: Running")
+                            toggle_running.update(
+                                value="Disable", css_classes=["disabled-button"]
+                            )
+                        config.save()
 
-                toggle_running.click(fn=toggle_running_fn)
-
+                    toggle_running.click(fn=toggle_running_fn)
+            with gr.Row():
                 running_type = gr.Textbox(
                     "Running Type: Image Generation",
                     label="",
@@ -518,76 +517,76 @@ def on_ui_tabs():
                     readonly=True,
                     visible=False,
                 )
+            
+                def call_apis(session, apikey):
+                    horde_user = HordeUser()
+                    horde_worker = HordeWorker()
+                    horde_news = HordeNews()
+                    horde_status = HordeStatus()
+                    horde_stats = HordeStats()
+                    user_info = horde_user.get_user_info(session, apikey)
+                    # Get worker id from user info
+                    worker_ids = user_info["worker_ids"]
+                    for worker in worker_ids:
+                        worker_info = horde_worker.get_worker_info(session, apikey, worker)
 
-            def call_apis(session, apikey):
-                horde_user = HordeUser()
-                horde_worker = HordeWorker()
-                horde_news = HordeNews()
-                horde_status = HordeStatus()
-                horde_stats = HordeStats()
-                user_info = horde_user.get_user_info(session, apikey)
-                # Get worker id from user info
-                worker_ids = user_info["worker_ids"]
-                for worker in worker_ids:
-                    worker_info = horde_worker.get_worker_info(session, apikey, worker)
+                        worker_name = worker_info["name"]
+                        if worker_name == config.name:
+                            print(f"Current Worker: {worker_name}")
+                            break
 
-                    worker_name = worker_info["name"]
-                    if worker_name == config.name:
-                        print(f"Current Worker: {worker_name}")
-                        break
+                    news_info = horde_news.get_horde_news(session)
+                    horde_status = horde_status.get_horde_status(session)
+                    stats_info = horde_stats.get_horde_stats(session)
 
-                news_info = horde_news.get_horde_news(session)
-                horde_status = horde_status.get_horde_status(session)
-                stats_info = horde_stats.get_horde_stats(session)
+                    return user_info, worker_info, news_info, horde_status, stats_info
 
-                return user_info, worker_info, news_info, horde_status, stats_info
+                session = requests.Session()
+                user_info, worker_info, news_info, horde_status, stats_info = call_apis(
+                    session, config.apikey
+                )
 
-            session = requests.Session()
-            user_info, worker_info, news_info, horde_status, stats_info = call_apis(
-                session, config.apikey
-            )
+                try:
+                    with gr.Tab("Generation"):
+                        get_generator_ui(status)
+                except Exception as e:
+                    print(f"Error: Generator UI not found, {e}")
 
-            try:
-                with gr.Tab("Generation"):
-                    get_generator_ui(status)
-            except Exception as e:
-                print(f"Error: Generator UI not found, {e}")
+                try:
+                    with gr.Tab("Worker"):
+                        get_worker_ui(worker_info)
+                except Exception as e:
+                    print(f"Error: Worker UI not found, {e}")
 
-            try:
-                with gr.Tab("Worker"):
-                    get_worker_ui(worker_info)
-            except Exception as e:
-                print(f"Error: Worker UI not found, {e}")
+                try:
+                    with gr.Tab("User"):
+                        get_user_ui(user_info)
+                except Exception as e:
+                    print(f"Error: User UI not found, {e}")
 
-            try:
-                with gr.Tab("User"):
-                    get_user_ui(user_info)
-            except Exception as e:
-                print(f"Error: User UI not found, {e}")
+                try:
+                    with gr.Tab("Kudos"):
+                        get_kudos_ui()
+                except Exception as e:
+                    print(f"Error: Kudos UI not found,  {e}")
 
-            try:
-                with gr.Tab("Kudos"):
-                    get_kudos_ui()
-            except Exception as e:
-                print(f"Error: Kudos UI not found,  {e}")
+                try:
+                    with gr.Tab("News"):
+                        get_news_ui(news_info, horde_status)
+                except Exception as e:
+                    print(f"Error: News UI not found, {e}")
 
-            try:
-                with gr.Tab("News"):
-                    get_news_ui(news_info, horde_status)
-            except Exception as e:
-                print(f"Error: News UI not found, {e}")
+                try:
+                    with gr.Tab("Stats"):
+                        get_stats_ui(stats_info)
+                except Exception as e:
+                    print(f"Error: Stats UI not found, {e}")
 
-            try:
-                with gr.Tab("Stats"):
-                    get_stats_ui(stats_info)
-            except Exception as e:
-                print(f"Error: Stats UI not found, {e}")
-
-            try:
-                with gr.Tab("Settings"):
-                    get_settings_ui(status, running_type)
-            except Exception as e:
-                print(f"Error: Settings UI not found, {e}")
+                try:
+                    with gr.Tab("Settings"):
+                        get_settings_ui(status, running_type)
+                except Exception as e:
+                    print(f"Error: Settings UI not found, {e}")
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

@@ -119,6 +119,14 @@ def get_generator_ui(state):
                         columns=4,
                     )
 
+                    state = gr.HTML(
+                        "",
+                        label="State",
+                        elem_id=tab_prefix + "state",
+                        visible=True,
+                        readonly=True,
+                    )
+
                     def on_refresh(image=False, show_images=config.show_image_preview):
                         cid = f"Current ID: {horde.state.id}"
                         html = "".join(
@@ -137,16 +145,19 @@ def get_generator_ui(state):
                     with gr.Column():
                         log = gr.HTML(elem_id=tab_prefix + "log")
 
-                    refresh.click(
-                        fn=lambda: on_refresh(),
-                        outputs=[current_id, log, state],
-                        show_progress=False,
-                    )
-                    refresh_image.click(
-                        fn=lambda: on_refresh(True),
-                        outputs=[current_id, log, state, preview],
-                        show_progress=False,
-                    )      
+                    if current_id and log and state:
+                        refresh.click(
+                            fn=lambda: on_refresh(),
+                            outputs=[current_id, log, state],
+                            show_progress=False,
+                        )
+
+                    if current_id and log and state and preview:
+                        refresh_image.click(
+                            fn=lambda: on_refresh(True),
+                            outputs=[current_id, log, state, preview],
+                            show_progress=False,
+                        )      
 
     return generator_ui
 

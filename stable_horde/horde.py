@@ -1,4 +1,5 @@
 import asyncio
+import requests
 import json
 from os import path
 from typing import Any, Dict, List, Optional, Tuple
@@ -153,9 +154,9 @@ class StableHorde:
         self.current_models = self.config.current_models
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
-        async with aiohttp.ClientSession() as session:
+        with requests.Session() as session:
             horde_user = HordeUser()
-            user_info = await horde_user.get_user_info(session, self.config.apikey)
+            user_info = horde_user.get_user_info(session, self.config.apikey)
             username = user_info["username"]
             id = user_info["id"]
             worker_ids = user_info["worker_ids"]
@@ -166,7 +167,7 @@ class StableHorde:
 
             for worker in worker_ids:
                 horde_worker = HordeWorker()
-                worker_info = await horde_worker.get_worker_info(
+                worker_info = horde_worker.get_worker_info(
                     session, self.config.apikey, worker
                 )
                 worker_name = worker_info["name"]

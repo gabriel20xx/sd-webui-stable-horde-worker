@@ -273,37 +273,42 @@ def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
             with gr.Box(scale=2):
-                gr.Textbox(
-                    horde_status["maintenance_mode"],
-                    label="Maintenance mode",
-                    elem_id=tab_prefix + "status_maintenance_mode",
-                    visible=True,
-                )
-                gr.Textbox(
-                    horde_status["invite_only_mode"],
-                    label="Invite only mode",
-                    elem_id=tab_prefix + "status_invite_only_mode",
-                    visible=True,
-                )
-                gr.Textbox(
-                    horde_status["raid_mode"],
-                    label="Raid mode",
-                    elem_id=tab_prefix + "status_raid_mode",
-                    visible=True,
-                )
+                if "maintenance_mode" in horde_status:
+                    gr.Textbox(
+                        horde_status["maintenance_mode"],
+                        label="Maintenance mode",
+                        elem_id=tab_prefix + "status_maintenance_mode",
+                        visible=True,
+                    )
+                if "invite_only_mode" in horde_status:
+                    gr.Textbox(
+                        horde_status["invite_only_mode"],
+                        label="Invite only mode",
+                        elem_id=tab_prefix + "status_invite_only_mode",
+                        visible=True,
+                    )
+                if "raid_mode" in horde_status:
+                    gr.Textbox(
+                        horde_status["raid_mode"],
+                        label="Raid mode",
+                        elem_id=tab_prefix + "status_raid_mode",
+                        visible=True,
+                    )
             with gr.Box(scale=2):
-                gr.Textbox(
-                    news_info["title"],
-                    label="Title",
-                    elem_id=tab_prefix + "news_title",
-                    visible=True,
-                )
-                gr.Textbox(
-                    news_info["newspiece"],
-                    label="Newspiece",
-                    elem_id=tab_prefix + "news_newspiece",
-                    visible=True,
-                )
+                if "title" in news_info:
+                    gr.Textbox(
+                        news_info["title"],
+                        label="Title",
+                        elem_id=tab_prefix + "news_title",
+                        visible=True,
+                    )
+                if "newspiece" in news_info:
+                    gr.Textbox(
+                        news_info["newspiece"],
+                        label="Newspiece",
+                        elem_id=tab_prefix + "news_newspiece",
+                        visible=True
+                    )
     return news_ui
 
 

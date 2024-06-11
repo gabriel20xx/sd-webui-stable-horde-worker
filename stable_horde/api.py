@@ -13,11 +13,11 @@ class HordeUser:
         }
 
         r = session.get("https://stablehorde.net/api/v2/find_user", headers=headers)
-        json = r.json()
-        if r.status == 200:
-            return json
+        data = r.json()
+        if r.status_code == 200:
+            return data
         else:
-            raise Exception(f"Error: {json.get('message')}")
+            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
 
 class HordeWorker:
@@ -33,8 +33,8 @@ class HordeWorker:
         r = session.get(
             f"https://stablehorde.net/api/v2/workers/{worker_id}", headers=headers
         )
-        json = r.json()
-        if r.status == 200:
-            return json
+        data = r.json()
+        if r.status_code == 200:
+            return data
         else:
-            raise Exception(f"Error: {json.get('message')}")
+            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")

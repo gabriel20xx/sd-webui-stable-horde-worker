@@ -446,6 +446,7 @@ def on_ui_tabs():
                     session, config.apikey, worker
                 )
                 if worker_name == config.name:
+                    print(f"Current Worker: {worker_name}")
                     break
 
             return user_info, worker_info

@@ -86,13 +86,15 @@ def apply_stable_horde_settings(
 tab_prefix = "stable-horde-"
 
 def get_generator_ui(state):
-    current_id = None
-    log = None
-    state = None
-    preview = None
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
             with gr.Row(equal_height=False):
+                current_id = gr.Textbox(
+                        "Current ID: ",
+                        label="",
+                        elem_id=tab_prefix + "current-id",
+                        readonly=True, 
+                    )
                 with gr.Column() as refresh_column:
                     refresh = gr.Button(
                         "Refresh",
@@ -109,14 +111,7 @@ def get_generator_ui(state):
                         "Current ID: ",
                         label="",
                         elem_id=tab_prefix + "current-id",
-                        readonly=True,
-                    )
-                    preview = gr.Gallery(
-                        label="Preview",
-                        elem_id=tab_prefix + "preview",
-                        visible=config.show_image_preview,
-                        readonly=True,
-                        columns=4,
+                        readonly=True, 
                     )
 
                     state = gr.HTML(
@@ -127,37 +122,47 @@ def get_generator_ui(state):
                         readonly=True,
                     )
 
-                    def on_refresh(image=False, show_images=config.show_image_preview):
-                        cid = f"Current ID: {horde.state.id}"
-                        html = "".join(
-                            map(
-                                lambda x: f"<p>{x[0]}: {x[1]}</p>",
-                                horde.state.to_dict().items(),
-                            )
-                        )
-                        images = (
-                            [horde.state.image] if horde.state.image is not None else []
-                        )
-                        if image and show_images:
-                            return cid, html, horde.state.status, images
-                        return cid, html, horde.state.status
+                with gr.Column():
+                    preview = gr.Gallery(
+                        label="Preview",
+                        elem_id=tab_prefix + "preview",
+                        visible=config.show_image_preview,
+                        readonly=True,
+                        columns=4,
+                    )
+
                     
-                    with gr.Column():
-                        log = gr.HTML(elem_id=tab_prefix + "log")
-
-                    if current_id and log and state:
-                        refresh.click(
-                            fn=lambda: on_refresh(),
-                            outputs=[current_id, log, state],
-                            show_progress=False,
+                def on_refresh(image=False, show_images=config.show_image_preview):
+                    cid = f"Current ID: {horde.state.id}"
+                    html = "".join(
+                        map(
+                            lambda x: f"<p>{x[0]}: {x[1]}</p>",
+                            horde.state.to_dict().items(),
                         )
+                    )
+                    images = (
+                        [horde.state.image] if horde.state.image is not None else []
+                    )
+                    if image and show_images:
+                        return cid, html, horde.state.status, images
+                    return cid, html, horde.state.status
+                    
+                with gr.Column():
+                    log = gr.HTML(elem_id=tab_prefix + "log")
 
-                    if current_id and log and state and preview:
-                        refresh_image.click(
-                            fn=lambda: on_refresh(True),
-                            outputs=[current_id, log, state, preview],
-                            show_progress=False,
-                        )      
+                if current_id and log and state:
+                    refresh.click(
+                        fn=lambda: on_refresh(),
+                        outputs=[current_id, log, state],
+                        show_progress=False,
+                    )
+
+                if current_id and log and state and preview:
+                    refresh_image.click(
+                        fn=lambda: on_refresh(True),
+                        outputs=[current_id, log, state, preview],
+                        show_progress=False,
+                    )    
 
     return generator_ui
 

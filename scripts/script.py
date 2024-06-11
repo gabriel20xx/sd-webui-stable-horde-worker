@@ -145,7 +145,7 @@ def get_generator_ui(state):
                         columns=4,
                     )
 
-    return (generator_ui)
+    return generator_ui
 
 def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:

@@ -491,7 +491,8 @@ def on_ui_tabs():
                         color: white;
                     }
                     </style>
-                        """
+                        """,
+                    visible=False,
                 )
 
                 def toggle_running_fn():

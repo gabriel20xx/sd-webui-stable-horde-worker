@@ -170,9 +170,7 @@ def get_worker_ui(worker_info):
         gr.Markdown("## Worker Details")
         for key, value in worker_info.items():
             if value is not None:
-                gr.Textbox(
-                    value, label=key.capitalize(), interactive=False, lines=1
-                )
+                gr.Textbox(value, label=key.capitalize(), interactive=False, lines=1)
 
     return worker_ui
 
@@ -257,11 +255,11 @@ def get_kudos_ui():
         with gr.Column():
             with gr.Box(scale=2):
                 pass
-                
+
     return kudos_ui
 
 
-def get_news_ui(news_info):
+def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
             with gr.Box(scale=2):
@@ -502,7 +500,9 @@ def on_ui_tabs():
                 return user_info, worker_info, news_info, horde_status
 
             session = requests.Session()
-            user_info, worker_info, news_info, horde_status = call_apis(session, config.apikey)
+            user_info, worker_info, news_info, horde_status = call_apis(
+                session, config.apikey
+            )
 
             try:
                 with gr.Tab("Generation"):
@@ -530,7 +530,7 @@ def on_ui_tabs():
 
             try:
                 with gr.Tab("News"):
-                    get_news_ui(news_info)
+                    get_news_ui(news_info, horde_status)
             except Exception as e:
                 print(f"Error: News UI not found, {e}")
 

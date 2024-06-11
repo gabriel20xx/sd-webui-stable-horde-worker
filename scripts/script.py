@@ -17,6 +17,7 @@ from stable_horde import (
     HordeNews,
     HordeStatus,
     KudoTransfer,
+    HordeStats,
 )
 
 basedir = scripts.basedir()

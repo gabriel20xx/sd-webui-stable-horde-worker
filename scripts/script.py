@@ -254,8 +254,121 @@ def get_user_ui(user_info):
                 )
         with gr.Column():
             workers = gr.HTML("No Worker")
+        with gr.Column():
+            gr.Markdown("## User Details")
+            components = []
+            if "username" in user_info:
+                components.append(gr.Textbox(f"Username: {user_info['username']}", interactive=False, lines=1))
+            if "id" in user_info:
+                components.append(gr.Textbox(f"ID: {user_info['id']}", interactive=False, lines=1))
+            if "kudos" in user_info:
+                components.append(gr.Textbox(f"Kudos: {user_info['kudos']}", interactive=False, lines=1))
+            if "evaluating_kudos" in user_info:
+                components.append(gr.Textbox(f"Evaluating Kudos: {user_info['evaluating_kudos']}", interactive=False, lines=1))
+            if "concurrency" in user_info:
+                components.append(gr.Textbox(f"Concurrency: {user_info['concurrency']}", interactive=False, lines=1))
+            if "worker_invited" in user_info:
+                components.append(gr.Textbox(f"Worker Invited: {user_info['worker_invited']}", interactive=False, lines=1))
+            if "moderator" in user_info:
+                components.append(gr.Textbox(f"Moderator: {user_info['moderator']}", interactive=False, lines=1))
+            if "kudos_details" in user_info:
+                kudos_details = user_info["kudos_details"]
+                if "accumulated" in kudos_details:
+                    components.append(gr.Textbox(f"Accumulated Kudos: {kudos_details['accumulated']}", interactive=False, lines=1))
+                if "gifted" in kudos_details:
+                    components.append(gr.Textbox(f"Gifted Kudos: {kudos_details['gifted']}", interactive=False, lines=1))
+                if "donated" in kudos_details:
+                    components.append(gr.Textbox(f"Donated Kudos: {kudos_details['donated']}", interactive=False, lines=1))
+                if "admin" in kudos_details:
+                    components.append(gr.Textbox(f"Admin Kudos: {kudos_details['admin']}", interactive=False, lines=1))
+                if "received" in kudos_details:
+                    components.append(gr.Textbox(f"Received Kudos: {kudos_details['received']}", interactive=False, lines=1))
+                if "recurring" in kudos_details:
+                    components.append(gr.Textbox(f"Recurring Kudos: {kudos_details['recurring']}", interactive=False, lines=1))
+                if "awarded" in kudos_details:
+                    components.append(gr.Textbox(f"Awarded Kudos: {kudos_details['awarded']}", interactive=False, lines=1))
+            if "worker_count" in user_info:
+                components.append(gr.Textbox(f"Worker Count: {user_info['worker_count']}", interactive=False, lines=1))
+            if "worker_ids" in user_info:
+                components.append(gr.Textbox(f"Worker IDs: {', '.join(user_info['worker_ids'])}", interactive=False, lines=1))
+            if "sharedkey_ids" in user_info:
+                components.append(gr.Textbox(f"Shared Key IDs: {', '.join(user_info['sharedkey_ids'])}", interactive=False, lines=1))
+            if "monthly_kudos" in user_info:
+                monthly_kudos = user_info["monthly_kudos"]
+                if "amount" in monthly_kudos:
+                    components.append(gr.Textbox(f"Monthly Kudos Amount: {monthly_kudos['amount']}", interactive=False, lines=1))
+                if "last_received" in monthly_kudos:
+                    components.append(gr.Textbox(f"Last Monthly Kudos Received: {monthly_kudos['last_received']}", interactive=False, lines=1))
+            if "trusted" in user_info:
+                components.append(gr.Textbox(f"Trusted: {user_info['trusted']}", interactive=False, lines=1))
+            if "flagged" in user_info:
+                components.append(gr.Textbox(f"Flagged: {user_info['flagged']}", interactive=False, lines=1))
+            if "vpn" in user_info:
+                components.append(gr.Textbox(f"VPN: {user_info['vpn']}", interactive=False, lines=1))
+            if "service" in user_info:
+                components.append(gr.Textbox(f"Service: {user_info['service']}", interactive=False, lines=1))
+            if "education" in user_info:
+                components.append(gr.Textbox(f"Education: {user_info['education']}", interactive=False, lines=1))
+            if "customizer" in user_info:
+                components.append(gr.Textbox(f"Customizer: {user_info['customizer']}", interactive=False, lines=1))
+            if "special" in user_info:
+                components.append(gr.Textbox(f"Special: {user_info['special']}", interactive=False, lines=1))
+            if "suspicious" in user_info:
+                components.append(gr.Textbox(f"Suspicious: {user_info['suspicious']}", interactive=False, lines=1))
+            if "pseudonymous" in user_info:
+                components.append(gr.Textbox(f"Pseudonymous: {user_info['pseudonymous']}", interactive=False, lines=1))
+            if "contact" in user_info:
+                components.append(gr.Textbox(f"Contact: {user_info['contact']}", interactive=False, lines=1))
+            if "admin_comment" in user_info:
+                components.append(gr.Textbox(f"Admin Comment: {user_info['admin_comment']}", interactive=False, lines=1))
+            if "account_age" in user_info:
+                components.append(gr.Textbox(f"Account Age: {user_info['account_age']}", interactive=False, lines=1))
+            if "usage" in user_info:
+                usage = user_info["usage"]
+                if "megapixelsteps" in usage:
+                    components.append(gr.Textbox(f"Usage Megapixelsteps: {usage['megapixelsteps']}", interactive=False, lines=1))
+                if "requests" in usage:
+                    components.append(gr.Textbox(f"Usage Requests: {usage['requests']}", interactive=False, lines=1))
+            if "contributions" in user_info:
+                contributions = user_info["contributions"]
+                if "megapixelsteps" in contributions:
+                    components.append(gr.Textbox(f"Contribution Megapixelsteps: {contributions['megapixelsteps']}", interactive=False, lines=1))
+                if "fulfillments" in contributions:
+                    components.append(gr.Textbox(f"Contribution Fulfillments: {contributions['fulfillments']}", interactive=False, lines=1))
+            if "records" in user_info:
+                records = user_info["records"]
+                if "usage" in records:
+                    usage_records = records["usage"]
+                    if "megapixelsteps" in usage_records:
+                        components.append(gr.Textbox(f"Record Usage Megapixelsteps: {usage_records['megapixelsteps']}", interactive=False, lines=1))
+                    if "tokens" in usage_records:
+                        components.append(gr.Textbox(f"Record Usage Tokens: {usage_records['tokens']}", interactive=False, lines=1))
+                if "contribution" in records:
+                    contribution_records = records["contribution"]
+                    if "megapixelsteps" in contribution_records:
+                        components.append(gr.Textbox(f"Record Contribution Megapixelsteps: {contribution_records['megapixelsteps']}", interactive=False, lines=1))
+                    if "tokens" in contribution_records:
+                        components.append(gr.Textbox(f"Record Contribution Tokens: {contribution_records['tokens']}", interactive=False, lines=1))
+                if "fulfillment" in records:
+                    fulfillment_records = records["fulfillment"]
+                    if "image" in fulfillment_records:
+                        components.append(gr.Textbox(f"Fulfillment Image: {fulfillment_records['image']}", interactive=False, lines=1))
+                    if "text" in fulfillment_records:
+                        components.append(gr.Textbox(f"Fulfillment Text: {fulfillment_records['text']}", interactive=False, lines=1))
+                    if "interrogation" in fulfillment_records:
+                        components.append(gr.Textbox(f"Fulfillment Interrogation: {fulfillment_records['interrogation']}", interactive=False, lines=1))
+                if "request" in records:
+                    request_records = records["request"]
+                    if "image" in request_records:
+                        components.append(gr.Textbox(f"Request Image: {request_records['image']}", interactive=False, lines=1))
+                    if "text" in request_records:
+                        components.append(gr.Textbox(f"Request Text: {request_records['text']}", interactive=False, lines=1))
+                    if "interrogation" in request_records:
+                        components.append(gr.Textbox(f"Request Interrogation: {request_records['interrogation']}", interactive=False, lines=1))
 
-        def update_user_info():
+            return components
+
+        """ def update_user_info():
             if horde.state.user is None:
                 return (
                     "**Try click update button to fetch the user info**",
@@ -283,7 +396,7 @@ def get_user_ui(user_info):
             )
 
             workers_html = (
-                """
+                
                 <table>
                 <thead>
                 <tr>
@@ -294,12 +407,12 @@ def get_user_ui(user_info):
                 </tr>
                 </thead>
                 <tbody>
-                """
+                
                 + "".join(workers_table_cells)
-                + """
+                + 
                 </tbody>
                 </table>
-                """
+                
             )
 
             return (
@@ -307,7 +420,7 @@ def get_user_ui(user_info):
                 workers_html,
             )
 
-        user_update.click(fn=update_user_info, outputs=[user_welcome, workers])
+        user_update.click(fn=update_user_info, outputs=[user_welcome, workers]) """
 
         return user_ui
 

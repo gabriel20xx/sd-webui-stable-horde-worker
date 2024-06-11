@@ -446,10 +446,8 @@ def on_ui_tabs():
                     session, config.apikey, worker
                 )
                 if worker_name == config.name:
-                    current_worker_id = worker
                     break
 
-            worker_info = horde_worker.get_worker_info(session, config.apikey, current_worker_id)
             return user_info, worker_info
 
         user_info, worker_info = call_apis(session, apikey)

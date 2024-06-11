@@ -202,7 +202,7 @@ class StableHorde:
                     # there are generation jobs from webui.
                     with call_queue.queue_lock:
                         self.type = None
-                        print("[Stable Horde] Looking for requests...")
+                        print("[Stable Horde] Looking for requests...", end='\r')
                         req = await HordeJob.get_request(
                             await self.get_session(),
                             self.config,

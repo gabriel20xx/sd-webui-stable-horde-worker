@@ -83,17 +83,19 @@ def apply_stable_horde_settings(
         "Running Type: Image Generation",
     )
 
+
 tab_prefix = "stable-horde-"
+
 
 def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
             current_id = gr.Textbox(
-                        "Current ID: ",
-                        label="",
-                        elem_id=tab_prefix + "current-id",
-                        readonly=True, 
-                    )
+                "Current ID: ",
+                label="",
+                elem_id=tab_prefix + "current-id",
+                readonly=True,
+            )
             with gr.Row(equal_height=False):
                 with gr.Column() as refresh_column:
                     refresh = gr.Button(
@@ -111,7 +113,7 @@ def get_generator_ui(state):
                         "Current ID: ",
                         label="",
                         elem_id=tab_prefix + "current-id",
-                        readonly=True, 
+                        readonly=True,
                     )
 
                     state = gr.HTML(
@@ -132,7 +134,6 @@ def get_generator_ui(state):
                         columns=4,
                     )
 
-                    
                 def on_refresh(image=False, show_images=config.show_image_preview):
                     cid = f"Current ID: {horde.state.id}"
                     html = "".join(
@@ -147,7 +148,7 @@ def get_generator_ui(state):
                     if image and show_images:
                         return cid, html, horde.state.status, images
                     return cid, html, horde.state.status
-                    
+
                 with gr.Column():
                     log = gr.HTML(elem_id=tab_prefix + "log")
 
@@ -163,130 +164,101 @@ def get_generator_ui(state):
                         fn=lambda: on_refresh(True),
                         outputs=[current_id, log, state, preview],
                         show_progress=False,
-                    )    
+                    )
 
     return generator_ui
 
 
 def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:
-        with gr.Row():
-            gr.Markdown("## Worker Details")
-            if 'type' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Type: {worker_info['type']}")
-            if 'name' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Name: {worker_info['name']}")
-            if 'id' in worker_info:
-                with gr.Row():
-                    gr.Label(f"ID: {worker_info['id']}")
-            if 'online' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Online: {worker_info['online']}")
-            if 'requests_fulfilled' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
-            if 'kudos_rewards' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
-            if 'kudos_details' in worker_info and 'generated' in worker_info['kudos_details']:
-                with gr.Row():
-                    gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
-            if 'kudos_details' in worker_info and 'uptime' in worker_info['kudos_details']:
-                with gr.Row():
-                    gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
-            if 'performance' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Performance: {worker_info['performance']}")
-            if 'threads' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Threads: {worker_info['threads']}")
-            if 'uptime' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Uptime: {worker_info['uptime']}")
-            if 'maintenance_mode' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
-            if 'paused' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Paused: {worker_info['paused']}")
-            if 'info' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Info: {worker_info['info']}")
-            if 'nsfw' in worker_info:
-                with gr.Row():
-                    gr.Label(f"NSFW: {worker_info['nsfw']}")
-            if 'owner' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Owner: {worker_info['owner']}")
-            if 'ipaddr' in worker_info:
-                with gr.Row():
-                    gr.Label(f"IP Address: {worker_info['ipaddr']}")
-            if 'trusted' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Trusted: {worker_info['trusted']}")
-            if 'flagged' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Flagged: {worker_info['flagged']}")
-            if 'suspicious' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Suspicious: {worker_info['suspicious']}")
-            if 'uncompleted_jobs' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
-            if 'models' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Models: {', '.join(worker_info['models'])}")
-            if 'forms' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
-            if 'team' in worker_info and 'name' in worker_info['team']:
-                with gr.Row():
-                    gr.Label(f"Team Name: {worker_info['team']['name']}")
-            if 'team' in worker_info and 'id' in worker_info['team']:
-                with gr.Row():
-                    gr.Label(f"Team ID: {worker_info['team']['id']}")
-            if 'contact' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Contact: {worker_info['contact']}")
-            if 'bridge_agent' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
-            if 'max_pixels' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
-            if 'megapixelsteps_generated' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
-            if 'img2img' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Img2Img: {worker_info['img2img']}")
-            if 'painting' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Painting: {worker_info['painting']}")
-            if 'post-processing' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Post-Processing: {worker_info['post-processing']}")
-            if 'lora' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Lora: {worker_info['lora']}")
-            if 'controlnet' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Controlnet: {worker_info['controlnet']}")
-            if 'sdxl_controlnet' in worker_info:
-                with gr.Row():
-                    gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
-            if 'max_length' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Max Length: {worker_info['max_length']}")
-            if 'max_context_length' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
-            if 'tokens_generated' in worker_info:
-                with gr.Row():
-                    gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
-    
+        gr.Markdown("## Worker Details")
+        if "type" in worker_info:
+            gr.Label(f"Type: {worker_info['type']}")
+        if "name" in worker_info:
+            gr.Label(f"Name: {worker_info['name']}")
+        if "id" in worker_info:
+            gr.Label(f"ID: {worker_info['id']}")
+        if "online" in worker_info:
+            gr.Label(f"Online: {worker_info['online']}")
+        if "requests_fulfilled" in worker_info:
+            gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
+        if "kudos_rewards" in worker_info:
+            gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
+        if (
+            "kudos_details" in worker_info
+            and "generated" in worker_info["kudos_details"]
+        ):
+            gr.Label(
+                f"Kudos Generated: {worker_info['kudos_details']['generated']}"
+            )
+        if (
+            "kudos_details" in worker_info
+            and "uptime" in worker_info["kudos_details"]
+        ):
+            gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
+        if "performance" in worker_info:
+            gr.Label(f"Performance: {worker_info['performance']}")
+        if "threads" in worker_info:
+            gr.Label(f"Threads: {worker_info['threads']}")
+        if "uptime" in worker_info:
+            gr.Label(f"Uptime: {worker_info['uptime']}")
+        if "maintenance_mode" in worker_info:
+            gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
+        if "paused" in worker_info:
+            gr.Label(f"Paused: {worker_info['paused']}")
+        if "info" in worker_info:
+            gr.Label(f"Info: {worker_info['info']}")
+        if "nsfw" in worker_info:
+            gr.Label(f"NSFW: {worker_info['nsfw']}")
+        if "owner" in worker_info:
+            gr.Label(f"Owner: {worker_info['owner']}")
+        if "ipaddr" in worker_info:
+            gr.Label(f"IP Address: {worker_info['ipaddr']}")
+        if "trusted" in worker_info:
+            gr.Label(f"Trusted: {worker_info['trusted']}")
+        if "flagged" in worker_info:
+            gr.Label(f"Flagged: {worker_info['flagged']}")
+        if "suspicious" in worker_info:
+            gr.Label(f"Suspicious: {worker_info['suspicious']}")
+        if "uncompleted_jobs" in worker_info:
+            gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
+        if "models" in worker_info:
+            gr.Label(f"Models: {', '.join(worker_info['models'])}")
+        if "forms" in worker_info:
+            gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
+        if "team" in worker_info and "name" in worker_info["team"]:
+            gr.Label(f"Team Name: {worker_info['team']['name']}")
+        if "team" in worker_info and "id" in worker_info["team"]:
+            gr.Label(f"Team ID: {worker_info['team']['id']}")
+        if "contact" in worker_info:
+            gr.Label(f"Contact: {worker_info['contact']}")
+        if "bridge_agent" in worker_info:
+            gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
+        if "max_pixels" in worker_info:
+            gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
+        if "megapixelsteps_generated" in worker_info:
+            gr.Label(
+                f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}"
+            )
+        if "img2img" in worker_info:
+            gr.Label(f"Img2Img: {worker_info['img2img']}")
+        if "painting" in worker_info:
+            gr.Label(f"Painting: {worker_info['painting']}")
+        if "post-processing" in worker_info:
+            gr.Label(f"Post-Processing: {worker_info['post-processing']}")
+        if "lora" in worker_info:
+            gr.Label(f"Lora: {worker_info['lora']}")
+        if "controlnet" in worker_info:
+            gr.Label(f"Controlnet: {worker_info['controlnet']}")
+        if "sdxl_controlnet" in worker_info:
+            gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
+        if "max_length" in worker_info:
+            gr.Label(f"Max Length: {worker_info['max_length']}")
+        if "max_context_length" in worker_info:
+            gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
+        if "tokens_generated" in worker_info:
+            gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+
     return worker_ui
 
 
@@ -358,7 +330,7 @@ def get_user_ui(user_info):
         user_update.click(fn=update_user_info, outputs=[user_welcome, workers])
 
         return user_ui
-    
+
 
 def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
@@ -427,6 +399,7 @@ def get_settings_ui(status, running_type):
                     save_images = gr.Checkbox(config.save_images, label="Save Images")
 
                 with gr.Box(scale=2):
+
                     def on_apply_selected_models(local_selected_models):
                         status.update(
                             f'Status: \
@@ -445,10 +418,7 @@ def get_settings_ui(status, running_type):
                         {list(selected_models.values())} updated'
 
                     local_selected_models_dropdown = gr.Dropdown(
-                        [
-                            model.name
-                            for model in sd_models.checkpoints_list.values()
-                        ],
+                        [model.name for model in sd_models.checkpoints_list.values()],
                         value=[
                             model.name
                             for model in sd_models.checkpoints_list.values()
@@ -475,26 +445,26 @@ def get_settings_ui(status, running_type):
                 )
 
             apply_settings.click(
-            fn=apply_stable_horde_settings,
-            inputs=[
-                enable,
-                name,
-                apikey,
-                allow_img2img,
-                allow_painting,
-                allow_unsafe_ipaddr,
-                allow_post_processing,
-                restore_settings,
-                nsfw,
-                interval,
-                max_pixels,
-                endpoint,
-                show_images,
-                save_images,
-                save_images_folder,
-            ],
-            outputs=[status, running_type],
-        )
+                fn=apply_stable_horde_settings,
+                inputs=[
+                    enable,
+                    name,
+                    apikey,
+                    allow_img2img,
+                    allow_painting,
+                    allow_unsafe_ipaddr,
+                    allow_post_processing,
+                    restore_settings,
+                    nsfw,
+                    interval,
+                    max_pixels,
+                    endpoint,
+                    show_images,
+                    save_images,
+                    save_images_folder,
+                ],
+                outputs=[status, running_type],
+            )
 
     return settings_ui
 
@@ -514,7 +484,7 @@ def on_ui_tabs():
                 config.save()
 
             save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
-        
+
         with gr.Row():
             status = gr.Textbox(
                 f'Status: {"Running" if config.enabled else "Stopped"}',
@@ -527,18 +497,16 @@ def on_ui_tabs():
                 label="",
                 elem_id=tab_prefix + "running-type",
                 readonly=True,
-                )
-            
+            )
+
         def call_apis(session, apikey):
             horde_user = HordeUser()
             horde_worker = HordeWorker()
-            user_info = horde_user.get_user_info(session, apikey) 
+            user_info = horde_user.get_user_info(session, apikey)
             # Get worker id from user info
             worker_ids = user_info["worker_ids"]
             for worker in worker_ids:
-                worker_info = horde_worker.get_worker_info(
-                    session, apikey, worker
-                )
+                worker_info = horde_worker.get_worker_info(session, apikey, worker)
 
                 worker_name = worker_info["name"]
                 if worker_name == config.name:

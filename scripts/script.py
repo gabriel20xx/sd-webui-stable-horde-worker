@@ -735,33 +735,33 @@ def get_settings_ui(status, running_type):
                 )
                 gr.Markdown("Once you select a model it will take some time to load.")
 
-            """ apply_settings = gr.Button(
+            apply_settings = gr.Button(
                 "Apply Settings",
                 visible=True,
                 elem_id=tab_prefix + "apply-settings",
             )
 
-            apply_settings.click(
-                fn=apply_stable_horde_settings,
-                inputs=[
-                    config.enabled,
-                    name,
-                    apikey,
-                    allow_img2img,
-                    allow_painting,
-                    allow_unsafe_ipaddr,
-                    allow_post_processing,
-                    restore_settings,
-                    nsfw,
-                    interval,
-                    max_pixels,
-                    endpoint,
-                    show_images,
-                    save_images,
-                    save_images_folder,
-                ],
-                outputs=[status, running_type],
-            ) """
+        apply_settings.click(
+            fn=apply_stable_horde_settings,
+            inputs=[
+                config.enabled,
+                name,
+                apikey,
+                allow_img2img,
+                allow_painting,
+                allow_unsafe_ipaddr,
+                allow_post_processing,
+                restore_settings,
+                nsfw,
+                interval,
+                max_pixels,
+                endpoint,
+                show_images,
+                save_images,
+                save_images_folder,
+            ],
+            outputs=[status, running_type],
+        )
 
     return settings_ui
 

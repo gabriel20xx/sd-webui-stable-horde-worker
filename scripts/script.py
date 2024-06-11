@@ -263,7 +263,14 @@ def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
             with gr.Box(scale=2):
-                news_title = gr.Textbox(
+                status = gr.Textbox(
+                    horde_status["title"],
+                    label="Title",
+                    elem_id=tab_prefix + "news_title",
+                    visible=False,
+                )
+            with gr.Box(scale=2):
+                news = gr.Textbox(
                     news_info["title"],
                     label="Title",
                     elem_id=tab_prefix + "news_title",

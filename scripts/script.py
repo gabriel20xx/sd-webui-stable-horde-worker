@@ -641,6 +641,32 @@ def get_user_ui(user_info):
     return user_ui
 
 
+def get_kudos_ui(kudos_info):
+    with gr.Blocks() as kudos_ui:
+        with gr.Column():
+            with gr.Box(scale=2):
+                kudos_title = gr.Textbox(
+                    kudos_info["title"],
+                    label="Title",
+                    elem_id=tab_prefix + "kudos_title",
+                    visible=False,
+                 )
+    return kudos_ui
+
+
+def get_news_ui(news_info):
+    with gr.Blocks() as news_ui:
+        with gr.Column():
+            with gr.Box(scale=2):
+                news_title = gr.Textbox(
+                    news_info["title"],
+                    label="Title",
+                    elem_id=tab_prefix + "news_title",
+                    visible=False,
+                )
+    return news_ui
+
+
 def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
@@ -882,6 +908,18 @@ def on_ui_tabs():
                 get_user_ui(user_info)
         except Exception as e:
             print(f"Error: User UI not found, {e}")
+
+        try:
+            with gr.Tab("Kudos"):
+                get_kudos_ui(kudos_info)
+        except Exception as e:
+            print(f"Error: Kudos UI not found,  {e}")
+
+        try:
+            with gr.Tab("News"):
+                get_news_ui(news_info)
+        except Exception as e:
+            print(f"Error: News UI not found, {e}")
 
         try:
             with gr.Tab("Settings"):

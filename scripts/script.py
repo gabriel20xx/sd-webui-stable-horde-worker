@@ -751,7 +751,7 @@ def get_settings_ui(status, running_type):
             apply_settings.click(
                 fn=apply_stable_horde_settings,
                 inputs=[
-                    enabled,
+                    enable,
                     name,
                     apikey,
                     allow_img2img,

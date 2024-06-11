@@ -115,7 +115,22 @@ def get_generator_ui(state):
                 readonly=True,
             )
 
-        with gr.Column() as refresh_column:
+            def on_refresh(image=False, show_images=config.show_image_preview):
+                cid = f"Current ID: {horde.state.id}"
+                html = "".join(
+                    map(
+                        lambda x: f"<p>{x[0]}: {x[1]}</p>",
+                        horde.state.to_dict().items(),
+                    )
+                )
+                images = [horde.state.image] if horde.state.image is not None else []
+                if image and show_images:
+                    return cid, html, horde.state.status, images
+                return cid, html, horde.state.status
+
+            log = gr.HTML(elem_id=tab_prefix + "log")
+
+        with gr.Column():
             refresh = gr.Button(
                 "Refresh",
                 visible=False,
@@ -134,21 +149,6 @@ def get_generator_ui(state):
                 readonly=True,
                 columns=4,
             )
-
-            def on_refresh(image=False, show_images=config.show_image_preview):
-                cid = f"Current ID: {horde.state.id}"
-                html = "".join(
-                    map(
-                        lambda x: f"<p>{x[0]}: {x[1]}</p>",
-                        horde.state.to_dict().items(),
-                    )
-                )
-                images = [horde.state.image] if horde.state.image is not None else []
-                if image and show_images:
-                    return cid, html, horde.state.status, images
-                return cid, html, horde.state.status
-
-            log = gr.HTML(elem_id=tab_prefix + "log")
 
             if current_id and log and state:
                 refresh.click(

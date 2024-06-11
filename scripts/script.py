@@ -700,7 +700,6 @@ def get_settings_ui(status, running_type):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box(scale=2):
-
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \
@@ -859,17 +858,29 @@ def on_ui_tabs():
         session = requests.Session()
         user_info, worker_info = call_apis(session, config.apikey)
 
-        with gr.Tab("Generation"):
-            get_generator_ui(status)
+        try:
+            with gr.Tab("Generation"):
+                get_generator_ui(status)
+        except:
+            print("Error: Generator UI not found")
 
-        with gr.Tab("Worker"):
-            get_worker_ui(worker_info)
+        try:
+            with gr.Tab("Worker"):
+                get_worker_ui(worker_info)
+        except:
+            print("Error: Worker UI not found")
 
-        with gr.Tab("User"):
-            get_user_ui(user_info)
+        try:
+            with gr.Tab("User"):
+                get_user_ui(user_info)
+        except:
+            print("Error: User UI not found")
 
-        with gr.Tab("Settings"):
-            get_settings_ui(status, running_type)
+        try:
+            with gr.Tab("Settings"):
+                get_settings_ui(status, running_type)
+        except:
+            print("Error: Settings UI not found")
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

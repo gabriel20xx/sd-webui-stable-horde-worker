@@ -645,6 +645,13 @@ def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
             with gr.Box(scale=2):
+                enable = gr.Checkbox(
+                    config.enabled,
+                    label="Enable",
+                    elem_id=tab_prefix + "enable",
+                    visible=False,
+                )
+                
                 name = gr.Textbox(
                     config.name,
                     label="Worker Name",
@@ -741,27 +748,27 @@ def get_settings_ui(status, running_type):
                 elem_id=tab_prefix + "apply-settings",
             )
 
-        apply_settings.click(
-            fn=apply_stable_horde_settings,
-            inputs=[
-                config.enabled,
-                name,
-                apikey,
-                allow_img2img,
-                allow_painting,
-                allow_unsafe_ipaddr,
-                allow_post_processing,
-                restore_settings,
-                nsfw,
-                interval,
-                max_pixels,
-                endpoint,
-                show_images,
-                save_images,
-                save_images_folder,
-            ],
-            outputs=[status, running_type],
-        )
+            apply_settings.click(
+                fn=apply_stable_horde_settings,
+                inputs=[
+                    enabled,
+                    name,
+                    apikey,
+                    allow_img2img,
+                    allow_painting,
+                    allow_unsafe_ipaddr,
+                    allow_post_processing,
+                    restore_settings,
+                    nsfw,
+                    interval,
+                    max_pixels,
+                    endpoint,
+                    show_images,
+                    save_images,
+                    save_images_folder,
+                ],
+                outputs=[status, running_type],
+            )
 
     return settings_ui
 

@@ -85,7 +85,7 @@ def apply_stable_horde_settings(
 
 tab_prefix = "stable-horde-"
 
-async def get_generator_ui(state):
+def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
             with gr.Row(equal_height=False):

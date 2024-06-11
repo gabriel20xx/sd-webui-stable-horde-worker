@@ -88,13 +88,13 @@ tab_prefix = "stable-horde-"
 def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Column(elem_id="stable-horde"):
-            with gr.Row(equal_height=False):
-                current_id = gr.Textbox(
+            current_id = gr.Textbox(
                         "Current ID: ",
                         label="",
                         elem_id=tab_prefix + "current-id",
                         readonly=True, 
                     )
+            with gr.Row(equal_height=False):
                 with gr.Column() as refresh_column:
                     refresh = gr.Button(
                         "Refresh",
@@ -122,6 +122,7 @@ def get_generator_ui(state):
                         readonly=True,
                     )
 
+            with gr.Row(equal_height=False):
                 with gr.Column():
                     preview = gr.Gallery(
                         label="Preview",

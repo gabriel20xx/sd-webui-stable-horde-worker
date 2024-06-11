@@ -472,6 +472,12 @@ def on_ui_tabs():
                     readonly=True,
                 )
 
+                toggle_running = gr.Button(
+                    "Disable",
+                    elem_id=f"{tab_prefix}disable",
+                    css_classes=["enabled-button"],
+                )
+
                 gr.HTML(
                     """
                     <style>
@@ -486,12 +492,6 @@ def on_ui_tabs():
                     }
                     </style>
                         """
-                )
-
-                toggle_running = gr.Button(
-                    "Disable",
-                    elem_id=f"{tab_prefix}disable",
-                    css_classes=["enabled-button"],
                 )
 
                 def toggle_running_fn():

@@ -152,44 +152,82 @@ def get_worker_ui(worker_info):
         with gr.Row():
             gr.Markdown("## Worker Details")
         with gr.Row():
-            gr.Label(f"Type: {worker_info['type']}")
-            gr.Label(f"Name: {worker_info['name']}")
-            gr.Label(f"ID: {worker_info['id']}")
-            gr.Label(f"Online: {worker_info['online']}")
-            gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
-            gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
-            gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
-            gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
-            gr.Label(f"Performance: {worker_info['performance']}")
-            gr.Label(f"Threads: {worker_info['threads']}")
-            gr.Label(f"Uptime: {worker_info['uptime']}")
-            gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
-            # gr.Label(f"Paused: {worker_info['paused']}")
-            # gr.Label(f"Info: {worker_info['info']}")
-            gr.Label(f"NSFW: {worker_info['nsfw']}")
-            # gr.Label(f"Owner: {worker_info['owner']}")
-            # gr.Label(f"IP Address: {worker_info['ipaddr']}")
-            gr.Label(f"Trusted: {worker_info['trusted']}")
-            gr.Label(f"Flagged: {worker_info['flagged']}")
-            # gr.Label(f"Suspicious: {worker_info['suspicious']}")
-            gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
-            gr.Label(f"Models: {', '.join(worker_info['models'])}")
-            # gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
-            gr.Label(f"Team Name: {worker_info['team']['name']}")
-            gr.Label(f"Team ID: {worker_info['team']['id']}")
-            # gr.Label(f"Contact: {worker_info['contact']}")
-            gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
-            gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
-            gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
-            gr.Label(f"Img2Img: {worker_info['img2img']}")
-            gr.Label(f"Painting: {worker_info['painting']}")
-            gr.Label(f"Post-Processing: {worker_info['post-processing']}")
-            gr.Label(f"Lora: {worker_info['lora']}")
-            gr.Label(f"Controlnet: {worker_info['controlnet']}")
-            gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
-            # gr.Label(f"Max Length: {worker_info['max_length']}")
-            # gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
-            # gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
+            if 'type' in worker_info:
+                gr.Label(f"Type: {worker_info['type']}")
+            if 'name' in worker_info:
+                gr.Label(f"Name: {worker_info['name']}")
+            if 'id' in worker_info:
+                gr.Label(f"ID: {worker_info['id']}")
+            if 'online' in worker_info:
+                gr.Label(f"Online: {worker_info['online']}")
+            if 'requests_fulfilled' in worker_info:
+                gr.Label(f"Requests Fulfilled: {worker_info['requests_fulfilled']}")
+            if 'kudos_rewards' in worker_info:
+                gr.Label(f"Kudos Rewards: {worker_info['kudos_rewards']}")
+            if 'kudos_details' in worker_info and 'generated' in worker_info['kudos_details']:
+                gr.Label(f"Kudos Generated: {worker_info['kudos_details']['generated']}")
+            if 'kudos_details' in worker_info and 'uptime' in worker_info['kudos_details']:
+                gr.Label(f"Kudos Uptime: {worker_info['kudos_details']['uptime']}")
+            if 'performance' in worker_info:
+                gr.Label(f"Performance: {worker_info['performance']}")
+            if 'threads' in worker_info:
+                gr.Label(f"Threads: {worker_info['threads']}")
+            if 'uptime' in worker_info:
+                gr.Label(f"Uptime: {worker_info['uptime']}")
+            if 'maintenance_mode' in worker_info:
+                gr.Label(f"Maintenance Mode: {worker_info['maintenance_mode']}")
+            if 'paused' in worker_info:
+                gr.Label(f"Paused: {worker_info['paused']}")
+            if 'info' in worker_info:
+                gr.Label(f"Info: {worker_info['info']}")
+            if 'nsfw' in worker_info:
+                gr.Label(f"NSFW: {worker_info['nsfw']}")
+            if 'owner' in worker_info:
+                gr.Label(f"Owner: {worker_info['owner']}")
+            if 'ipaddr' in worker_info:
+                gr.Label(f"IP Address: {worker_info['ipaddr']}")
+            if 'trusted' in worker_info:
+                gr.Label(f"Trusted: {worker_info['trusted']}")
+            if 'flagged' in worker_info:
+                gr.Label(f"Flagged: {worker_info['flagged']}")
+            if 'suspicious' in worker_info:
+                gr.Label(f"Suspicious: {worker_info['suspicious']}")
+            if 'uncompleted_jobs' in worker_info:
+                gr.Label(f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}")
+            if 'models' in worker_info:
+                gr.Label(f"Models: {', '.join(worker_info['models'])}")
+            if 'forms' in worker_info:
+                gr.Label(f"Forms: {', '.join(worker_info['forms'])}")
+            if 'team' in worker_info and 'name' in worker_info['team']:
+                gr.Label(f"Team Name: {worker_info['team']['name']}")
+            if 'team' in worker_info and 'id' in worker_info['team']:
+                gr.Label(f"Team ID: {worker_info['team']['id']}")
+            if 'contact' in worker_info:
+                gr.Label(f"Contact: {worker_info['contact']}")
+            if 'bridge_agent' in worker_info:
+                gr.Label(f"Bridge Agent: {worker_info['bridge_agent']}")
+            if 'max_pixels' in worker_info:
+                gr.Label(f"Max Pixels: {worker_info['max_pixels']}")
+            if 'megapixelsteps_generated' in worker_info:
+                gr.Label(f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}")
+            if 'img2img' in worker_info:
+                gr.Label(f"Img2Img: {worker_info['img2img']}")
+            if 'painting' in worker_info:
+                gr.Label(f"Painting: {worker_info['painting']}")
+            if 'post-processing' in worker_info:
+                gr.Label(f"Post-Processing: {worker_info['post-processing']}")
+            if 'lora' in worker_info:
+                gr.Label(f"Lora: {worker_info['lora']}")
+            if 'controlnet' in worker_info:
+                gr.Label(f"Controlnet: {worker_info['controlnet']}")
+            if 'sdxl_controlnet' in worker_info:
+                gr.Label(f"SDXL Controlnet: {worker_info['sdxl_controlnet']}")
+            if 'max_length' in worker_info:
+                gr.Label(f"Max Length: {worker_info['max_length']}")
+            if 'max_context_length' in worker_info:
+                gr.Label(f"Max Context Length: {worker_info['max_context_length']}")
+            if 'tokens_generated' in worker_info:
+                gr.Label(f"Tokens Generated: {worker_info['tokens_generated']}")
     
     return worker_ui
 

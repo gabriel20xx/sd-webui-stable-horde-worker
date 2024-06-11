@@ -259,6 +259,15 @@ def get_kudos_ui():
     return kudos_ui
 
 
+def get_stats_ui(stats_info):
+    with gr.Blocks() as stats_ui:
+        with gr.Column():
+            with gr.Box(scale=2):
+                pass
+
+    return stats_ui
+
+
 def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
@@ -508,6 +517,7 @@ def on_ui_tabs():
                 horde_worker = HordeWorker()
                 horde_news = HordeNews()
                 horde_status = HordeStatus()
+                horde_stats = HordeStats()
                 user_info = horde_user.get_user_info(session, apikey)
                 # Get worker id from user info
                 worker_ids = user_info["worker_ids"]
@@ -521,11 +531,12 @@ def on_ui_tabs():
 
                 news_info = horde_news.get_horde_news(session)
                 horde_status = horde_status.get_horde_status(session)
+                stats_info = horde_stats.get_horde_stats(session)
 
-                return user_info, worker_info, news_info, horde_status
+                return user_info, worker_info, news_info, horde_status, stats_info
 
             session = requests.Session()
-            user_info, worker_info, news_info, horde_status = call_apis(
+            user_info, worker_info, news_info, horde_status, stats_info = call_apis(
                 session, config.apikey
             )
 
@@ -558,6 +569,12 @@ def on_ui_tabs():
                     get_news_ui(news_info, horde_status)
             except Exception as e:
                 print(f"Error: News UI not found, {e}")
+
+            try:
+                with gr.Tab("Stats"):
+                    get_stats_ui(stats_info)
+            except Exception as e:
+                print(f"Error: Stats UI not found, {e}")
 
             try:
                 with gr.Tab("Settings"):

@@ -93,3 +93,19 @@ class KudoTransfer:
             return data
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
+
+
+class HordeStats:
+    @staticmethod
+    def get_horde_stats(session: requests.Session):
+        headers = {
+            "accept": "application/json",
+        }
+        r = session.get(
+            "https://stablehorde.net/api/v2/stats/img/totals", headers=headers
+        )
+        data = r.json()
+        if r.status_code == 200:
+            return data
+        else:
+            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")

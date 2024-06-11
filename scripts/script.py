@@ -451,6 +451,7 @@ def on_ui_tabs():
 
             return user_info, worker_info
 
+        session = requests.Session()
         user_info, worker_info = call_apis(session, apikey)
 
         with gr.Tab("Generation"):

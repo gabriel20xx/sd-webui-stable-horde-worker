@@ -651,7 +651,6 @@ def get_settings_ui(status, running_type):
                     elem_id=tab_prefix + "enable",
                     visible=False,
                 )
-                
                 name = gr.Textbox(
                     config.name,
                     label="Worker Name",
@@ -707,6 +706,7 @@ def get_settings_ui(status, running_type):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box(scale=2):
+
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \

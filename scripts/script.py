@@ -861,26 +861,26 @@ def on_ui_tabs():
         try:
             with gr.Tab("Generation"):
                 get_generator_ui(status)
-        except:
-            print("Error: Generator UI not found")
+        except Exception as e:
+            print(f"Error: Generator UI not found, {e}")
 
         try:
             with gr.Tab("Worker"):
                 get_worker_ui(worker_info)
-        except:
-            print("Error: Worker UI not found")
+        except Exception as e:
+            print(f"Error: Worker UI not found, {e}")
 
         try:
             with gr.Tab("User"):
                 get_user_ui(user_info)
-        except:
-            print("Error: User UI not found")
+        except Exception as e:
+            print(f"Error: User UI not found, {e}")
 
         try:
             with gr.Tab("Settings"):
                 get_settings_ui(status, running_type)
-        except:
-            print("Error: Settings UI not found")
+        except Exception as e:
+            print(f"Error: Settings UI not found, {e}")
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

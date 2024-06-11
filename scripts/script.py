@@ -288,18 +288,11 @@ def get_news_ui(news_info, horde_status):
                     )
             with gr.Box(scale=2):
                 for news_item in news_info[:3]:
-                    if "title" in news_item:
-                        gr.Textbox(
-                            news_item["title"],
-                            label="Title",
-                            elem_id=tab_prefix + "news_title",
-                            visible=True,
-                        )
-                    if "newspiece" in news_item:
+                    if "title" and "newspiece" in news_item:
                         gr.Textbox(
                             news_item["newspiece"],
-                            label="Newspiece",
-                            elem_id=tab_prefix + "news_newspiece",
+                            label=news_item["title"],
+                            elem_id=tab_prefix + "news_title",
                             visible=True,
                         )
     return news_ui
@@ -545,13 +538,6 @@ def on_ui_tabs():
                         break
 
                 news_info = horde_news.get_horde_news(session)
-                news_info = sorted(
-                    news_info,
-                    key=lambda x: datetime.datetime.strptime(
-                        x["date_published"], "%Y-%m-%d"
-                    ),
-                    reverse=True,
-                )
                 horde_status = horde_status.get_horde_status(session)
                 stats_info = horde_stats.get_horde_stats(session)
 

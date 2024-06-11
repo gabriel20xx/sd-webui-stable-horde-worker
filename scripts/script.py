@@ -419,27 +419,27 @@ def get_settings_ui(status, running_type):
                 elem_id=tab_prefix + "apply-settings",
             )
 
-            apply_settings.click(
-                fn=apply_stable_horde_settings,
-                inputs=[
-                    enable,
-                    name,
-                    apikey,
-                    allow_img2img,
-                    allow_painting,
-                    allow_unsafe_ipaddr,
-                    allow_post_processing,
-                    restore_settings,
-                    nsfw,
-                    interval,
-                    max_pixels,
-                    endpoint,
-                    show_images,
-                    save_images,
-                    save_images_folder,
-                ],
-                outputs=[status, running_type],
-            )
+        apply_settings.click(
+            fn=apply_stable_horde_settings,
+            inputs=[
+                enable,
+                name,
+                apikey,
+                allow_img2img,
+                allow_painting,
+                allow_unsafe_ipaddr,
+                allow_post_processing,
+                restore_settings,
+                nsfw,
+                interval,
+                max_pixels,
+                endpoint,
+                show_images,
+                save_images,
+                save_images_folder,
+            ],
+            outputs=[status, running_type],
+        )
 
     return settings_ui
 

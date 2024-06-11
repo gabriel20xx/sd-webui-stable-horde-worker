@@ -471,7 +471,7 @@ def get_settings_ui(status, running_type):
 
 def on_ui_tabs():
     with gr.Blocks() as ui_tabs:
-        with gr.Row():
+        with gr.Column():
             apikey = gr.Textbox(
                 config.apikey,
                 label="Stable Horde API Key",
@@ -485,18 +485,34 @@ def on_ui_tabs():
 
             save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
 
-        with gr.Row():
+        with gr.Column():
             status = gr.Textbox(
                 f'Status: {"Running" if config.enabled else "Stopped"}',
                 label="",
                 elem_id=tab_prefix + "status",
                 readonly=True,
             )
+
+            toggle_running = gr.Button("Disable", elem_id=f"{tab_prefix}disable")
+
+            def toggle_running_fn():
+                if config.enabled:
+                    config.enabled = False
+                    status.update("Status: Stopped")
+                    running_type.update("Running Type: Image Generation")
+                else:
+                    config.enabled = True
+                    status.update("Status: Running")
+                config.save()
+
+            toggle_running.click(fn=toggle_running_fn)
+
             running_type = gr.Textbox(
                 "Running Type: Image Generation",
                 label="",
                 elem_id=tab_prefix + "running-type",
                 readonly=True,
+                visible=False,
             )
 
         def call_apis(session, apikey):

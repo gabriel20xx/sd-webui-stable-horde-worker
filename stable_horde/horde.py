@@ -4,6 +4,7 @@ import json
 from os import path
 from typing import Any, Dict, List, Optional, Tuple
 from re import sub
+import time
 
 import aiohttp
 import numpy as np
@@ -184,6 +185,7 @@ class StableHorde:
                     print(f"Trusted: {trusted}")
                     print(f"Flagged: {flagged}")
 
+        start_time = time.time()
         while True:
             if not self.current_models:
                 self.state.status = self.detect_current_model()
@@ -202,7 +204,12 @@ class StableHorde:
                     # there are generation jobs from webui.
                     with call_queue.queue_lock:
                         self.type = None
-                        print("[Stable Horde] Looking for requests...", end='\r')
+                        end_time = time.time()
+                        elapsed_time = end_time - start_time
+                        print(
+                            f"Looking for requests... ({elapsed_time:.0f}s)",
+                            end="\r",
+                        )
                         req = await HordeJob.get_request(
                             await self.get_session(),
                             self.config,
@@ -211,6 +218,7 @@ class StableHorde:
                         )
                     if req:
                         await self.handle_request(req)
+                        start_time = time.time()
                 except Exception:
                     import traceback
 

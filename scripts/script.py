@@ -440,11 +440,11 @@ def on_ui_tabs():
             # Get worker id from user info
             worker_ids = user_info["worker_ids"]
             for worker in worker_ids:
-                worker_name = worker_info["name"]
-                
                 worker_info = horde_worker.get_worker_info(
                     session, apikey, worker
                 )
+
+                worker_name = worker_info["name"]
                 if worker_name == config.name:
                     print(f"Current Worker: {worker_name}")
                     break

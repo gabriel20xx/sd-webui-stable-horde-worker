@@ -446,45 +446,46 @@ def get_settings_ui(status, running_type):
 
 def on_ui_tabs():
     with gr.Blocks() as ui_tabs:
-        with gr.Row():
-            with gr.Column():
-                apikey = gr.Textbox(
-                    config.apikey,
-                    label="Stable Horde API Key",
-                    elem_id=tab_prefix + "apikey",
-                    resizeable=False,
-                )
-                save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
+        with gr.Column():
+            with gr.Row():
+                with gr.Column():
+                    apikey = gr.Textbox(
+                        config.apikey,
+                        label="Stable Horde API Key",
+                        elem_id=tab_prefix + "apikey",
+                        resizeable=False,
+                    )
+                    save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
 
-                def save_apikey_fn(apikey: str):
-                    config.apikey = apikey
-                    config.save()
+                    def save_apikey_fn(apikey: str):
+                        config.apikey = apikey
+                        config.save()
 
-                save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+                    save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
 
-            with gr.Column():
-                status = gr.Textbox(
-                    f'{"Running" if config.enabled else "Stopped"}',
-                    label="Status",
-                    elem_id=tab_prefix + "status",
-                    readonly=True,
-                )
+                with gr.Column():
+                    status = gr.Textbox(
+                        f'{"Running" if config.enabled else "Stopped"}',
+                        label="Status",
+                        elem_id=tab_prefix + "status",
+                        readonly=True,
+                    )
 
-                gr.HTML(
-                    """
-                <style>
-                .enabled-button {
-                    background-color: red;
-                    color: white;
-                }
+                    gr.HTML(
+                        """
+                    <style>
+                    .enabled-button {
+                        background-color: red;
+                        color: white;
+                    }
 
-                .disabled-button {
-                    background-color: green;
-                    color: white;
-                }
-                </style>
-                    """
-                )
+                    .disabled-button {
+                        background-color: green;
+                        color: white;
+                    }
+                    </style>
+                        """
+                    )
 
                 toggle_running = gr.Button(
                     "Disable",

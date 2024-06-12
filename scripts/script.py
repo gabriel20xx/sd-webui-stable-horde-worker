@@ -253,11 +253,42 @@ def get_user_ui(user_info):
     return user_ui
 
 
-def get_kudos_ui():
+def get_kudos_ui(user_info):
     with gr.Blocks() as kudos_ui:
-        with gr.Column():
-            with gr.Box(scale=2):
-                pass
+        with gr.Row():
+            with gr.Column():
+                # Transfer Kudos Title
+                gr.Markdown(
+                    "## Transfer Kudos",
+                    elem_id="kudos_title",
+                )
+
+                # Username
+                gr.Textbox(
+                    label="Username",
+                    placeholder="Enter username",
+                    elem_id="kudos_username",
+                )
+
+            with gr. Column():
+                # Kudo amount display
+                gr.Slider(
+                    label="Kudos",
+                    minimum=0,
+                    maximum=user_info["kudos"],
+                    step=1,
+                    value=10,
+                    elem_id="kudos_amount",
+                )
+
+                # Transfer Kudo amount
+                gr.Button(
+                    "Transfer",
+                    variant="primary",
+                    elem_id="kudos_transfer_button",
+                )
+            
+            # Transfer Button
 
     return kudos_ui
 
@@ -452,7 +483,7 @@ def get_settings_ui(status, running_type):
 
 
 def on_ui_tabs():
-    with gr.Blocks() as ui_tabs:
+    with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="red")) as ui_tabs:
         with gr.Row():
             with gr.Column():
                 apikey = gr.Textbox(
@@ -479,25 +510,8 @@ def on_ui_tabs():
 
                 toggle_running = gr.Button(
                     "Disable",
+                    variant="secondary",
                     elem_id=f"{tab_prefix}disable",
-                    css_classes=["enabled-button"],
-                )
-
-                gr.HTML(
-                    """
-                    <style>
-                    .enabled-button {
-                        background-color: red;
-                        color: white;
-                    }
-
-                    .disabled-button {
-                        background-color: green;
-                        color: white;
-                    }
-                    </style>
-                        """,
-                    visible=False,
                 )
 
                 def toggle_running_fn():
@@ -506,13 +520,13 @@ def on_ui_tabs():
                         status.update("Status: Stopped")
                         running_type.update("Running Type: Image Generation")
                         toggle_running.update(
-                            value="Enable", css_classes=["disabled-button"]
+                            value="Enable", variant="primary"
                         )
                     else:
                         config.enabled = True
                         status.update("Status: Running")
                         toggle_running.update(
-                            value="Disable", css_classes=["disabled-button"]
+                            value="Disable", variant="secondary"
                         )
                     config.save()
 

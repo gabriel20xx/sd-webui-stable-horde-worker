@@ -278,7 +278,9 @@ def get_news_ui(news_info, horde_status):
         )
         with gr.Row():
             news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
-            news_update.click()
+
+            horde_news = HordeNews()
+            news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
         with gr.Box(scale=2):
             with gr.Column():
                 if "maintenance_mode" in horde_status:
@@ -506,6 +508,14 @@ def on_ui_tabs():
                     label="Status",
                     elem_id=tab_prefix + "status",
                     readonly=True,
+                )
+
+                running_type = gr.Textbox(
+                    "Running Type: Image Generation",
+                    label="",
+                    elem_id=tab_prefix + "running-type",
+                    readonly=True,
+                    visible=False,
                 )
 
                 toggle_running = gr.Button(

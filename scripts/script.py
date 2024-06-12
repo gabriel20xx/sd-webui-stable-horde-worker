@@ -579,33 +579,18 @@ def on_ui_tabs():
                     elem_id=f"{tab_prefix}disable",
                 )
 
-            def call_apis(session, apikey):
-                horde_user = HordeUser()
+                # TODO Move this somewhere else
+                session = requests.Session()
                 horde_worker = HordeWorker()
-                horde_news = HordeNews()
-                horde_status = HordeStatus()
-                horde_stats = HordeStats()
-                user_info = horde_user.get_user_info(session, apikey)
-                # Get worker id from user info
+                horde_user = HordeUser()
+                user_info = horde_user.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:
-                    worker_info = horde_worker.get_worker_info(session, apikey, worker)
-
+                    worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
                     worker_name = worker_info["name"]
                     if worker_name == config.name:
                         print(f"Current Worker: {worker_name}")
                         break
-
-                news_info = horde_news.get_horde_news(session)
-                horde_status = horde_status.get_horde_status(session)
-                stats_info = horde_stats.get_horde_stats(session)
-
-                return user_info, worker_info, news_info, horde_status, stats_info
-
-            session = requests.Session()
-            user_info, worker_info, news_info, horde_status, stats_info = call_apis(
-                session, config.apikey
-            )
 
             # General tabs
             try:

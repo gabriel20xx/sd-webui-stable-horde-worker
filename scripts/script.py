@@ -3,9 +3,7 @@ from typing import Optional
 from fastapi import FastAPI
 import gradio as gr
 import asyncio
-import aiohttp
 import requests
-import datetime
 from threading import Thread
 
 from modules import scripts, script_callbacks, sd_models, shared
@@ -205,8 +203,7 @@ def get_worker_ui(worker):
                     )
         # Click functions
         worker_update.click(
-            fn=horde_worker.get_worker_info,
-            inputs=[session, config.apikey, worker],
+            fn=horde_worker.get_worker_info(session, config.apikey, worker),
             outputs=worker_info,
         )
 
@@ -220,12 +217,6 @@ def get_user_ui():
         horde_user = HordeUser()
         user_info = horde_user.get_user_info(session, config.apikey)
 
-        user_update.click(
-            fn=horde_user.get_user_info,
-            inputs=[session, config.apikey],
-            outputs=user_info,
-        )
-
         # User UI
         gr.Markdown("## User Details", elem_id="user_title")
         with gr.Row():
@@ -238,6 +229,11 @@ def get_user_ui():
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
+        # Click functions
+        user_update.click(
+            fn=horde_user.get_user_info(session, config.apikey),
+            outputs=user_info,
+        )
 
     return user_ui
 
@@ -295,7 +291,7 @@ def get_kudos_ui():
                 elem_id="kudos_transfer_button",
             )
         # Click functions
-        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
+        transfer.click(fn=kudo_transfer.transfer_kudos(username, kudos_amount))
 
     return kudos_ui
 
@@ -348,7 +344,7 @@ def get_news_ui():
                             interactive=False,
                         )
         # Click functions
-        news_update.click(fn=horde_news.get_horde_news, inputs=[session], outputs=news_info)
+        news_update.click(fn=horde_news.get_horde_news(session), outputs=news_info)
 
     return news_ui
 
@@ -379,7 +375,7 @@ def get_stats_ui(stats_info):
                             lines=1,
                         )
         # Click functions
-        stats_update.click(fn=horde_stats.get_horde_stats, inputs=[session], outputs=stats_info)
+        stats_update.click(fn=horde_stats.get_horde_stats(session), outputs=stats_info)
 
     return stats_ui
 
@@ -455,7 +451,6 @@ def get_settings_ui(status):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box():
-
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \
@@ -610,7 +605,7 @@ def on_ui_tabs():
                 get_settings_ui(status, running_type)
 
         # Click functions
-        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+        save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)

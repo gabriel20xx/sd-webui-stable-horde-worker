@@ -309,7 +309,7 @@ def get_news_ui(news_info, horde_status):
                     )
         with gr.Box(scale=2):
             with gr.Column():
-                for news_item, i in news_info[:3]:
+                for news_item in news_info[:3]:
                     if "title" and "newspiece" and "date_published" in news_item:
                         gr.Textbox(
                             news_item["newspiece"],

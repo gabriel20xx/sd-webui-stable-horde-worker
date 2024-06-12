@@ -247,7 +247,7 @@ def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
         # Kudos functions
         horde_user = HordeUser()
-        user_info = horde_user.get_user_info()
+        user_info = horde_user.get_user_info(session, config.apikey)
         kudo_transfer = KudoTransfer()
 
         # Kudos UI
@@ -305,9 +305,9 @@ def get_news_ui():
     with gr.Blocks() as news_ui:
         # News functions
         horde_news = HordeNews()
-        news_info = horde_news.get_horde_news()
+        news_info = horde_news.get_horde_news(session)
         horde_status = HordeStatus()
-        status_info = horde_status.get_horde_status()
+        status_info = horde_status.get_horde_status(session)
 
         # News UI
         gr.Markdown(

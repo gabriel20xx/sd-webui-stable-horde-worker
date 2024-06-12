@@ -98,7 +98,7 @@ tab_prefix = "stable-horde-"
 
 
 # Generator UI
-def get_generator_ui(state):
+def get_generator_ui():
     with gr.Blocks() as generator_ui:
         with gr.Row():
             with gr.Column(elem_id="stable-horde"):
@@ -595,7 +595,7 @@ def on_ui_tabs():
             # General tabs
             try:
                 with gr.Tab("Generation"):
-                    get_generator_ui(horde.state)
+                    get_generator_ui()
             except Exception as e:
                 print(f"Error: Generator UI not found, {e}")
 

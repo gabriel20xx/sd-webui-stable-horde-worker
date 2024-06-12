@@ -215,7 +215,7 @@ def get_user_ui():
         # User functions
         horde_user = HordeUser()
         user_info = horde_user.get_user_info()
-        
+
         user_update.click(fn=horde_user.get_user_info, outputs=user_info)
 
         # User UI
@@ -311,27 +311,18 @@ def get_news_ui():
 
         with gr.Box(scale=2):
             with gr.Column():
-                if "maintenance_mode" in status_info:
+                status_modes = {
+                "maintenance_mode": "Maintenance mode",
+                "invite_only_mode": "Invite only mode",
+                "raid_mode": "Raid mode"
+            }
+
+            for mode, label in status_modes.items():
+                if mode in status_info:
                     gr.Textbox(
-                        status_info["maintenance_mode"],
-                        label="Maintenance mode",
-                        elem_id=tab_prefix + "status_maintenance_mode",
-                        visible=True,
-                        interactive=False,
-                    )
-                if "invite_only_mode" in status_info:
-                    gr.Textbox(
-                        status_info["invite_only_mode"],
-                        label="Invite only mode",
-                        elem_id=tab_prefix + "status_invite_only_mode",
-                        visible=True,
-                        interactive=False,
-                    )
-                if "raid_mode" in status_info:
-                    gr.Textbox(
-                        status_info["raid_mode"],
-                        label="Raid mode",
-                        elem_id=tab_prefix + "status_raid_mode",
+                        status_info[mode],
+                        label=label,
+                        elem_id=tab_prefix + f"status_{mode}",
                         visible=True,
                         interactive=False,
                     )
@@ -350,7 +341,7 @@ def get_news_ui():
                         )
         # Click functions
         news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
-    
+
     return news_ui
 
 
@@ -388,12 +379,13 @@ def get_stats_ui(stats_info):
 # Settings UI
 def get_settings_ui(status):
     with gr.Blocks() as settings_ui:
+        # Settings UI
         with gr.Column():
             gr.Markdown(
                 "## Settings",
                 elem_id="settings_title",
             )
-            with gr.Box(scale=2):
+            with gr.Box():
                 enable = gr.Checkbox(
                     config.enabled,
                     label="Enable",
@@ -454,7 +446,7 @@ def get_settings_ui(status):
                 )
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
-            with gr.Box(scale=2):
+            with gr.Box():
 
                 def on_apply_selected_models(local_selected_models):
                     status.update(
@@ -496,7 +488,7 @@ def get_settings_ui(status):
                 visible=True,
                 elem_id=tab_prefix + "apply-settings",
             )
-
+        # Click functions
         apply_settings.click(
             fn=apply_stable_horde_settings,
             inputs=[
@@ -586,7 +578,9 @@ def on_ui_tabs():
                 user_info = horde_user.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:
-                    worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
+                    worker_info = horde_worker.get_worker_info(
+                        session, config.apikey, worker
+                    )
                     worker_name = worker_info["name"]
                     if worker_name == config.name:
                         print(f"Current Worker: {worker_name}")

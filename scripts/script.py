@@ -593,47 +593,20 @@ def on_ui_tabs():
                         break
 
             # General tabs
-            try:
-                with gr.Tab("Generation"):
-                    get_generator_ui()
-            except Exception as e:
-                print(f"Error: Generator UI not found, {e}")
-
-            try:
-                with gr.Tab("Worker"):
-                    get_worker_ui()
-            except Exception as e:
-                print(f"Error: Worker UI not found, {e}")
-
-            try:
-                with gr.Tab("User"):
-                    get_user_ui()
-            except Exception as e:
-                print(f"Error: User UI not found, {e}")
-
-            try:
-                with gr.Tab("Kudos"):
-                    get_kudos_ui()
-            except Exception as e:
-                print(f"Error: Kudos UI not found,  {e}")
-
-            try:
-                with gr.Tab("News"):
-                    get_news_ui()
-            except Exception as e:
-                print(f"Error: News UI not found, {e}")
-
-            try:
-                with gr.Tab("Stats"):
-                    get_stats_ui()
-            except Exception as e:
-                print(f"Error: Stats UI not found, {e}")
-
-            try:
-                with gr.Tab("Settings"):
-                    get_settings_ui(status, running_type)
-            except Exception as e:
-                print(f"Error: Settings UI not found, {e}")
+            with gr.Tab("Generation"):
+                get_generator_ui()
+            with gr.Tab("Worker"):
+                get_worker_ui()
+            with gr.Tab("User"):
+                get_user_ui()
+            with gr.Tab("Kudos"):
+                get_kudos_ui()
+            with gr.Tab("News"):
+                get_news_ui()
+            with gr.Tab("Stats"):
+                get_stats_ui()
+            with gr.Tab("Settings"):
+                get_settings_ui(status, running_type)
 
         # Click functions
         save_apikey.click(fn=save_apikey_fn, inputs=[apikey])

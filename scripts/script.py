@@ -99,70 +99,71 @@ tab_prefix = "stable-horde-"
 
 def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
-        with gr.Column(elem_id="stable-horde"):
-            current_id = gr.Textbox(
-                "Current ID: ",
-                label="",
-                elem_id=tab_prefix + "current-id",
-                readonly=True,
-            )
+        with gr.Row():
+            with gr.Column(elem_id="stable-horde"):
+                current_id = gr.Textbox(
+                    "Current ID: ",
+                    label="",
+                    elem_id=tab_prefix + "current-id",
+                    readonly=True,
+                )
 
-            state = gr.HTML(
-                "",
-                label="State",
-                elem_id=tab_prefix + "state",
-                visible=True,
-                readonly=True,
-            )
+                state = gr.HTML(
+                    "",
+                    label="State",
+                    elem_id=tab_prefix + "state",
+                    visible=True,
+                    readonly=True,
+                )
 
-            def on_refresh(image=False, show_images=config.show_image_preview):
-                cid = f"Current ID: {horde.state.id}"
-                html = "".join(
-                    map(
-                        lambda x: f"<p>{x[0]}: {x[1]}</p>",
-                        horde.state.to_dict().items(),
+                def on_refresh(image=False, show_images=config.show_image_preview):
+                    cid = f"Current ID: {horde.state.id}"
+                    html = "".join(
+                        map(
+                            lambda x: f"<p>{x[0]}: {x[1]}</p>",
+                            horde.state.to_dict().items(),
+                        )
                     )
+                    images = [horde.state.image] if horde.state.image is not None else []
+                    if image and show_images:
+                        return cid, html, horde.state.status, images
+                    return cid, html, horde.state.status
+
+                log = gr.HTML(elem_id=tab_prefix + "log")
+
+            with gr.Column():
+                refresh = gr.Button(
+                    "Refresh",
+                    visible=False,
+                    elem_id=tab_prefix + "refresh",
                 )
-                images = [horde.state.image] if horde.state.image is not None else []
-                if image and show_images:
-                    return cid, html, horde.state.status, images
-                return cid, html, horde.state.status
-
-            log = gr.HTML(elem_id=tab_prefix + "log")
-
-        with gr.Column():
-            refresh = gr.Button(
-                "Refresh",
-                visible=False,
-                elem_id=tab_prefix + "refresh",
-            )
-            refresh_image = gr.Button(
-                "Refresh Image",
-                visible=False,
-                elem_id=tab_prefix + "refresh-image",
-            )
-
-            preview = gr.Gallery(
-                label="Preview",
-                elem_id=tab_prefix + "preview",
-                visible=config.show_image_preview,
-                readonly=True,
-                columns=4,
-            )
-
-            if current_id and log and state:
-                refresh.click(
-                    fn=lambda: on_refresh(),
-                    outputs=[current_id, log, state],
-                    show_progress=False,
+                refresh_image = gr.Button(
+                    "Refresh Image",
+                    visible=False,
+                    elem_id=tab_prefix + "refresh-image",
                 )
 
-            if current_id and log and state and preview:
-                refresh_image.click(
-                    fn=lambda: on_refresh(True),
-                    outputs=[current_id, log, state, preview],
-                    show_progress=False,
+                preview = gr.Gallery(
+                    label="Preview",
+                    elem_id=tab_prefix + "preview",
+                    visible=config.show_image_preview,
+                    readonly=True,
+                    columns=4,
                 )
+
+                if current_id and log and state:
+                    refresh.click(
+                        fn=lambda: on_refresh(),
+                        outputs=[current_id, log, state],
+                        show_progress=False,
+                    )
+
+                if current_id and log and state and preview:
+                    refresh_image.click(
+                        fn=lambda: on_refresh(True),
+                        outputs=[current_id, log, state, preview],
+                        show_progress=False,
+                    )
 
     return generator_ui
 
@@ -300,16 +301,17 @@ def get_news_ui(news_info, horde_status):
 
 def get_stats_ui(stats_info):
     with gr.Blocks() as stats_ui:
-        with gr.Column():
-            with gr.Box(scale=2):
-                for period, data in stats_info.items():
-                    for metric, value in data.items():
-                        gr.Textbox(
-                            value,
-                            label=f"{period.capitalize()} {metric.capitalize()}",
-                            interactive=False,
-                            lines=1
-                        )
+        with gr.Row():
+            with gr.Column():
+                with gr.Box(scale=2):
+                    for period, data in stats_info.items():
+                        for metric, value in data.items():
+                            gr.Textbox(
+                                value,
+                                label=f"{period.capitalize()} {metric.capitalize()}",
+                                interactive=False,
+                                lines=1
+                            )
 
     return stats_ui
 
@@ -317,103 +319,104 @@ def get_stats_ui(stats_info):
 def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
-            with gr.Box(scale=2):
-                enable = gr.Checkbox(
-                    config.enabled,
-                    label="Enable",
-                    elem_id=tab_prefix + "enable",
-                    visible=False,
-                )
-                name = gr.Textbox(
-                    config.name,
-                    label="Worker Name",
-                    elem_id=tab_prefix + "name",
-                )
-                apikey = gr.Textbox(
-                    config.apikey,
-                    label="Stable Horde API Key",
-                    elem_id=tab_prefix + "apikey",
-                )
-                allow_img2img = gr.Checkbox(config.allow_img2img, label="Allow img2img")
-                allow_painting = gr.Checkbox(
-                    config.allow_painting, label="Allow Painting"
-                )
-                allow_unsafe_ipaddr = gr.Checkbox(
-                    config.allow_unsafe_ipaddr,
-                    label="Allow Unsafe IP Address",
-                )
-                allow_post_processing = gr.Checkbox(
-                    config.allow_post_processing,
-                    label="Allow Post Processing",
-                )
-                restore_settings = gr.Checkbox(
-                    config.restore_settings,
-                    label="Restore settings after rendering a job",
-                )
-                nsfw = gr.Checkbox(config.nsfw, label="Allow NSFW")
-                interval = gr.Slider(
-                    0,
-                    60,
-                    config.interval,
-                    step=1,
-                    label="Duration Between Generations (seconds)",
-                )
-                max_pixels = gr.Textbox(
-                    str(config.max_pixels),
-                    label="Max Pixels",
-                    elem_id=tab_prefix + "max-pixels",
-                )
-                endpoint = gr.Textbox(
-                    config.endpoint,
-                    label="Stable Horde Endpoint",
-                    elem_id=tab_prefix + "endpoint",
-                )
-                save_images_folder = gr.Textbox(
-                    config.save_images_folder,
-                    label="Folder to Save Generation Images",
-                    elem_id=tab_prefix + "save-images-folder",
-                )
-                show_images = gr.Checkbox(
-                    config.show_image_preview, label="Show Images"
-                )
-                save_images = gr.Checkbox(config.save_images, label="Save Images")
-
-            with gr.Box(scale=2):
-
-                def on_apply_selected_models(local_selected_models):
-                    status.update(
-                        f'Status: \
-                    {"Running" if config.enabled else "Stopped"}, \
-                    Updating selected models...'
+            with gr.Blocks():
+                with gr.Box(scale=2):
+                    enable = gr.Checkbox(
+                        config.enabled,
+                        label="Enable",
+                        elem_id=tab_prefix + "enable",
+                        visible=False,
                     )
-                    selected_models = horde.set_current_models(local_selected_models)
-                    local_selected_models_dropdown.update(
-                        value=list(selected_models.values())
+                    name = gr.Textbox(
+                        config.name,
+                        label="Worker Name",
+                        elem_id=tab_prefix + "name",
                     )
-                    return f'Status: \
-                    {"Running" if config.enabled else "Stopped"}, \
-                    Selected models \
-                    {list(selected_models.values())} updated'
+                    apikey = gr.Textbox(
+                        config.apikey,
+                        label="Stable Horde API Key",
+                        elem_id=tab_prefix + "apikey",
+                    )
+                    allow_img2img = gr.Checkbox(config.allow_img2img, label="Allow img2img")
+                    allow_painting = gr.Checkbox(
+                        config.allow_painting, label="Allow Painting"
+                    )
+                    allow_unsafe_ipaddr = gr.Checkbox(
+                        config.allow_unsafe_ipaddr,
+                        label="Allow Unsafe IP Address",
+                    )
+                    allow_post_processing = gr.Checkbox(
+                        config.allow_post_processing,
+                        label="Allow Post Processing",
+                    )
+                    restore_settings = gr.Checkbox(
+                        config.restore_settings,
+                        label="Restore settings after rendering a job",
+                    )
+                    nsfw = gr.Checkbox(config.nsfw, label="Allow NSFW")
+                    interval = gr.Slider(
+                        0,
+                        60,
+                        config.interval,
+                        step=1,
+                        label="Duration Between Generations (seconds)",
+                    )
+                    max_pixels = gr.Textbox(
+                        str(config.max_pixels),
+                        label="Max Pixels",
+                        elem_id=tab_prefix + "max-pixels",
+                    )
+                    endpoint = gr.Textbox(
+                        config.endpoint,
+                        label="Stable Horde Endpoint",
+                        elem_id=tab_prefix + "endpoint",
+                    )
+                    save_images_folder = gr.Textbox(
+                        config.save_images_folder,
+                        label="Folder to Save Generation Images",
+                        elem_id=tab_prefix + "save-images-folder",
+                    )
+                    show_images = gr.Checkbox(
+                        config.show_image_preview, label="Show Images"
+                    )
+                    save_images = gr.Checkbox(config.save_images, label="Save Images")
 
-                local_selected_models_dropdown = gr.Dropdown(
-                    [model.name for model in sd_models.checkpoints_list.values()],
-                    value=[
-                        model.name
-                        for model in sd_models.checkpoints_list.values()
-                        if model.name in list(config.current_models.values())
-                    ],
-                    label="Selected models for sharing",
-                    elem_id=tab_prefix + "local-selected-models",
-                    multiselect=True,
-                    interactive=True,
-                )
+                with gr.Box(scale=2):
 
-                local_selected_models_dropdown.change(
-                    on_apply_selected_models,
-                    inputs=[local_selected_models_dropdown],
-                    outputs=[status],
-                )
-                gr.Markdown("Once you select a model it will take some time to load.")
+                    def on_apply_selected_models(local_selected_models):
+                        status.update(
+                            f'Status: \
+                        {"Running" if config.enabled else "Stopped"}, \
+                        Updating selected models...'
+                        )
+                        selected_models = horde.set_current_models(local_selected_models)
+                        local_selected_models_dropdown.update(
+                            value=list(selected_models.values())
+                        )
+                        return f'Status: \
+                        {"Running" if config.enabled else "Stopped"}, \
+                        Selected models \
+                        {list(selected_models.values())} updated'
+
+                    local_selected_models_dropdown = gr.Dropdown(
+                        [model.name for model in sd_models.checkpoints_list.values()],
+                        value=[
+                            model.name
+                            for model in sd_models.checkpoints_list.values()
+                            if model.name in list(config.current_models.values())
+                        ],
+                        label="Selected models for sharing",
+                        elem_id=tab_prefix + "local-selected-models",
+                        multiselect=True,
+                        interactive=True,
+                    )
+
+                    local_selected_models_dropdown.change(
+                        on_apply_selected_models,
+                        inputs=[local_selected_models_dropdown],
+                        outputs=[status],
+                    )
+                    gr.Markdown("Once you select a model it will take some time to load.")
 
             apply_settings = gr.Button(
                 "Apply Settings",

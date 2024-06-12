@@ -352,6 +352,13 @@ def get_news_ui():
 
 def get_stats_ui(stats_info):
     with gr.Blocks() as stats_ui:
+        # Stats functions
+        horde_stats = HordeStats()
+        stats_info = horde_stats.get_horde_stats()
+
+        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
+
+        # Stats UI
         gr.Markdown(
             "## Stats",
             elem_id="stats_title",
@@ -370,8 +377,6 @@ def get_stats_ui(stats_info):
                             interactive=False,
                             lines=1,
                         )
-        horde_stats = HordeStats()
-        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
 
     return stats_ui
 
@@ -487,27 +492,27 @@ def get_settings_ui(status, running_type):
                 elem_id=tab_prefix + "apply-settings",
             )
 
-    apply_settings.click(
-        fn=apply_stable_horde_settings,
-        inputs=[
-            enable,
-            name,
-            apikey,
-            allow_img2img,
-            allow_painting,
-            allow_unsafe_ipaddr,
-            allow_post_processing,
-            restore_settings,
-            nsfw,
-            interval,
-            max_pixels,
-            endpoint,
-            show_images,
-            save_images,
-            save_images_folder,
-        ],
-        outputs=[status, running_type],
-    )
+        apply_settings.click(
+            fn=apply_stable_horde_settings,
+            inputs=[
+                enable,
+                name,
+                apikey,
+                allow_img2img,
+                allow_painting,
+                allow_unsafe_ipaddr,
+                allow_post_processing,
+                restore_settings,
+                nsfw,
+                interval,
+                max_pixels,
+                endpoint,
+                show_images,
+                save_images,
+                save_images_folder,
+            ],
+            outputs=[status, running_type],
+        )
 
     return settings_ui
 

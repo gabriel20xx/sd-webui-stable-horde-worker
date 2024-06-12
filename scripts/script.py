@@ -314,7 +314,9 @@ def get_news_ui(news_info, horde_status):
                     if "title" and "newspiece" and "date_published" in news_item:
                         gr.Textbox(
                             news_item["newspiece"],
-                            label=news_item["date_published"] + " - " + news_item["title"],
+                            label=news_item["date_published"]
+                            + " - "
+                            + news_item["title"],
                             elem_id=tab_prefix + "news_title",
                             visible=True,
                             interactive=False,
@@ -500,12 +502,6 @@ def on_ui_tabs():
                 )
                 save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
 
-                def save_apikey_fn(apikey: str):
-                    config.apikey = apikey
-                    config.save()
-
-                save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
-
             with gr.Column():
                 status = gr.Textbox(
                     f'{"Running" if config.enabled else "Stopped"}',
@@ -527,20 +523,6 @@ def on_ui_tabs():
                     variant="secondary",
                     elem_id=f"{tab_prefix}disable",
                 )
-
-                def toggle_running_fn():
-                    if config.enabled:
-                        config.enabled = False
-                        status.update("Status: Stopped")
-                        running_type.update("Running Type: Image Generation")
-                        toggle_running.update(value="Enable", variant="primary")
-                    else:
-                        config.enabled = True
-                        status.update("Status: Running")
-                        toggle_running.update(value="Disable", variant="secondary")
-                    config.save()
-
-                toggle_running.click(fn=toggle_running_fn)
 
             def call_apis(session, apikey):
                 horde_user = HordeUser()
@@ -611,6 +593,26 @@ def on_ui_tabs():
                     get_settings_ui(status, running_type)
             except Exception as e:
                 print(f"Error: Settings UI not found, {e}")
+
+        def save_apikey_fn(apikey: str):
+            config.apikey = apikey
+            config.save()
+
+        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+
+        def toggle_running_fn():
+            if config.enabled:
+                config.enabled = False
+                status.update("Status: Stopped")
+                running_type.update("Running Type: Image Generation")
+                toggle_running.update(value="Enable", variant="primary")
+            else:
+                config.enabled = True
+                status.update("Status: Running")
+                toggle_running.update(value="Disable", variant="secondary")
+            config.save()
+
+        toggle_running.click(fn=toggle_running_fn)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

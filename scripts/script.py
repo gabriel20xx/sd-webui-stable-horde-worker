@@ -196,60 +196,6 @@ def get_user_ui(user_info):
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
 
-        """ def update_user_info():
-            if horde.state.user is None:
-                return (
-                    "**Try click update button to fetch the user info**",
-                    "No Worker",
-                )
-
-            def map_worker_detail(worker: HordeWorker):
-                return "\n".join(
-                    map(
-                        lambda x: f"<td>{x}</td>",
-                        [
-                            worker.id,
-                            worker.name,
-                            worker.maintenance_mode,
-                            '<button onclick="'
-                            + f"stableHordeSwitchMaintenance('{worker.id}')\">"
-                            + "Switch Maintenance</button>",
-                        ],
-                    )
-                )
-
-            workers_table_cells = map(
-                lambda x: f"<tr>{map_worker_detail(x)}</tr>",
-                horde.state.user.workers,
-            )
-
-            workers_html = (
-                
-                <table>
-                <thead>
-                <tr>
-                <th>Worker ID</th>
-                <th>Worker Name</th>
-                <th>Maintenance Mode ?</th>
-                <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                
-                + "".join(workers_table_cells)
-                + 
-                </tbody>
-                </table>
-                
-            )
-
-            return (
-                f"Welcome Back, **{horde.state.user.username}** !",
-                workers_html,
-            )
-
-        user_update.click(fn=update_user_info, outputs=[user_welcome, workers]) """
-
     return user_ui
 
 
@@ -363,7 +309,7 @@ def get_stats_ui(stats_info):
 def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
-            with gr.Blocks():
+            with gr.Row():
                 with gr.Box(scale=2):
                     enable = gr.Checkbox(
                         config.enabled,

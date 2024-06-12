@@ -24,7 +24,7 @@ from stable_horde import (
 basedir = scripts.basedir()
 config = StableHordeConfig(basedir)
 horde = StableHorde(basedir, config)
-session: Optional[aiohttp.ClientSession] = None
+session = requests.Session()
 
 
 def on_app_started(demo: Optional[gr.Blocks], app: FastAPI):
@@ -185,11 +185,11 @@ def get_generator_ui():
 
 
 # Worker UI
-def get_worker_ui():
+def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         # Worker functions
         horde_worker = HordeWorker()
-        worker_info = horde_worker.get_worker_info()
+        worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
 
         # Worker UI
         gr.Markdown("## Worker Details")
@@ -204,7 +204,11 @@ def get_worker_ui():
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
         # Click functions
-        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
+        worker_update.click(
+            fn=horde_worker.get_worker_info,
+            inputs=[session, config.apikey, worker],
+            outputs=worker_info,
+        )
 
     return worker_ui
 
@@ -214,9 +218,13 @@ def get_user_ui():
     with gr.Blocks() as user_ui:
         # User functions
         horde_user = HordeUser()
-        user_info = horde_user.get_user_info()
+        user_info = horde_user.get_user_info(session, config.apikey)
 
-        user_update.click(fn=horde_user.get_user_info, outputs=user_info)
+        user_update.click(
+            fn=horde_user.get_user_info,
+            inputs=[session, config.apikey],
+            outputs=user_info,
+        )
 
         # User UI
         gr.Markdown("## User Details", elem_id="user_title")
@@ -312,10 +320,10 @@ def get_news_ui():
         with gr.Box(scale=2):
             with gr.Column():
                 status_modes = {
-                "maintenance_mode": "Maintenance mode",
-                "invite_only_mode": "Invite only mode",
-                "raid_mode": "Raid mode"
-            }
+                    "maintenance_mode": "Maintenance mode",
+                    "invite_only_mode": "Invite only mode",
+                    "raid_mode": "Raid mode",
+                }
 
             for mode, label in status_modes.items():
                 if mode in status_info:
@@ -340,7 +348,7 @@ def get_news_ui():
                             interactive=False,
                         )
         # Click functions
-        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
+        news_update.click(fn=horde_news.get_horde_news, inputs=[session], outputs=news_info)
 
     return news_ui
 
@@ -371,7 +379,7 @@ def get_stats_ui(stats_info):
                             lines=1,
                         )
         # Click functions
-        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
+        stats_update.click(fn=horde_stats.get_horde_stats, inputs=[session], outputs=stats_info)
 
     return stats_ui
 
@@ -572,7 +580,6 @@ def on_ui_tabs():
                 )
 
                 # TODO Move this somewhere else
-                session = requests.Session()
                 horde_worker = HordeWorker()
                 horde_user = HordeUser()
                 user_info = horde_user.get_user_info(session, config.apikey)
@@ -590,7 +597,7 @@ def on_ui_tabs():
             with gr.Tab("Generation"):
                 get_generator_ui()
             with gr.Tab("Worker"):
-                get_worker_ui()
+                get_worker_ui(worker)
             with gr.Tab("User"):
                 get_user_ui()
             with gr.Tab("Kudos"):

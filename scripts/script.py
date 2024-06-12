@@ -304,14 +304,16 @@ def get_stats_ui(stats_info):
         with gr.Row():
             with gr.Column():
                 with gr.Box(scale=2):
-                    for period, data in stats_info.items():
-                        for metric, value in data.items():
-                            gr.Textbox(
-                                value,
-                                label=f"{period.capitalize()} {metric.capitalize()}",
-                                interactive=False,
-                                lines=1
-                            )
+                    with gr.Row():
+                        with gr.Column():
+                            for period, data in stats_info.items():
+                                for metric, value in data.items():
+                                    gr.Textbox(
+                                        value,
+                                        label=f"{period.capitalize()} {metric.capitalize()}",
+                                        interactive=False,
+                                        lines=1
+                                    )
 
     return stats_ui
 

@@ -187,24 +187,27 @@ def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:
         gr.Markdown("## Worker Details")
         with gr.Row():
-            worker_update = gr.Button("Update Worker Details", elem_id=f"{tab_prefix}worker-update")
+            worker_update = gr.Button(
+                "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
+            )
             worker_update.click()
         with gr.Column():
             for key, value in worker_info.items():
                 if value is not None:
-                    gr.Textbox(value, label=key.capitalize(), interactive=False, lines=1)
+                    gr.Textbox(
+                        value, label=key.capitalize(), interactive=False, lines=1
+                    )
 
     return worker_ui
 
 
 def get_user_ui(user_info):
     with gr.Blocks() as user_ui:
-        gr.Markdown(
-            "## User Details", 
-            elem_id="user_title"
-        )
+        gr.Markdown("## User Details", elem_id="user_title")
         with gr.Row():
-            user_update = gr.Button("Update User Details", elem_id=f"{tab_prefix}user-update")
+            user_update = gr.Button(
+                "Update User Details", elem_id=f"{tab_prefix}user-update"
+            )
             user_update.click()
         with gr.Column():
             for key, value in user_info.items():
@@ -304,11 +307,11 @@ def get_news_ui(news_info, horde_status):
                     )
         with gr.Box(scale=2):
             with gr.Column():
-                for news_item in news_info[:3]:
+                for news_item, i in news_info[:3]:
                     if "title" and "newspiece" in news_item:
                         gr.Textbox(
                             news_item["newspiece"],
-                            label=news_item["title"],
+                            label=i + ". " + news_item["title"],
                             elem_id=tab_prefix + "news_title",
                             visible=True,
                             interactive=False,
@@ -323,7 +326,9 @@ def get_stats_ui(stats_info):
             elem_id="stats_title",
         )
         with gr.Row():
-            stats_update = gr.Button("Update Stats", elem_id=f"{tab_prefix}stats-update")
+            stats_update = gr.Button(
+                "Update Stats", elem_id=f"{tab_prefix}stats-update"
+            )
             stats_update.click()
         with gr.Box(scale=2):
             with gr.Column():
@@ -363,9 +368,7 @@ def get_settings_ui(status, running_type):
                     label="Stable Horde API Key",
                     elem_id=tab_prefix + "apikey",
                 )
-                allow_img2img = gr.Checkbox(
-                    config.allow_img2img, label="Allow img2img"
-                )
+                allow_img2img = gr.Checkbox(config.allow_img2img, label="Allow img2img")
                 allow_painting = gr.Checkbox(
                     config.allow_painting, label="Allow Painting"
                 )
@@ -410,15 +413,14 @@ def get_settings_ui(status, running_type):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box(scale=2):
+
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \
                     {"Running" if config.enabled else "Stopped"}, \
                     Updating selected models...'
                     )
-                    selected_models = horde.set_current_models(
-                        local_selected_models
-                    )
+                    selected_models = horde.set_current_models(local_selected_models)
                     local_selected_models_dropdown.update(
                         value=list(selected_models.values())
                     )
@@ -445,9 +447,7 @@ def get_settings_ui(status, running_type):
                     inputs=[local_selected_models_dropdown],
                     outputs=[status],
                 )
-                gr.Markdown(
-                    "Once you select a model it will take some time to load."
-                )
+                gr.Markdown("Once you select a model it will take some time to load.")
 
             apply_settings = gr.Button(
                 "Apply Settings",

@@ -166,19 +166,19 @@ def get_generator_ui(state):
                     columns=4,
                 )
 
-                if current_id and log and state:
-                    refresh.click(
-                        fn=lambda: on_refresh(),
-                        outputs=[current_id, log, state],
-                        show_progress=False,
-                    )
+        if current_id and log and state:
+            refresh.click(
+                fn=lambda: on_refresh(),
+                outputs=[current_id, log, state],
+                show_progress=False,
+            )
 
-                if current_id and log and state and preview:
-                    refresh_image.click(
-                        fn=lambda: on_refresh(True),
-                        outputs=[current_id, log, state, preview],
-                        show_progress=False,
-                    )
+        if current_id and log and state and preview:
+            refresh_image.click(
+                fn=lambda: on_refresh(True),
+                outputs=[current_id, log, state, preview],
+                show_progress=False,
+            )
 
     return generator_ui
 
@@ -190,13 +190,14 @@ def get_worker_ui(worker_info):
             worker_update = gr.Button(
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
-            worker_update.click()
         with gr.Column():
             for key, value in worker_info.items():
                 if value is not None:
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
+        horde_worker = HordeWorker()
+        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
 
     return worker_ui
 
@@ -208,13 +209,14 @@ def get_user_ui(user_info):
             user_update = gr.Button(
                 "Update User Details", elem_id=f"{tab_prefix}user-update"
             )
-            user_update.click()
         with gr.Column():
             for key, value in user_info.items():
                 if value is not None:
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
+        horde_user = HordeUser()
+        user_update.click(fn=horde_user.get_user_info, outputs=user_info)
 
     return user_ui
 
@@ -230,7 +232,7 @@ def get_kudos_ui(user_info):
                 )
 
                 # Username
-                gr.Textbox(
+                username = gr.Textbox(
                     label="Username",
                     placeholder="Enter username",
                     elem_id="kudos_username",
@@ -248,7 +250,7 @@ def get_kudos_ui(user_info):
                 )
 
                 # Transfer Kudo amount
-                gr.Slider(
+                kudos_amount = gr.Slider(
                     label="Kudos",
                     minimum=0,
                     maximum=user_info["kudos"],
@@ -265,7 +267,8 @@ def get_kudos_ui(user_info):
                 elem_id="kudos_transfer_button",
             )
 
-            transfer.click()
+        kudo_transfer = KudoTransfer()
+        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
 
     return kudos_ui
 
@@ -331,7 +334,6 @@ def get_stats_ui(stats_info):
             stats_update = gr.Button(
                 "Update Stats", elem_id=f"{tab_prefix}stats-update"
             )
-            stats_update.click()
         with gr.Box(scale=2):
             with gr.Column():
                 for period, data in stats_info.items():
@@ -342,6 +344,8 @@ def get_stats_ui(stats_info):
                             interactive=False,
                             lines=1,
                         )
+        horde_stats = HordeStats()
+        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
 
     return stats_ui
 

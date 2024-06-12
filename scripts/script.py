@@ -101,6 +101,11 @@ def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Row():
             with gr.Column(elem_id="stable-horde"):
+                gr.Markdown(
+                    "## Generations",
+                    elem_id="kudos_title",
+                )
+
                 current_id = gr.Textbox(
                     "Current ID: ",
                     label="",
@@ -124,7 +129,9 @@ def get_generator_ui(state):
                             horde.state.to_dict().items(),
                         )
                     )
-                    images = [horde.state.image] if horde.state.image is not None else []
+                    images = (
+                        [horde.state.image] if horde.state.image is not None else []
+                    )
                     if image and show_images:
                         return cid, html, horde.state.status, images
                     return cid, html, horde.state.status
@@ -189,7 +196,10 @@ def get_user_ui(user_info):
                     elem_id=f"{tab_prefix}user-webcome",
                 )
         with gr.Column():
-            gr.Markdown("## User Details")
+            gr.Markdown(
+                "## User Details", 
+                elem_id="user_title"
+            )
             for key, value in user_info.items():
                 if value is not None:
                     gr.Textbox(
@@ -216,7 +226,7 @@ def get_kudos_ui(user_info):
                     elem_id="kudos_username",
                 )
 
-            with gr. Column():
+            with gr.Column():
                 # Kudo amount display
                 gr.Textbox(
                     user_info["kudos"],
@@ -235,7 +245,7 @@ def get_kudos_ui(user_info):
                     value=10,
                     elem_id="kudos_amount",
                 )
-            
+
             # Transfer Button
             gr.Button(
                 "Transfer",
@@ -250,6 +260,10 @@ def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         with gr.Column():
             with gr.Box(scale=2):
+                gr.Markdown(
+                    "## News",
+                    elem_id="news_title",
+                )
                 if "maintenance_mode" in horde_status:
                     gr.Textbox(
                         horde_status["maintenance_mode"],
@@ -294,13 +308,17 @@ def get_stats_ui(stats_info):
                 with gr.Box(scale=2):
                     with gr.Row():
                         with gr.Column():
+                            gr.Markdown(
+                                "## Stats",
+                                elem_id="stats_title",
+                            )
                             for period, data in stats_info.items():
                                 for metric, value in data.items():
                                     gr.Textbox(
                                         value,
                                         label=f"{period.capitalize()} {metric.capitalize()}",
                                         interactive=False,
-                                        lines=1
+                                        lines=1,
                                     )
 
     return stats_ui
@@ -310,6 +328,10 @@ def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
             with gr.Row():
+                gr.Markdown(
+                    "## Settings",
+                    elem_id="settings_title",
+                )
                 with gr.Box(scale=2):
                     enable = gr.Checkbox(
                         config.enabled,
@@ -327,7 +349,9 @@ def get_settings_ui(status, running_type):
                         label="Stable Horde API Key",
                         elem_id=tab_prefix + "apikey",
                     )
-                    allow_img2img = gr.Checkbox(config.allow_img2img, label="Allow img2img")
+                    allow_img2img = gr.Checkbox(
+                        config.allow_img2img, label="Allow img2img"
+                    )
                     allow_painting = gr.Checkbox(
                         config.allow_painting, label="Allow Painting"
                     )
@@ -379,7 +403,9 @@ def get_settings_ui(status, running_type):
                         {"Running" if config.enabled else "Stopped"}, \
                         Updating selected models...'
                         )
-                        selected_models = horde.set_current_models(local_selected_models)
+                        selected_models = horde.set_current_models(
+                            local_selected_models
+                        )
                         local_selected_models_dropdown.update(
                             value=list(selected_models.values())
                         )
@@ -406,7 +432,9 @@ def get_settings_ui(status, running_type):
                         inputs=[local_selected_models_dropdown],
                         outputs=[status],
                     )
-                    gr.Markdown("Once you select a model it will take some time to load.")
+                    gr.Markdown(
+                        "Once you select a model it will take some time to load."
+                    )
 
             apply_settings = gr.Button(
                 "Apply Settings",
@@ -440,7 +468,9 @@ def get_settings_ui(status, running_type):
 
 
 def on_ui_tabs():
-    with gr.Blocks(theme=gr.themes.Default(primary_hue="green", secondary_hue="red")) as ui_tabs:
+    with gr.Blocks(
+        theme=gr.themes.Default(primary_hue="green", secondary_hue="red")
+    ) as ui_tabs:
         with gr.Row():
             with gr.Column():
                 apikey = gr.Textbox(
@@ -476,15 +506,11 @@ def on_ui_tabs():
                         config.enabled = False
                         status.update("Status: Stopped")
                         running_type.update("Running Type: Image Generation")
-                        toggle_running.update(
-                            value="Enable", variant="primary"
-                        )
+                        toggle_running.update(value="Enable", variant="primary")
                     else:
                         config.enabled = True
                         status.update("Status: Running")
-                        toggle_running.update(
-                            value="Disable", variant="secondary"
-                        )
+                        toggle_running.update(value="Disable", variant="secondary")
                     config.save()
 
                 toggle_running.click(fn=toggle_running_fn)

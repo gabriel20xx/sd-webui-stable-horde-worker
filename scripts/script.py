@@ -279,8 +279,6 @@ def get_news_ui(news_info, horde_status):
         with gr.Row():
             news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
 
-            horde_news = HordeNews()
-            news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
         with gr.Box(scale=2):
             with gr.Column():
                 if "maintenance_mode" in horde_status:
@@ -318,6 +316,8 @@ def get_news_ui(news_info, horde_status):
                             visible=True,
                             interactive=False,
                         )
+        horde_news = HordeNews()
+        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
     return news_ui
 
 
@@ -457,27 +457,27 @@ def get_settings_ui(status, running_type):
                 elem_id=tab_prefix + "apply-settings",
             )
 
-        apply_settings.click(
-            fn=apply_stable_horde_settings,
-            inputs=[
-                enable,
-                name,
-                apikey,
-                allow_img2img,
-                allow_painting,
-                allow_unsafe_ipaddr,
-                allow_post_processing,
-                restore_settings,
-                nsfw,
-                interval,
-                max_pixels,
-                endpoint,
-                show_images,
-                save_images,
-                save_images_folder,
-            ],
-            outputs=[status, running_type],
-        )
+    apply_settings.click(
+        fn=apply_stable_horde_settings,
+        inputs=[
+            enable,
+            name,
+            apikey,
+            allow_img2img,
+            allow_painting,
+            allow_unsafe_ipaddr,
+            allow_post_processing,
+            restore_settings,
+            nsfw,
+            interval,
+            max_pixels,
+            endpoint,
+            show_images,
+            save_images,
+            save_images_folder,
+        ],
+        outputs=[status, running_type],
+    )
 
     return settings_ui
 

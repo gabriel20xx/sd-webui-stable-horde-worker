@@ -258,12 +258,12 @@ def get_kudos_ui(user_info):
 
 def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
-        with gr.Column():
-            with gr.Box(scale=2):
-                gr.Markdown(
-                    "## News",
-                    elem_id="news_title",
-                )
+        gr.Markdown(
+                "## News",
+                elem_id="news_title",
+            )
+        with gr.Box(scale=2):
+            with gr.Column():
                 if "maintenance_mode" in horde_status:
                     gr.Textbox(
                         horde_status["maintenance_mode"],
@@ -288,7 +288,8 @@ def get_news_ui(news_info, horde_status):
                         visible=True,
                         interactive=False,
                     )
-            with gr.Box(scale=2):
+        with gr.Box(scale=2):
+            with gr.Column():
                 for news_item in news_info[:3]:
                     if "title" and "newspiece" in news_item:
                         gr.Textbox(

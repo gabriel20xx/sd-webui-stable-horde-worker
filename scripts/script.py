@@ -113,6 +113,14 @@ def get_generator_ui(state):
                     readonly=True,
                 )
 
+                running_type = gr.Textbox(
+                    "Running Type: Image Generation",
+                    label="",
+                    elem_id=tab_prefix + "running-type",
+                    readonly=True,
+                    visible=False,
+                )
+
                 state = gr.HTML(
                     "",
                     label="State",
@@ -178,28 +186,27 @@ def get_generator_ui(state):
 def get_worker_ui(worker_info):
     with gr.Blocks() as worker_ui:
         gr.Markdown("## Worker Details")
-        for key, value in worker_info.items():
-            if value is not None:
-                gr.Textbox(value, label=key.capitalize(), interactive=False, lines=1)
+        with gr.Row():
+            worker_update = gr.Button("Update Worker Details", elem_id=f"{tab_prefix}worker-update")
+            worker_update.click()
+        with gr.Column():
+            for key, value in worker_info.items():
+                if value is not None:
+                    gr.Textbox(value, label=key.capitalize(), interactive=False, lines=1)
 
     return worker_ui
 
 
 def get_user_ui(user_info):
     with gr.Blocks() as user_ui:
+        gr.Markdown(
+            "## User Details", 
+            elem_id="user_title"
+        )
         with gr.Row():
-            with gr.Column(scale=1):
-                user_update = gr.Button("Update", elem_id=f"{tab_prefix}user-update")
-            with gr.Column(scale=4):
-                user_welcome = gr.Markdown(
-                    "**Try click update button to fetch the user info**",
-                    elem_id=f"{tab_prefix}user-webcome",
-                )
+            user_update = gr.Button("Update User Details", elem_id=f"{tab_prefix}user-update")
+            user_update.click()
         with gr.Column():
-            gr.Markdown(
-                "## User Details", 
-                elem_id="user_title"
-            )
             for key, value in user_info.items():
                 if value is not None:
                     gr.Textbox(
@@ -224,6 +231,7 @@ def get_kudos_ui(user_info):
                     label="Username",
                     placeholder="Enter username",
                     elem_id="kudos_username",
+                    interactive=True,
                 )
 
             with gr.Column():
@@ -244,14 +252,17 @@ def get_kudos_ui(user_info):
                     step=1,
                     value=10,
                     elem_id="kudos_amount",
+                    interactive=True,
                 )
-
+        with gr.Row():
             # Transfer Button
-            gr.Button(
+            transfer = gr.Button(
                 "Transfer",
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
+
+            transfer.click()
 
     return kudos_ui
 
@@ -259,9 +270,12 @@ def get_kudos_ui(user_info):
 def get_news_ui(news_info, horde_status):
     with gr.Blocks() as news_ui:
         gr.Markdown(
-                "## News",
-                elem_id="news_title",
-            )
+            "## News",
+            elem_id="news_title",
+        )
+        with gr.Row():
+            news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
+            news_update.click()
         with gr.Box(scale=2):
             with gr.Column():
                 if "maintenance_mode" in horde_status:
@@ -308,6 +322,9 @@ def get_stats_ui(stats_info):
             "## Stats",
             elem_id="stats_title",
         )
+        with gr.Row():
+            stats_update = gr.Button("Update Stats", elem_id=f"{tab_prefix}stats-update")
+            stats_update.click()
         with gr.Box(scale=2):
             with gr.Column():
                 for period, data in stats_info.items():
@@ -510,14 +527,6 @@ def on_ui_tabs():
                     config.save()
 
                 toggle_running.click(fn=toggle_running_fn)
-        with gr.Row():
-            running_type = gr.Textbox(
-                "Running Type: Image Generation",
-                label="",
-                elem_id=tab_prefix + "running-type",
-                readonly=True,
-                visible=False,
-            )
 
             def call_apis(session, apikey):
                 horde_user = HordeUser()

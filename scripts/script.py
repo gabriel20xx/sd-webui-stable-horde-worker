@@ -357,7 +357,7 @@ def get_stats_ui(stats_info):
     with gr.Blocks() as stats_ui:
         # Stats functions
         horde_stats = HordeStats()
-        stats_info = horde_stats.get_horde_stats()
+        stats_info = horde_stats.get_horde_stats(session)
 
         # Stats UI
         gr.Markdown(

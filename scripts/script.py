@@ -272,6 +272,15 @@ def get_kudos_ui(user_info):
 
             with gr. Column():
                 # Kudo amount display
+                gr.Textbox(
+                    user_info["kudos"],
+                    label="Your Kudos",
+                    placeholder="0",
+                    elem_id="kudos_display",
+                    interactive=False,
+                )
+
+                # Transfer Kudo amount
                 gr.Slider(
                     label="Kudos",
                     minimum=0,
@@ -280,15 +289,13 @@ def get_kudos_ui(user_info):
                     value=10,
                     elem_id="kudos_amount",
                 )
-
-                # Transfer Kudo amount
-                gr.Button(
-                    "Transfer",
-                    variant="primary",
-                    elem_id="kudos_transfer_button",
-                )
             
             # Transfer Button
+            gr.Button(
+                "Transfer",
+                variant="primary",
+                elem_id="kudos_transfer_button",
+            )
 
     return kudos_ui
 
@@ -303,6 +310,7 @@ def get_news_ui(news_info, horde_status):
                         label="Maintenance mode",
                         elem_id=tab_prefix + "status_maintenance_mode",
                         visible=True,
+                        interactive=False,
                     )
                 if "invite_only_mode" in horde_status:
                     gr.Textbox(
@@ -310,6 +318,7 @@ def get_news_ui(news_info, horde_status):
                         label="Invite only mode",
                         elem_id=tab_prefix + "status_invite_only_mode",
                         visible=True,
+                        interactive=False,
                     )
                 if "raid_mode" in horde_status:
                     gr.Textbox(
@@ -317,6 +326,7 @@ def get_news_ui(news_info, horde_status):
                         label="Raid mode",
                         elem_id=tab_prefix + "status_raid_mode",
                         visible=True,
+                        interactive=False,
                     )
             with gr.Box(scale=2):
                 for news_item in news_info[:3]:
@@ -326,6 +336,7 @@ def get_news_ui(news_info, horde_status):
                             label=news_item["title"],
                             elem_id=tab_prefix + "news_title",
                             visible=True,
+                            interactive=False,
                         )
     return news_ui
 

@@ -183,8 +183,15 @@ def get_generator_ui(state):
     return generator_ui
 
 
-def get_worker_ui(worker_info):
+def get_worker_ui():
     with gr.Blocks() as worker_ui:
+        # Worker functions
+        horde_worker = HordeWorker()
+        worker_info = horde_worker.get_worker_info()
+
+        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
+
+        # Worker UI
         gr.Markdown("## Worker Details")
         with gr.Row():
             worker_update = gr.Button(
@@ -196,14 +203,19 @@ def get_worker_ui(worker_info):
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
-        horde_worker = HordeWorker()
-        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
 
     return worker_ui
 
 
-def get_user_ui(user_info):
+def get_user_ui():
     with gr.Blocks() as user_ui:
+        # User functions
+        horde_user = HordeUser()
+        user_info = horde_user.get_user_info()
+        
+        user_update.click(fn=horde_user.get_user_info, outputs=user_info)
+
+        # User UI
         gr.Markdown("## User Details", elem_id="user_title")
         with gr.Row():
             user_update = gr.Button(
@@ -215,14 +227,21 @@ def get_user_ui(user_info):
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
-        horde_user = HordeUser()
-        user_update.click(fn=horde_user.get_user_info, outputs=user_info)
 
     return user_ui
 
 
-def get_kudos_ui(user_info):
+def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
+        # Kudos functions
+        horde_user = HordeUser()
+        user_info = horde_user.get_user_info()
+        
+        kudo_transfer = KudoTransfer()
+
+        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
+
+        # Kudos UI
         with gr.Row():
             with gr.Column():
                 # Transfer Kudos Title
@@ -267,14 +286,20 @@ def get_kudos_ui(user_info):
                 elem_id="kudos_transfer_button",
             )
 
-        kudo_transfer = KudoTransfer()
-        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
-
     return kudos_ui
 
 
-def get_news_ui(news_info, horde_status):
+def get_news_ui():
     with gr.Blocks() as news_ui:
+        # News functions
+        horde_news = HordeNews()
+        news_info = horde_news.get_horde_news()
+        horde_status = HordeStatus()
+        status_info = horde_status.get_horde_status()
+
+        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
+
+        # News UI
         gr.Markdown(
             "## News",
             elem_id="news_title",
@@ -284,25 +309,25 @@ def get_news_ui(news_info, horde_status):
 
         with gr.Box(scale=2):
             with gr.Column():
-                if "maintenance_mode" in horde_status:
+                if "maintenance_mode" in status_info:
                     gr.Textbox(
-                        horde_status["maintenance_mode"],
+                        status_info["maintenance_mode"],
                         label="Maintenance mode",
                         elem_id=tab_prefix + "status_maintenance_mode",
                         visible=True,
                         interactive=False,
                     )
-                if "invite_only_mode" in horde_status:
+                if "invite_only_mode" in status_info:
                     gr.Textbox(
-                        horde_status["invite_only_mode"],
+                        status_info["invite_only_mode"],
                         label="Invite only mode",
                         elem_id=tab_prefix + "status_invite_only_mode",
                         visible=True,
                         interactive=False,
                     )
-                if "raid_mode" in horde_status:
+                if "raid_mode" in status_info:
                     gr.Textbox(
-                        horde_status["raid_mode"],
+                        status_info["raid_mode"],
                         label="Raid mode",
                         elem_id=tab_prefix + "status_raid_mode",
                         visible=True,
@@ -321,8 +346,7 @@ def get_news_ui(news_info, horde_status):
                             visible=True,
                             interactive=False,
                         )
-        horde_news = HordeNews()
-        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
+    
     return news_ui
 
 
@@ -492,6 +516,28 @@ def on_ui_tabs():
     with gr.Blocks(
         theme=gr.themes.Default(primary_hue="green", secondary_hue="red")
     ) as ui_tabs:
+        # General functions
+        def save_apikey_fn(apikey: str):
+            config.apikey = apikey
+            config.save()
+
+        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+
+        def toggle_running_fn():
+            if config.enabled:
+                config.enabled = False
+                status.update("Status: Stopped")
+                running_type.update("Running Type: Image Generation")
+                toggle_running.update(value="Enable", variant="primary")
+            else:
+                config.enabled = True
+                status.update("Status: Running")
+                toggle_running.update(value="Disable", variant="secondary")
+            config.save()
+
+        toggle_running.click(fn=toggle_running_fn)
+
+        # General UI
         with gr.Row():
             with gr.Column():
                 apikey = gr.Textbox(
@@ -593,26 +639,6 @@ def on_ui_tabs():
                     get_settings_ui(status, running_type)
             except Exception as e:
                 print(f"Error: Settings UI not found, {e}")
-
-        def save_apikey_fn(apikey: str):
-            config.apikey = apikey
-            config.save()
-
-        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
-
-        def toggle_running_fn():
-            if config.enabled:
-                config.enabled = False
-                status.update("Status: Stopped")
-                running_type.update("Running Type: Image Generation")
-                toggle_running.update(value="Enable", variant="primary")
-            else:
-                config.enabled = True
-                status.update("Status: Running")
-                toggle_running.update(value="Disable", variant="secondary")
-            config.save()
-
-        toggle_running.click(fn=toggle_running_fn)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

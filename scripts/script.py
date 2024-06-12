@@ -567,7 +567,7 @@ def on_ui_tabs():
 
             try:
                 with gr.Tab("Kudos"):
-                    get_kudos_ui()
+                    get_kudos_ui(user_info)
             except Exception as e:
                 print(f"Error: Kudos UI not found,  {e}")
 

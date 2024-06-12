@@ -164,7 +164,6 @@ class StableHorde:
 
             print(f"Username: {username}")
             print(f"User ID: {id}")
-            print(f"Worker IDs: {worker_ids}")
 
             for worker in worker_ids:
                 horde_worker = HordeWorker()
@@ -174,16 +173,11 @@ class StableHorde:
                 worker_name = worker_info["name"]
                 worker_id = worker_info["id"]
                 models = worker_info["models"]
-                maintenance_mode = worker_info["maintenance_mode"]
-                trusted = worker_info["trusted"]
-                flagged = worker_info["flagged"]
 
                 if worker_name == self.config.name:
-                    print(f"Worker name: {worker_name}, id: {worker_id}")
+                    print(f"Worker id: {worker_id}")
+                    print(f"Worker name: {worker_name}")
                     print(f"Worker models: {models}")
-                    print(f"Maintenance: {maintenance_mode}")
-                    print(f"Trusted: {trusted}")
-                    print(f"Flagged: {flagged}")
 
         start_time = time.time()
         while True:

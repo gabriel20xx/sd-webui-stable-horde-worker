@@ -97,6 +97,7 @@ def apply_stable_horde_settings(
 tab_prefix = "stable-horde-"
 
 
+# Generator UI
 def get_generator_ui(state):
     with gr.Blocks() as generator_ui:
         with gr.Row():
@@ -165,7 +166,7 @@ def get_generator_ui(state):
                     readonly=True,
                     columns=4,
                 )
-
+        # Click functions
         if current_id and log and state:
             refresh.click(
                 fn=lambda: on_refresh(),
@@ -183,13 +184,12 @@ def get_generator_ui(state):
     return generator_ui
 
 
+# Worker UI
 def get_worker_ui():
     with gr.Blocks() as worker_ui:
         # Worker functions
         horde_worker = HordeWorker()
         worker_info = horde_worker.get_worker_info()
-
-        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
 
         # Worker UI
         gr.Markdown("## Worker Details")
@@ -203,10 +203,13 @@ def get_worker_ui():
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
+        # Click functions
+        worker_update.click(fn=horde_worker.get_worker_info, outputs=worker_info)
 
     return worker_ui
 
 
+# User UI
 def get_user_ui():
     with gr.Blocks() as user_ui:
         # User functions
@@ -231,15 +234,13 @@ def get_user_ui():
     return user_ui
 
 
+# Kudos UI
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
         # Kudos functions
         horde_user = HordeUser()
         user_info = horde_user.get_user_info()
-        
         kudo_transfer = KudoTransfer()
-
-        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
 
         # Kudos UI
         with gr.Row():
@@ -285,10 +286,13 @@ def get_kudos_ui():
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
+        # Click functions
+        transfer.click(fn=kudo_transfer.transfer_kudos, inputs=[username, kudos_amount])
 
     return kudos_ui
 
 
+# News UI
 def get_news_ui():
     with gr.Blocks() as news_ui:
         # News functions
@@ -296,8 +300,6 @@ def get_news_ui():
         news_info = horde_news.get_horde_news()
         horde_status = HordeStatus()
         status_info = horde_status.get_horde_status()
-
-        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
 
         # News UI
         gr.Markdown(
@@ -346,6 +348,8 @@ def get_news_ui():
                             visible=True,
                             interactive=False,
                         )
+        # Click functions
+        news_update.click(fn=horde_news.get_horde_news, outputs=news_info)
     
     return news_ui
 
@@ -355,8 +359,6 @@ def get_stats_ui(stats_info):
         # Stats functions
         horde_stats = HordeStats()
         stats_info = horde_stats.get_horde_stats()
-
-        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
 
         # Stats UI
         gr.Markdown(
@@ -377,10 +379,13 @@ def get_stats_ui(stats_info):
                             interactive=False,
                             lines=1,
                         )
+        # Click functions
+        stats_update.click(fn=horde_stats.get_horde_stats, outputs=stats_info)
 
     return stats_ui
 
 
+# Settings UI
 def get_settings_ui(status, running_type):
     with gr.Blocks() as settings_ui:
         with gr.Column():
@@ -517,6 +522,7 @@ def get_settings_ui(status, running_type):
     return settings_ui
 
 
+# General UI
 def on_ui_tabs():
     with gr.Blocks(
         theme=gr.themes.Default(primary_hue="green", secondary_hue="red")
@@ -525,8 +531,6 @@ def on_ui_tabs():
         def save_apikey_fn(apikey: str):
             config.apikey = apikey
             config.save()
-
-        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
 
         def toggle_running_fn():
             if config.enabled:
@@ -539,8 +543,6 @@ def on_ui_tabs():
                 status.update("Status: Running")
                 toggle_running.update(value="Disable", variant="secondary")
             config.save()
-
-        toggle_running.click(fn=toggle_running_fn)
 
         # General UI
         with gr.Row():
@@ -603,6 +605,7 @@ def on_ui_tabs():
                 session, config.apikey
             )
 
+            # General tabs
             try:
                 with gr.Tab("Generation"):
                     get_generator_ui(status)
@@ -644,6 +647,10 @@ def on_ui_tabs():
                     get_settings_ui(status, running_type)
             except Exception as e:
                 print(f"Error: Settings UI not found, {e}")
+
+        # Click functions
+        save_apikey.click(fn=save_apikey_fn, inputs=[apikey])
+        toggle_running.click(fn=toggle_running_fn)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

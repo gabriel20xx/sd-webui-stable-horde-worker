@@ -386,7 +386,7 @@ def get_stats_ui(stats_info):
 
 
 # Settings UI
-def get_settings_ui(status, running_type):
+def get_settings_ui(status):
     with gr.Blocks() as settings_ui:
         with gr.Column():
             gr.Markdown(
@@ -516,7 +516,9 @@ def get_settings_ui(status, running_type):
                 save_images,
                 save_images_folder,
             ],
-            outputs=[status, running_type],
+            output=[
+                status,
+            ],
         )
 
     return settings_ui
@@ -608,37 +610,37 @@ def on_ui_tabs():
             # General tabs
             try:
                 with gr.Tab("Generation"):
-                    get_generator_ui(status)
+                    get_generator_ui(horde.state)
             except Exception as e:
                 print(f"Error: Generator UI not found, {e}")
 
             try:
                 with gr.Tab("Worker"):
-                    get_worker_ui(worker_info)
+                    get_worker_ui()
             except Exception as e:
                 print(f"Error: Worker UI not found, {e}")
 
             try:
                 with gr.Tab("User"):
-                    get_user_ui(user_info)
+                    get_user_ui()
             except Exception as e:
                 print(f"Error: User UI not found, {e}")
 
             try:
                 with gr.Tab("Kudos"):
-                    get_kudos_ui(user_info)
+                    get_kudos_ui()
             except Exception as e:
                 print(f"Error: Kudos UI not found,  {e}")
 
             try:
                 with gr.Tab("News"):
-                    get_news_ui(news_info, horde_status)
+                    get_news_ui()
             except Exception as e:
                 print(f"Error: News UI not found, {e}")
 
             try:
                 with gr.Tab("Stats"):
-                    get_stats_ui(stats_info)
+                    get_stats_ui()
             except Exception as e:
                 print(f"Error: Stats UI not found, {e}")
 

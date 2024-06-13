@@ -12,12 +12,7 @@ from modules import scripts, script_callbacks, sd_models, shared
 from stable_horde import (
     StableHorde,
     StableHordeConfig,
-    HordeUser,
-    HordeWorker,
-    HordeNews,
-    HordeStatus,
-    KudoTransfer,
-    HordeStats,
+    API,
 )
 
 basedir = scripts.basedir()
@@ -173,9 +168,8 @@ def get_generator_ui():
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         # Worker functions
-        horde_worker = HordeWorker()
-        worker_info_json = horde_worker.get_worker_info(session, config.apikey, worker)
-        worker_info = json.loads(worker_info_json)
+        horde_worker = API()
+        worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
 
         # Worker UI
         gr.Markdown("## Worker Details")
@@ -184,7 +178,7 @@ def get_worker_ui(worker):
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
 
-        worker_info_json = gr.JSON(
+        worker_info = gr.Textbox(
             value=worker_info,
             label="Stats",
             interactive=False,
@@ -205,7 +199,7 @@ def get_worker_ui(worker):
 def get_user_ui():
     with gr.Blocks() as user_ui:
         # User functions
-        horde_user = HordeUser()
+        horde_user = API()
         user_info = horde_user.get_user_info(session, config.apikey)
 
         # User UI
@@ -235,7 +229,7 @@ def get_user_ui():
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
         # Kudos functions
-        horde_user = HordeUser()
+        horde_user = API()
         user_info = horde_user.get_user_info(session, config.apikey)
 
         # Kudos UI
@@ -290,9 +284,9 @@ def get_kudos_ui():
 def get_news_ui():
     with gr.Blocks() as news_ui:
         # News functions
-        horde_news = HordeNews()
+        horde_news = API()
         news_info = horde_news.get_horde_news(session)
-        horde_status = HordeStatus()
+        horde_status = API()
         status_info = horde_status.get_horde_status(session)
 
         # News UI
@@ -347,7 +341,7 @@ def get_news_ui():
 def get_stats_ui(stats_info):
     with gr.Blocks() as stats_ui:
         # Stats functions
-        horde_stats = HordeStats()
+        horde_stats = API()
         stats_info = horde_stats.get_horde_stats(session)
 
         # Stats UI
@@ -552,16 +546,11 @@ def on_ui_tabs():
                 )
 
                 # TODO Move this somewhere else
-                horde_worker = HordeWorker()
-                horde_user = HordeUser()
-                kudo_transfer = KudoTransfer()
-                horde_news = HordeNews()
-                horde_status = HordeStatus()
-                horde_stats = HordeStats()
-                user_info = horde_user.get_user_info(session, config.apikey)
+                api = API()
+                user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:
-                    worker_info = horde_worker.get_worker_info(
+                    worker_info = api.get_worker_info(
                         session, config.apikey, worker
                     )
                     worker_name = worker_info["name"]
@@ -612,22 +601,22 @@ def on_ui_tabs():
         save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
         worker_ui.worker_update.click(
-            fn=horde_worker.get_worker_info(session, config.apikey, worker),
+            fn=api.get_worker_info(session, config.apikey, worker),
             inputs=[apikey],
             outputs=[worker_info],
         )
         user_ui.user_update.click(
-            fn=horde_user.get_user_info(session, config.apikey),
+            fn=api.get_user_info(session, config.apikey),
             outputs=[user_info],
         )
         kudos_ui.transfer.click(
-            fn=kudo_transfer.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
+            fn=api.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
         )
         news_ui.news_update.click(
-            fn=horde_news.get_horde_news(session), outputs=[news_ui.news_info]
+            fn=api.get_horde_news(session), outputs=[news_ui.news_info]
         )
         stats_ui.stats_update.click(
-            fn=horde_stats.get_horde_stats(session), outputs=[stats_ui.stats_info]
+            fn=api.get_horde_stats(session), outputs=[stats_ui.stats_info]
         )
         settings_ui.apply_settings.click(
             fn=apply_stable_horde_settings,

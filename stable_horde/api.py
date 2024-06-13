@@ -1,7 +1,7 @@
 import requests
 
 
-class HordeUser:
+class API:
     @staticmethod
     def get_user_info(session: requests.Session, apikey: str):
         """
@@ -19,10 +19,8 @@ class HordeUser:
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
-
-class HordeWorker:
     @staticmethod
-    def get_worker_info(session: requests.Session, apikey: str, worker_id: str):
+    def get_worker_info(session: requests.Session, apikey: str, worker_id: str) -> dict:
         """
         Get worker info
         """
@@ -39,8 +37,6 @@ class HordeWorker:
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
-
-class HordeNews:
     @staticmethod
     def get_horde_news(session: requests.Session):
         """
@@ -54,8 +50,6 @@ class HordeNews:
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
-
-class HordeStatus:
     @staticmethod
     def get_horde_status(session: requests.Session):
         """
@@ -69,8 +63,6 @@ class HordeStatus:
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
-
-class KudoTransfer:
     @staticmethod
     def transfer_kudos(
         session: requests.Session, apikey: str, username: str, amount: int
@@ -94,8 +86,6 @@ class KudoTransfer:
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
-
-class HordeStats:
     @staticmethod
     def get_horde_stats(session: requests.Session):
         headers = {

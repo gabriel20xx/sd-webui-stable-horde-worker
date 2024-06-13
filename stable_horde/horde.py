@@ -16,7 +16,7 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 
 from .job import HordeJob
 from .config import StableHordeConfig
-from .api import HordeUser, HordeWorker
+from .api import API
 from modules.images import save_image
 from modules import shared, call_queue, processing, sd_models, sd_samplers
 
@@ -156,8 +156,8 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         with requests.Session() as session:
-            horde_user = HordeUser()
-            user_info = horde_user.get_user_info(session, self.config.apikey)
+            api = API()
+            user_info = api.get_user_info(session, self.config.apikey)
             username = user_info["username"]
             id = user_info["id"]
             worker_ids = user_info["worker_ids"]
@@ -166,8 +166,7 @@ class StableHorde:
             print(f"User ID: {id}")
 
             for worker in worker_ids:
-                horde_worker = HordeWorker()
-                worker_info = horde_worker.get_worker_info(
+                worker_info = api.get_worker_info(
                     session, self.config.apikey, worker
                 )
                 worker_name = worker_info["name"]

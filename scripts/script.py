@@ -177,14 +177,6 @@ def get_worker_ui(worker):
             worker_update = gr.Button(
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
-
-        worker_info = gr.Textbox(
-            value=worker_info,
-            label="Stats",
-            interactive=False,
-            elem_id=f"{tab_prefix}worker-info",
-            visible=False,
-        )
         with gr.Column():
             if "type" in worker_info:
                 gr.Textbox(f"Type: {worker_info['type']}", interactive=False, lines=1)
@@ -354,13 +346,6 @@ def get_user_ui():
             user_update = gr.Button(
                 "Update User Details", elem_id=f"{tab_prefix}user-update"
             )
-        user_info = gr.JSON(
-            value=user_info,
-            label="Stats",
-            interactive=False,
-            elem_id=f"{tab_prefix}user-info",
-            visible=False,
-        )
         with gr.Column():
             if "username" in user_info:
                 gr.Textbox(

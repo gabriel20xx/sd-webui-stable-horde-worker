@@ -4,6 +4,7 @@ from fastapi import FastAPI
 import gradio as gr
 import asyncio
 import requests
+import json
 from threading import Thread
 
 from modules import scripts, script_callbacks, sd_models, shared
@@ -173,7 +174,8 @@ def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         # Worker functions
         horde_worker = HordeWorker()
-        worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
+        worker_info_json = horde_worker.get_worker_info(session, config.apikey, worker)
+        worker_info = json.loads(worker_info_json)
 
         # Worker UI
         gr.Markdown("## Worker Details")
@@ -182,7 +184,7 @@ def get_worker_ui(worker):
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
 
-        worker_info = gr.JSON(
+        worker_info_json = gr.JSON(
             value=worker_info,
             label="Stats",
             interactive=False,

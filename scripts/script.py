@@ -974,7 +974,7 @@ def on_ui_tabs():
             with gr.Tab("Stats"):
                 stats_ui, stats_update, stats_outputs = get_stats_ui()
             with gr.Tab("Settings"):
-                settings_ui = get_settings_ui(status, running_type)
+                settings_ui = get_settings_ui(status)
 
         # Click functions
         if generator_ui.current_id and generator_ui.log and generator_ui.state:
@@ -1018,35 +1018,29 @@ def on_ui_tabs():
             fn=api.get_horde_news(session), outputs=[news_ui.news_info]
         )
 
-        def horde_stats(session):
-            data = api.get_horde_stats(session)
-            gradio_minute_images = data["minute_images"]
-            gradio_minute_ps = data["minute_ps"]
-            gradio_hour_images = data["hour_images"]
-            gradio_hour_ps = data["hour_ps"]
-            gradio_day_images = data["day_images"]
-            gradio_day_ps = data["day_ps"]
-            gradio_month_images = data["month_images"]
-            gradio_month_ps = data["month_ps"]
-            gradio_total_images = data["total_images"]
-            gradio_total_ps = data["total_ps"]
+        # Stats
+        def horde_stats(api, session):
+            stats_info = api.get_horde_stats(session)
             return (
-                gradio_minute_images,
-                gradio_minute_ps,
-                gradio_hour_images,
-                gradio_hour_ps,
-                gradio_day_images,
-                gradio_day_ps,
-                gradio_month_images,
-                gradio_month_ps,
-                gradio_total_images,
-                gradio_total_ps,
+                stats_info["minute"]["images"],
+                stats_info["minute"]["ps"],
+                stats_info["hour"]["images"],
+                stats_info["hour"]["ps"],
+                stats_info["day"]["images"],
+                stats_info["day"]["ps"],
+                stats_info["month"]["images"],
+                stats_info["month"]["ps"],
+                stats_info["total"]["images"],
+                stats_info["total"]["ps"],
             )
 
+        # Stats click
         stats_update.click(
             fn=lambda: horde_stats(api, session),
             outputs=stats_outputs,
         )
+
+        # Settings click
         settings_ui.apply_settings.click(
             fn=apply_stable_horde_settings,
             inputs=[

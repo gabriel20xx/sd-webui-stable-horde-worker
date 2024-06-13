@@ -195,18 +195,24 @@ def get_worker_ui(worker):
             worker_update = gr.Button(
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
-        with gr.Column():
-            worker_info = gr.Textbox(
-                "",
-                label="Worker Info",
-                interactive=False,
-                elem_id=f"{tab_prefix}worker-info",
-            )
 
-        # Click function wrapped in a lambda        
+        worker_info = gr.JSON(
+            value=worker_info,
+            label="Stats",
+            interactive=False,
+            elem_id=f"{tab_prefix}worker-info",
+            visible=False,
+        )    
+        with gr.Column():
+            for key, value in worker_info.items():
+                if value is not None:
+                    gr.Textbox(
+                        value, label=key.capitalize(), interactive=False, lines=1
+                    )
+        # Click functions
         worker_update.click(
             fn=horde_worker.get_worker_info(session, config.apikey, worker),
-            outputs=[worker_info],
+            outputs=worker_info,
         )
 
     return worker_ui
@@ -225,14 +231,19 @@ def get_user_ui():
             user_update = gr.Button(
                 "Update User Details", elem_id=f"{tab_prefix}user-update"
             )
+        user_info = gr.JSON(
+            value=user_info,
+            label="Stats",
+            interactive=False,
+            elem_id=f"{tab_prefix}user-info",
+            visible=False,
+        )    
         with gr.Column():
-            user_info = gr.Textbox(
-                "",
-                label="User Info",
-                interactive=False,
-                elem_id=f"{tab_prefix}user-info",
-            )
-
+            for key, value in user_info.items():
+                if value is not None:
+                    gr.Textbox(
+                        value, label=key.capitalize(), interactive=False, lines=1
+                    )
         # Click functions
         user_update.click(
             fn=horde_user.get_user_info(session, config.apikey),
@@ -335,6 +346,13 @@ def get_news_ui():
                         interactive=False,
                     )
         with gr.Box(scale=2):
+            news_info = gr.JSON(
+                value=news_info,
+                label="News",
+                interactive=False,
+                elem_id=f"{tab_prefix}news-info",
+                visible=False,
+            )    
             with gr.Column():
                 for news_item in news_info[:3]:
                     if "title" and "newspiece" and "date_published" in news_item:
@@ -368,7 +386,6 @@ def get_stats_ui(stats_info):
             stats_update = gr.Button(
                 "Update Stats", elem_id=f"{tab_prefix}stats-update"
             )
-
         stats_info = gr.JSON(
             value=stats_info,
             label="Stats",
@@ -463,7 +480,6 @@ def get_settings_ui(status):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box():
-
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \

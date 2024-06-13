@@ -201,9 +201,10 @@ def get_worker_ui(worker):
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
-        # Click functions
+        
+        # Click function wrapped in a lambda
         worker_update.click(
-            fn=horde_worker.get_worker_info(session, config.apikey, worker),
+            fn=lambda: horde_worker.get_worker_info(session, config.apikey, worker),
             outputs=worker_info,
         )
 
@@ -451,6 +452,7 @@ def get_settings_ui(status):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box():
+
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \

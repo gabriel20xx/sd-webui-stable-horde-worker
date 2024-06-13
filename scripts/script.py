@@ -363,8 +363,8 @@ def get_kudos_ui():
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
-        kudos_ui.transfer.click(
-            fn=api.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
+        transfer.click(
+            fn=api.transfer_kudos(username, kudos_amount)
         )
 
     return kudos_ui

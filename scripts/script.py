@@ -164,20 +164,6 @@ def get_generator_ui():
                     readonly=True,
                     columns=4,
                 )
-        # Click functions
-        if current_id and log and state:
-            refresh.click(
-                fn=lambda: on_refresh(),
-                outputs=[current_id, log, state],
-                show_progress=False,
-            )
-
-        if current_id and log and state and preview:
-            refresh_image.click(
-                fn=lambda: on_refresh(True),
-                outputs=[current_id, log, state, preview],
-                show_progress=False,
-            )
 
     return generator_ui
 
@@ -202,18 +188,13 @@ def get_worker_ui(worker):
             interactive=False,
             elem_id=f"{tab_prefix}worker-info",
             visible=False,
-        )    
+        )
         with gr.Column():
             for key, value in worker_info.items():
                 if value is not None:
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
-        # Click functions
-        worker_update.click(
-            fn=horde_worker.get_worker_info(session, config.apikey, worker),
-            outputs=worker_info,
-        )
 
     return worker_ui
 
@@ -237,18 +218,13 @@ def get_user_ui():
             interactive=False,
             elem_id=f"{tab_prefix}user-info",
             visible=False,
-        )    
+        )
         with gr.Column():
             for key, value in user_info.items():
                 if value is not None:
                     gr.Textbox(
                         value, label=key.capitalize(), interactive=False, lines=1
                     )
-        # Click functions
-        user_update.click(
-            fn=horde_user.get_user_info(session, config.apikey),
-            outputs=user_info,
-        )
 
     return user_ui
 
@@ -259,7 +235,6 @@ def get_kudos_ui():
         # Kudos functions
         horde_user = HordeUser()
         user_info = horde_user.get_user_info(session, config.apikey)
-        kudo_transfer = KudoTransfer()
 
         # Kudos UI
         with gr.Row():
@@ -305,8 +280,6 @@ def get_kudos_ui():
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
-        # Click functions
-        transfer.click(fn=kudo_transfer.transfer_kudos(username, kudos_amount))
 
     return kudos_ui
 
@@ -352,7 +325,7 @@ def get_news_ui():
                 interactive=False,
                 elem_id=f"{tab_prefix}news-info",
                 visible=False,
-            )    
+            )
             with gr.Column():
                 for news_item in news_info[:3]:
                     if "title" and "newspiece" and "date_published" in news_item:
@@ -365,8 +338,6 @@ def get_news_ui():
                             visible=True,
                             interactive=False,
                         )
-        # Click functions
-        news_update.click(fn=horde_news.get_horde_news(session), outputs=news_info)
 
     return news_ui
 
@@ -392,7 +363,7 @@ def get_stats_ui(stats_info):
             interactive=False,
             elem_id=f"{tab_prefix}stats-info",
             visible=False,
-        )    
+        )
         with gr.Box(scale=2):
             with gr.Column():
                 for period, data in stats_info.items():
@@ -403,8 +374,6 @@ def get_stats_ui(stats_info):
                             interactive=False,
                             lines=1,
                         )
-        # Click functions
-        stats_update.click(fn=horde_stats.get_horde_stats(session), outputs=stats_info)
 
     return stats_ui
 
@@ -480,6 +449,7 @@ def get_settings_ui(status):
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
             with gr.Box():
+
                 def on_apply_selected_models(local_selected_models):
                     status.update(
                         f'Status: \
@@ -520,30 +490,6 @@ def get_settings_ui(status):
                 visible=True,
                 elem_id=tab_prefix + "apply-settings",
             )
-        # Click functions
-        apply_settings.click(
-            fn=apply_stable_horde_settings,
-            inputs=[
-                enable,
-                name,
-                apikey,
-                allow_img2img,
-                allow_painting,
-                allow_unsafe_ipaddr,
-                allow_post_processing,
-                restore_settings,
-                nsfw,
-                interval,
-                max_pixels,
-                endpoint,
-                show_images,
-                save_images,
-                save_images_folder,
-            ],
-            output=[
-                status,
-            ],
-        )
 
     return settings_ui
 
@@ -606,6 +552,10 @@ def on_ui_tabs():
                 # TODO Move this somewhere else
                 horde_worker = HordeWorker()
                 horde_user = HordeUser()
+                kudo_transfer = KudoTransfer()
+                horde_news = HordeNews()
+                horde_status = HordeStatus()
+                horde_stats = HordeStats()
                 user_info = horde_user.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:
@@ -619,23 +569,87 @@ def on_ui_tabs():
 
             # General tabs
             with gr.Tab("Generation"):
-                get_generator_ui()
+                generator_ui = get_generator_ui()
             with gr.Tab("Worker"):
-                get_worker_ui(worker)
+                worker_ui = get_worker_ui(worker)
             with gr.Tab("User"):
-                get_user_ui()
+                user_ui = get_user_ui()
             with gr.Tab("Kudos"):
-                get_kudos_ui()
+                kudos_ui = get_kudos_ui()
             with gr.Tab("News"):
-                get_news_ui()
+                news_ui = get_news_ui()
             with gr.Tab("Stats"):
-                get_stats_ui()
+                stats_ui = get_stats_ui()
             with gr.Tab("Settings"):
-                get_settings_ui(status, running_type)
+                settings_ui = get_settings_ui(status, running_type)
 
         # Click functions
+        if generator_ui.current_id and generator_ui.log and generator_ui.state:
+            generator_ui.refresh.click(
+                fn=lambda: generator_ui.on_refresh(),
+                outputs=[generator_ui.current_id, generator_ui.log, generator_ui.state],
+                show_progress=False,
+            )
+
+        if (
+            generator_ui.current_id
+            and generator_ui.log
+            and generator_ui.state
+            and generator_ui.preview
+        ):
+            generator_ui.refresh_image.click(
+                fn=lambda: generator_ui.on_refresh(True),
+                outputs=[
+                    generator_ui.current_id,
+                    generator_ui.log,
+                    generator_ui.state,
+                    generator_ui.preview,
+                ],
+                show_progress=False,
+            )
         save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
+        worker_ui.worker_update.click(
+            fn=horde_worker.get_worker_info(session, config.apikey, worker),
+            inputs=[apikey],
+            outputs=[worker_info],
+        )
+        user_ui.user_update.click(
+            fn=horde_user.get_user_info(session, config.apikey),
+            outputs=[user_info],
+        )
+        kudos_ui.transfer.click(
+            fn=kudo_transfer.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
+        )
+        news_ui.news_update.click(
+            fn=horde_news.get_horde_news(session), outputs=[news_ui.news_info]
+        )
+        stats_ui.stats_update.click(
+            fn=horde_stats.get_horde_stats(session), outputs=[stats_ui.stats_info]
+        )
+        settings_ui.apply_settings.click(
+            fn=apply_stable_horde_settings,
+            inputs=[
+                settings_ui.enable,
+                settings_ui.name,
+                apikey,
+                settings_ui.allow_img2img,
+                settings_ui.allow_painting,
+                settings_ui.allow_unsafe_ipaddr,
+                settings_ui.allow_post_processing,
+                settings_ui.restore_settings,
+                settings_ui.nsfw,
+                settings_ui.interval,
+                settings_ui.max_pixels,
+                settings_ui.endpoint,
+                settings_ui.show_images,
+                settings_ui.save_images,
+                settings_ui.save_images_folder,
+            ],
+            output=[
+                status,
+            ],
+        )
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

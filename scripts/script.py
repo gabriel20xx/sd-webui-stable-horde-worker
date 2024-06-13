@@ -711,7 +711,7 @@ def get_news_ui():
     return news_ui
 
 
-def get_stats_ui(stats_info):
+def get_stats_ui():
     with gr.Blocks() as stats_ui:
         # Stats functions
         api = API()
@@ -726,13 +726,6 @@ def get_stats_ui(stats_info):
             stats_update = gr.Button(
                 "Update Stats", elem_id=f"{tab_prefix}stats-update"
             )
-        stats_info = gr.JSON(
-            value=stats_info,
-            label="Stats",
-            interactive=False,
-            elem_id=f"{tab_prefix}stats-info",
-            visible=False,
-        )
         with gr.Box(scale=2):
             with gr.Column():
                 if "minute" in stats_info:

@@ -19,6 +19,7 @@ basedir = scripts.basedir()
 config = StableHordeConfig(basedir)
 horde = StableHorde(basedir, config)
 session = requests.Session()
+api = API()
 
 
 def on_app_started(demo: Optional[gr.Blocks], app: FastAPI):
@@ -48,6 +49,7 @@ def horde_thread():
     asyncio.run(horde.run())
 
 
+# Settings
 def apply_stable_horde_settings(
     enable: bool,
     name: str,
@@ -85,6 +87,57 @@ def apply_stable_horde_settings(
     return (
         f'Status: {"Running" if config.enabled else "Stopped"}',
         "Running Type: Image Generation",
+    )
+
+
+# Worker
+def fetch_and_update_worker_info(worker):
+    worker_info = api.get_worker_info(session, config.apikey, worker)
+    return [
+        (
+            worker_info[key]
+            if isinstance(worker_info[key], str)
+            else (
+                ", ".join(worker_info[key])
+                if isinstance(worker_info[key], list)
+                else str(worker_info[key])
+            )
+        )
+        for key in worker_info.keys()
+    ]
+
+
+# User
+def fetch_and_update_user_info():
+    user_info = api.get_user_info(session, config.apikey)
+    return [
+        (
+            user_info[key]
+            if isinstance(user_info[key], str)
+            else (
+                ", ".join(user_info[key])
+                if isinstance(user_info[key], list)
+                else str(user_info[key])
+            )
+        )
+        for key in user_info.keys()
+    ]
+
+
+# Stats
+def horde_stats(api, session):
+    stats_info = api.get_horde_stats(session)
+    return (
+        stats_info["minute"]["images"],
+        stats_info["minute"]["ps"],
+        stats_info["hour"]["images"],
+        stats_info["hour"]["ps"],
+        stats_info["day"]["images"],
+        stats_info["day"]["ps"],
+        stats_info["month"]["images"],
+        stats_info["month"]["ps"],
+        stats_info["total"]["images"],
+        stats_info["total"]["ps"],
     )
 
 
@@ -167,201 +220,25 @@ def get_generator_ui():
 # Worker UI
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
-        # Worker functions
-        horde_worker = API()
-        worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
+        worker_info = api.get_worker_info(session, config.apikey, worker)
 
-        # Worker UI
         gr.Markdown("## Worker Details")
-        with gr.Row():
-            worker_update = gr.Button(
-                "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
+        worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
+
+        details = []
+        for key in worker_info.keys():
+            detail = gr.Textbox(
+                value=f"{key.capitalize()}: {worker_info[key]}",
+                interactive=False,
+                lines=1,
             )
-        with gr.Column():
-            if "type" in worker_info:
-                gr.Textbox(f"Type: {worker_info['type']}", interactive=False, lines=1)
-            if "name" in worker_info:
-                gr.Textbox(f"Name: {worker_info['name']}", interactive=False, lines=1)
-            if "id" in worker_info:
-                gr.Textbox(f"ID: {worker_info['id']}", interactive=False, lines=1)
-            if "online" in worker_info:
-                gr.Textbox(
-                    f"Online: {worker_info['online']}", interactive=False, lines=1
-                )
-            if "requests_fulfilled" in worker_info:
-                gr.Textbox(
-                    f"Requests Fulfilled: {worker_info['requests_fulfilled']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "kudos_rewards" in worker_info:
-                gr.Textbox(
-                    f"Kudos Rewards: {worker_info['kudos_rewards']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if (
-                "kudos_details" in worker_info
-                and "generated" in worker_info["kudos_details"]
-            ):
-                gr.Textbox(
-                    f"Kudos Generated: {worker_info['kudos_details']['generated']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if (
-                "kudos_details" in worker_info
-                and "uptime" in worker_info["kudos_details"]
-            ):
-                gr.Textbox(
-                    f"Kudos Uptime: {worker_info['kudos_details']['uptime']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "performance" in worker_info:
-                gr.Textbox(
-                    f"Performance: {worker_info['performance']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "threads" in worker_info:
-                gr.Textbox(
-                    f"Threads: {worker_info['threads']}", interactive=False, lines=1
-                )
-            if "uptime" in worker_info:
-                gr.Textbox(
-                    f"Uptime: {worker_info['uptime']}", interactive=False, lines=1
-                )
-            if "maintenance_mode" in worker_info:
-                gr.Textbox(
-                    f"Maintenance Mode: {worker_info['maintenance_mode']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "paused" in worker_info:
-                gr.Textbox(
-                    f"Paused: {worker_info['paused']}", interactive=False, lines=1
-                )
-            if "info" in worker_info:
-                gr.Textbox(f"Info: {worker_info['info']}", interactive=False, lines=1)
-            if "nsfw" in worker_info:
-                gr.Textbox(f"NSFW: {worker_info['nsfw']}", interactive=False, lines=1)
-            if "owner" in worker_info:
-                gr.Textbox(f"Owner: {worker_info['owner']}", interactive=False, lines=1)
-            if "ipaddr" in worker_info:
-                gr.Textbox(
-                    f"IP Address: {worker_info['ipaddr']}", interactive=False, lines=1
-                )
-            if "trusted" in worker_info:
-                gr.Textbox(
-                    f"Trusted: {worker_info['trusted']}", interactive=False, lines=1
-                )
-            if "flagged" in worker_info:
-                gr.Textbox(
-                    f"Flagged: {worker_info['flagged']}", interactive=False, lines=1
-                )
-            if "suspicious" in worker_info:
-                gr.Textbox(
-                    f"Suspicious: {worker_info['suspicious']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "uncompleted_jobs" in worker_info:
-                gr.Textbox(
-                    f"Uncompleted Jobs: {worker_info['uncompleted_jobs']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "models" in worker_info:
-                gr.Textbox(
-                    f"Models: {', '.join(worker_info['models'])}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "forms" in worker_info:
-                gr.Textbox(
-                    f"Forms: {', '.join(worker_info['forms'])}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "team" in worker_info and "name" in worker_info["team"]:
-                gr.Textbox(
-                    f"Team Name: {worker_info['team']['name']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "team" in worker_info and "id" in worker_info["team"]:
-                gr.Textbox(
-                    f"Team ID: {worker_info['team']['id']}", interactive=False, lines=1
-                )
-            if "contact" in worker_info:
-                gr.Textbox(
-                    f"Contact: {worker_info['contact']}", interactive=False, lines=1
-                )
-            if "bridge_agent" in worker_info:
-                gr.Textbox(
-                    f"Bridge Agent: {worker_info['bridge_agent']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "max_pixels" in worker_info:
-                gr.Textbox(
-                    f"Max Pixels: {worker_info['max_pixels']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "megapixelsteps_generated" in worker_info:
-                gr.Textbox(
-                    f"Megapixelsteps Generated: {worker_info['megapixelsteps_generated']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "img2img" in worker_info:
-                gr.Textbox(
-                    f"Img2Img: {worker_info['img2img']}", interactive=False, lines=1
-                )
-            if "painting" in worker_info:
-                gr.Textbox(
-                    f"Painting: {worker_info['painting']}", interactive=False, lines=1
-                )
-            if "post-processing" in worker_info:
-                gr.Textbox(
-                    f"Post-Processing: {worker_info['post-processing']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "lora" in worker_info:
-                gr.Textbox(f"Lora: {worker_info['lora']}", interactive=False, lines=1)
-            if "controlnet" in worker_info:
-                gr.Textbox(
-                    f"Controlnet: {worker_info['controlnet']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "sdxl_controlnet" in worker_info:
-                gr.Textbox(
-                    f"SDXL Controlnet: {worker_info['sdxl_controlnet']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "max_length" in worker_info:
-                gr.Textbox(
-                    f"Max Length: {worker_info['max_length']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "max_context_length" in worker_info:
-                gr.Textbox(
-                    f"Max Context Length: {worker_info['max_context_length']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "tokens_generated" in worker_info:
-                gr.Textbox(
-                    f"Tokens Generated: {worker_info['tokens_generated']}",
-                    interactive=False,
-                    lines=1,
-                )
+            details.append(detail)
+
+        worker_update.click(
+            fn=lambda: fetch_and_update_worker_info(worker),
+            inputs=[],
+            outputs=details,
+        )
 
     return worker_ui
 
@@ -369,273 +246,27 @@ def get_worker_ui(worker):
 # User UI
 def get_user_ui():
     with gr.Blocks() as user_ui:
-        # User functions
-        api = API()
         user_info = api.get_user_info(session, config.apikey)
 
-        # User UI
         gr.Markdown("## User Details", elem_id="user_title")
-        with gr.Row():
-            user_update = gr.Button(
-                "Update User Details", elem_id=f"{tab_prefix}user-update"
+        user_update = gr.Button(
+            "Update User Details", elem_id=f"{tab_prefix}user-update"
+        )
+
+        details = []
+        for key in user_info.keys():
+            detail = gr.Textbox(
+                value=f"{key.capitalize()}: {user_info[key]}",
+                interactive=False,
+                lines=1,
             )
-        with gr.Column():
-            if "username" in user_info:
-                gr.Textbox(
-                    f"Username: {user_info['username']}", interactive=False, lines=1
-                )
-            if "id" in user_info:
-                gr.Textbox(f"ID: {user_info['id']}", interactive=False, lines=1)
-            if "kudos" in user_info:
-                gr.Textbox(f"Kudos: {user_info['kudos']}", interactive=False, lines=1)
-            if "evaluating_kudos" in user_info:
-                gr.Textbox(
-                    f"Evaluating Kudos: {user_info['evaluating_kudos']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "concurrency" in user_info:
-                gr.Textbox(
-                    f"Concurrency: {user_info['concurrency']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "worker_invited" in user_info:
-                gr.Textbox(
-                    f"Worker Invited: {user_info['worker_invited']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "moderator" in user_info:
-                gr.Textbox(
-                    f"Moderator: {user_info['moderator']}", interactive=False, lines=1
-                )
-            if "kudos_details" in user_info:
-                kudos_details = user_info["kudos_details"]
-                if "accumulated" in kudos_details:
-                    gr.Textbox(
-                        f"Accumulated Kudos: {kudos_details['accumulated']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "gifted" in kudos_details:
-                    gr.Textbox(
-                        f"Gifted Kudos: {kudos_details['gifted']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "donated" in kudos_details:
-                    gr.Textbox(
-                        f"Donated Kudos: {kudos_details['donated']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "admin" in kudos_details:
-                    gr.Textbox(
-                        f"Admin Kudos: {kudos_details['admin']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "received" in kudos_details:
-                    gr.Textbox(
-                        f"Received Kudos: {kudos_details['received']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "recurring" in kudos_details:
-                    gr.Textbox(
-                        f"Recurring Kudos: {kudos_details['recurring']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "awarded" in kudos_details:
-                    gr.Textbox(
-                        f"Awarded Kudos: {kudos_details['awarded']}",
-                        interactive=False,
-                        lines=1,
-                    )
-            if "worker_count" in user_info:
-                gr.Textbox(
-                    f"Worker Count: {user_info['worker_count']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "worker_ids" in user_info:
-                gr.Textbox(
-                    f"Worker IDs: {', '.join(user_info['worker_ids'])}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "sharedkey_ids" in user_info:
-                gr.Textbox(
-                    f"Shared Key IDs: {', '.join(user_info['sharedkey_ids'])}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "monthly_kudos" in user_info:
-                monthly_kudos = user_info["monthly_kudos"]
-                if "amount" in monthly_kudos:
-                    gr.Textbox(
-                        f"Monthly Kudos Amount: {monthly_kudos['amount']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "last_received" in monthly_kudos:
-                    gr.Textbox(
-                        f"Last Monthly Kudos Received: {monthly_kudos['last_received']}",
-                        interactive=False,
-                        lines=1,
-                    )
-            if "trusted" in user_info:
-                gr.Textbox(
-                    f"Trusted: {user_info['trusted']}", interactive=False, lines=1
-                )
-            if "flagged" in user_info:
-                gr.Textbox(
-                    f"Flagged: {user_info['flagged']}", interactive=False, lines=1
-                )
-            if "vpn" in user_info:
-                gr.Textbox(f"VPN: {user_info['vpn']}", interactive=False, lines=1)
-            if "service" in user_info:
-                gr.Textbox(
-                    f"Service: {user_info['service']}", interactive=False, lines=1
-                )
-            if "education" in user_info:
-                gr.Textbox(
-                    f"Education: {user_info['education']}", interactive=False, lines=1
-                )
-            if "customizer" in user_info:
-                gr.Textbox(
-                    f"Customizer: {user_info['customizer']}", interactive=False, lines=1
-                )
-            if "special" in user_info:
-                gr.Textbox(
-                    f"Special: {user_info['special']}", interactive=False, lines=1
-                )
-            if "suspicious" in user_info:
-                gr.Textbox(
-                    f"Suspicious: {user_info['suspicious']}", interactive=False, lines=1
-                )
-            if "pseudonymous" in user_info:
-                gr.Textbox(
-                    f"Pseudonymous: {user_info['pseudonymous']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "contact" in user_info:
-                gr.Textbox(
-                    f"Contact: {user_info['contact']}", interactive=False, lines=1
-                )
-            if "admin_comment" in user_info:
-                gr.Textbox(
-                    f"Admin Comment: {user_info['admin_comment']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "account_age" in user_info:
-                gr.Textbox(
-                    f"Account Age: {user_info['account_age']}",
-                    interactive=False,
-                    lines=1,
-                )
-            if "usage" in user_info:
-                usage = user_info["usage"]
-                if "megapixelsteps" in usage:
-                    gr.Textbox(
-                        f"Usage Megapixelsteps: {usage['megapixelsteps']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "requests" in usage:
-                    gr.Textbox(
-                        f"Usage Requests: {usage['requests']}",
-                        interactive=False,
-                        lines=1,
-                    )
-            if "contributions" in user_info:
-                contributions = user_info["contributions"]
-                if "megapixelsteps" in contributions:
-                    gr.Textbox(
-                        f"Contribution Megapixelsteps: {contributions['megapixelsteps']}",
-                        interactive=False,
-                        lines=1,
-                    )
-                if "fulfillments" in contributions:
-                    gr.Textbox(
-                        f"Contribution Fulfillments: {contributions['fulfillments']}",
-                        interactive=False,
-                        lines=1,
-                    )
-            if "records" in user_info:
-                records = user_info["records"]
-                if "usage" in records:
-                    usage_records = records["usage"]
-                    if "megapixelsteps" in usage_records:
-                        gr.Textbox(
-                            f"Record Usage Megapixelsteps: {usage_records['megapixelsteps']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "tokens" in usage_records:
-                        gr.Textbox(
-                            f"Record Usage Tokens: {usage_records['tokens']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                if "contribution" in records:
-                    contribution_records = records["contribution"]
-                    if "megapixelsteps" in contribution_records:
-                        gr.Textbox(
-                            f"Record Contribution Megapixelsteps: {contribution_records['megapixelsteps']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "tokens" in contribution_records:
-                        gr.Textbox(
-                            f"Record Contribution Tokens: {contribution_records['tokens']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                if "fulfillment" in records:
-                    fulfillment_records = records["fulfillment"]
-                    if "image" in fulfillment_records:
-                        gr.Textbox(
-                            f"Fulfillment Image: {fulfillment_records['image']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "text" in fulfillment_records:
-                        gr.Textbox(
-                            f"Fulfillment Text: {fulfillment_records['text']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "interrogation" in fulfillment_records:
-                        gr.Textbox(
-                            f"Fulfillment Interrogation: {fulfillment_records['interrogation']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                if "request" in records:
-                    request_records = records["request"]
-                    if "image" in request_records:
-                        gr.Textbox(
-                            f"Request Image: {request_records['image']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "text" in request_records:
-                        gr.Textbox(
-                            f"Request Text: {request_records['text']}",
-                            interactive=False,
-                            lines=1,
-                        )
-                    if "interrogation" in request_records:
-                        gr.Textbox(
-                            f"Request Interrogation: {request_records['interrogation']}",
-                            interactive=False,
-                            lines=1,
-                        )
+            details.append(detail)
+
+        user_update.click(
+            fn=lambda: fetch_and_update_user_info(),
+            inputs=[],
+            outputs=details,
+        )
     return user_ui
 
 
@@ -690,6 +321,9 @@ def get_kudos_ui():
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
+        kudos_ui.transfer.click(
+            fn=api.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
+        )
 
     return kudos_ui
 
@@ -740,6 +374,9 @@ def get_news_ui():
                             visible=True,
                             interactive=False,
                         )
+        news_ui.news_update.click(
+            fn=api.get_horde_news(session), outputs=[news_ui.news_info]
+        )
 
     return news_ui
 
@@ -763,18 +400,22 @@ def get_stats_ui():
                 gradio_total_images = gr.Textbox(interactive=False, lines=1)
                 gradio_total_ps = gr.Textbox(interactive=False, lines=1)
 
-        return stats_ui, stats_update, [
-            gradio_minute_images,
-            gradio_minute_ps,
-            gradio_hour_images,
-            gradio_hour_ps,
-            gradio_day_images,
-            gradio_day_ps,
-            gradio_month_images,
-            gradio_month_ps,
-            gradio_total_images,
-            gradio_total_ps,
-        ]
+        return (
+            stats_ui,
+            stats_update,
+            [
+                gradio_minute_images,
+                gradio_minute_ps,
+                gradio_hour_images,
+                gradio_hour_ps,
+                gradio_day_images,
+                gradio_day_ps,
+                gradio_month_images,
+                gradio_month_ps,
+                gradio_total_images,
+                gradio_total_ps,
+            ],
+        )
 
 
 # Settings UI
@@ -964,9 +605,9 @@ def on_ui_tabs():
             with gr.Tab("Generation"):
                 generator_ui = get_generator_ui()
             with gr.Tab("Worker"):
-                worker_ui = get_worker_ui(worker)
+                get_worker_ui(worker)
             with gr.Tab("User"):
-                user_ui = get_user_ui()
+                get_user_ui()
             with gr.Tab("Kudos"):
                 kudos_ui = get_kudos_ui()
             with gr.Tab("News"):
@@ -1002,37 +643,6 @@ def on_ui_tabs():
             )
         save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
-        worker_ui.worker_update.click(
-            fn=api.get_worker_info(session, config.apikey, worker),
-            inputs=[apikey],
-            outputs=[worker_info],
-        )
-        user_ui.user_update.click(
-            fn=api.get_user_info(session, config.apikey),
-            outputs=[user_info],
-        )
-        kudos_ui.transfer.click(
-            fn=api.transfer_kudos(kudos_ui.username, kudos_ui.kudos_amount)
-        )
-        news_ui.news_update.click(
-            fn=api.get_horde_news(session), outputs=[news_ui.news_info]
-        )
-
-        # Stats
-        def horde_stats(api, session):
-            stats_info = api.get_horde_stats(session)
-            return (
-                stats_info["minute"]["images"],
-                stats_info["minute"]["ps"],
-                stats_info["hour"]["images"],
-                stats_info["hour"]["ps"],
-                stats_info["day"]["images"],
-                stats_info["day"]["ps"],
-                stats_info["month"]["images"],
-                stats_info["month"]["ps"],
-                stats_info["total"]["images"],
-                stats_info["total"]["ps"],
-            )
 
         # Stats click
         stats_update.click(

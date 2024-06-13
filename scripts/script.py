@@ -647,7 +647,7 @@ def on_ui_tabs():
                 settings_ui.save_images_folder,
             ],
             output=[
-                status,
+                status, running_type
             ],
         )
 

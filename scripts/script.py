@@ -231,27 +231,27 @@ def get_generator_ui():
                     columns=4,
                 )
 
-            # Click functions
-        if generator_ui.current_id and generator_ui.log and generator_ui.state:
-            generator_ui.refresh.click(
-                fn=lambda: generator_ui.on_refresh(),
-                outputs=[generator_ui.current_id, generator_ui.log, generator_ui.state],
+        # Click functions
+        if current_id and log and state:
+            refresh.click(
+                fn=lambda: on_refresh(),
+                outputs=[current_id, log, state],
                 show_progress=False,
             )
 
         if (
-            generator_ui.current_id
-            and generator_ui.log
-            and generator_ui.state
-            and generator_ui.preview
+            current_id
+            and log
+            and state
+            and preview
         ):
-            generator_ui.refresh_image.click(
-                fn=lambda: generator_ui.on_refresh(True),
+            refresh_image.click(
+                fn=lambda: on_refresh(True),
                 outputs=[
-                    generator_ui.current_id,
-                    generator_ui.log,
-                    generator_ui.state,
-                    generator_ui.preview,
+                    current_id,
+                    log,
+                    state,
+                    preview,
                 ],
                 show_progress=False,
             )

@@ -624,7 +624,6 @@ def on_ui_tabs():
                 )
 
                 # TODO Move this somewhere else
-                api = API()
                 user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:

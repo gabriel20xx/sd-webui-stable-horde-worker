@@ -665,10 +665,9 @@ def get_kudos_ui():
 def get_news_ui():
     with gr.Blocks() as news_ui:
         # News functions
-        horde_news = API()
-        news_info = horde_news.get_horde_news(session)
-        horde_status = API()
-        status_info = horde_status.get_horde_status(session)
+        api = API()
+        news_info = api.get_horde_news(session)
+        status_info = api.get_horde_status(session)
 
         # News UI
         gr.Markdown(
@@ -696,13 +695,6 @@ def get_news_ui():
                         interactive=False,
                     )
         with gr.Box(scale=2):
-            news_info = gr.JSON(
-                value=news_info,
-                label="News",
-                interactive=False,
-                elem_id=f"{tab_prefix}news-info",
-                visible=False,
-            )
             with gr.Column():
                 for news_item in news_info[:3]:
                     if "title" and "newspiece" and "date_published" in news_item:
@@ -722,8 +714,8 @@ def get_news_ui():
 def get_stats_ui(stats_info):
     with gr.Blocks() as stats_ui:
         # Stats functions
-        horde_stats = API()
-        stats_info = horde_stats.get_horde_stats(session)
+        api = API()
+        stats_info = api.get_horde_stats(session)
 
         # Stats UI
         gr.Markdown(
@@ -743,14 +735,79 @@ def get_stats_ui(stats_info):
         )
         with gr.Box(scale=2):
             with gr.Column():
-                for period, data in stats_info.items():
-                    for metric, value in data.items():
-                        gr.Textbox(
-                            value,
-                            label=f"{period.capitalize()} {metric.capitalize()}",
-                            interactive=False,
-                            lines=1,
-                        )
+                if "minute" in stats_info:
+                    minute_images = stats_info["minute"]["images"]
+                    minute_ps = stats_info["minute"]["ps"]
+                    gr.Textbox(
+                        f"Minute Images: {minute_images}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    gr.Textbox(
+                        f"Minute Processing Speed: {minute_ps}",
+                        interactive=False,
+                        lines=1,
+                    )
+
+                # Displaying hour statistics
+                if "hour" in stats_info:
+                    hour_images = stats_info["hour"]["images"]
+                    hour_ps = stats_info["hour"]["ps"]
+                    gr.Textbox(
+                        f"Hour Images: {hour_images}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    gr.Textbox(
+                        f"Hour Processing Speed: {hour_ps}",
+                        interactive=False,
+                        lines=1,
+                    )
+
+                # Displaying day statistics
+                if "day" in stats_info:
+                    day_images = stats_info["day"]["images"]
+                    day_ps = stats_info["day"]["ps"]
+                    gr.Textbox(
+                        f"Day Images: {day_images}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    gr.Textbox(
+                        f"Day Processing Speed: {day_ps}",
+                        interactive=False,
+                        lines=1,
+                    )
+
+                # Displaying month statistics
+                if "month" in stats_info:
+                    month_images = stats_info["month"]["images"]
+                    month_ps = stats_info["month"]["ps"]
+                    gr.Textbox(
+                        f"Month Images: {month_images}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    gr.Textbox(
+                        f"Month Processing Speed: {month_ps}",
+                        interactive=False,
+                        lines=1,
+                    )
+
+                # Displaying total statistics
+                if "total" in stats_info:
+                    total_images = stats_info["total"]["images"]
+                    total_ps = stats_info["total"]["ps"]
+                    gr.Textbox(
+                        f"Total Images: {total_images}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    gr.Textbox(
+                        f"Total Processing Speed: {total_ps}",
+                        interactive=False,
+                        lines=1,
+                    )
 
     return stats_ui
 

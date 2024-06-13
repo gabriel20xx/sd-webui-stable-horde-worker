@@ -746,96 +746,35 @@ def get_news_ui():
 
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
-        # Stats functions
-        api = API()
-        stats_info = api.get_horde_stats(session)
-
-        # Stats UI
-        gr.Markdown(
-            "## Stats",
-            elem_id="stats_title",
-        )
+        gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():
-            stats_update = gr.Button(
-                "Update Stats", elem_id=f"{tab_prefix}stats-update"
-            )
+            stats_update = gr.Button("Update Stats", elem_id="stats-update")
+
         with gr.Box(scale=2):
             with gr.Column():
-                if "minute" in stats_info:
-                    minute_images = stats_info["minute"]["images"]
-                    minute_ps = stats_info["minute"]["ps"]
-                    gr.Textbox(
-                        f"Minute Images: {minute_images}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    gr.Textbox(
-                        f"Minute Processing Speed: {minute_ps}",
-                        interactive=False,
-                        lines=1,
-                    )
+                gradio_minute_images = gr.Textbox(interactive=False, lines=1)
+                gradio_minute_ps = gr.Textbox(interactive=False, lines=1)
+                gradio_hour_images = gr.Textbox(interactive=False, lines=1)
+                gradio_hour_ps = gr.Textbox(interactive=False, lines=1)
+                gradio_day_images = gr.Textbox(interactive=False, lines=1)
+                gradio_day_ps = gr.Textbox(interactive=False, lines=1)
+                gradio_month_images = gr.Textbox(interactive=False, lines=1)
+                gradio_month_ps = gr.Textbox(interactive=False, lines=1)
+                gradio_total_images = gr.Textbox(interactive=False, lines=1)
+                gradio_total_ps = gr.Textbox(interactive=False, lines=1)
 
-                # Displaying hour statistics
-                if "hour" in stats_info:
-                    hour_images = stats_info["hour"]["images"]
-                    hour_ps = stats_info["hour"]["ps"]
-                    gr.Textbox(
-                        f"Hour Images: {hour_images}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    gr.Textbox(
-                        f"Hour Processing Speed: {hour_ps}",
-                        interactive=False,
-                        lines=1,
-                    )
-
-                # Displaying day statistics
-                if "day" in stats_info:
-                    day_images = stats_info["day"]["images"]
-                    day_ps = stats_info["day"]["ps"]
-                    gr.Textbox(
-                        f"Day Images: {day_images}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    gr.Textbox(
-                        f"Day Processing Speed: {day_ps}",
-                        interactive=False,
-                        lines=1,
-                    )
-
-                # Displaying month statistics
-                if "month" in stats_info:
-                    month_images = stats_info["month"]["images"]
-                    month_ps = stats_info["month"]["ps"]
-                    gr.Textbox(
-                        f"Month Images: {month_images}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    gr.Textbox(
-                        f"Month Processing Speed: {month_ps}",
-                        interactive=False,
-                        lines=1,
-                    )
-
-                # Displaying total statistics
-                if "total" in stats_info:
-                    total_images = stats_info["total"]["images"]
-                    total_ps = stats_info["total"]["ps"]
-                    gr.Textbox(
-                        f"Total Images: {total_images}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    gr.Textbox(
-                        f"Total Processing Speed: {total_ps}",
-                        interactive=False,
-                        lines=1,
-                    )
-
-    return stats_ui
+        return stats_ui, stats_update, [
+            gradio_minute_images,
+            gradio_minute_ps,
+            gradio_hour_images,
+            gradio_hour_ps,
+            gradio_day_images,
+            gradio_day_ps,
+            gradio_month_images,
+            gradio_month_ps,
+            gradio_total_images,
+            gradio_total_ps,
+        ]
 
 
 # Settings UI
@@ -1033,7 +972,7 @@ def on_ui_tabs():
             with gr.Tab("News"):
                 news_ui = get_news_ui()
             with gr.Tab("Stats"):
-                stats_ui = get_stats_ui()
+                stats_ui, stats_update, stats_outputs = get_stats_ui()
             with gr.Tab("Settings"):
                 settings_ui = get_settings_ui(status, running_type)
 
@@ -1078,8 +1017,35 @@ def on_ui_tabs():
         news_ui.news_update.click(
             fn=api.get_horde_news(session), outputs=[news_ui.news_info]
         )
-        stats_ui.stats_update.click(
-            fn=api.get_horde_stats(session), outputs=[stats_ui.stats_info]
+
+        def horde_stats(session):
+            data = api.get_horde_stats(session)
+            gradio_minute_images = data["minute_images"]
+            gradio_minute_ps = data["minute_ps"]
+            gradio_hour_images = data["hour_images"]
+            gradio_hour_ps = data["hour_ps"]
+            gradio_day_images = data["day_images"]
+            gradio_day_ps = data["day_ps"]
+            gradio_month_images = data["month_images"]
+            gradio_month_ps = data["month_ps"]
+            gradio_total_images = data["total_images"]
+            gradio_total_ps = data["total_ps"]
+            return (
+                gradio_minute_images,
+                gradio_minute_ps,
+                gradio_hour_images,
+                gradio_hour_ps,
+                gradio_day_images,
+                gradio_day_ps,
+                gradio_month_images,
+                gradio_month_ps,
+                gradio_total_images,
+                gradio_total_ps,
+            )
+
+        stats_update.click(
+            fn=lambda: horde_stats(api, session),
+            outputs=stats_outputs,
         )
         settings_ui.apply_settings.click(
             fn=apply_stable_horde_settings,

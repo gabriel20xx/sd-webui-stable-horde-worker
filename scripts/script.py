@@ -185,7 +185,9 @@ def get_worker_ui(worker):
             if "id" in worker_info:
                 gr.Textbox(f"ID: {worker_info['id']}", interactive=False, lines=1)
             if "online" in worker_info:
-                gr.Textbox(f"Online: {worker_info['online']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Online: {worker_info['online']}", interactive=False, lines=1
+                )
             if "requests_fulfilled" in worker_info:
                 gr.Textbox(
                     f"Requests Fulfilled: {worker_info['requests_fulfilled']}",
@@ -207,7 +209,10 @@ def get_worker_ui(worker):
                     interactive=False,
                     lines=1,
                 )
-            if "kudos_details" in worker_info and "uptime" in worker_info["kudos_details"]:
+            if (
+                "kudos_details" in worker_info
+                and "uptime" in worker_info["kudos_details"]
+            ):
                 gr.Textbox(
                     f"Kudos Uptime: {worker_info['kudos_details']['uptime']}",
                     interactive=False,
@@ -215,12 +220,18 @@ def get_worker_ui(worker):
                 )
             if "performance" in worker_info:
                 gr.Textbox(
-                    f"Performance: {worker_info['performance']}", interactive=False, lines=1
+                    f"Performance: {worker_info['performance']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "threads" in worker_info:
-                gr.Textbox(f"Threads: {worker_info['threads']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Threads: {worker_info['threads']}", interactive=False, lines=1
+                )
             if "uptime" in worker_info:
-                gr.Textbox(f"Uptime: {worker_info['uptime']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Uptime: {worker_info['uptime']}", interactive=False, lines=1
+                )
             if "maintenance_mode" in worker_info:
                 gr.Textbox(
                     f"Maintenance Mode: {worker_info['maintenance_mode']}",
@@ -228,7 +239,9 @@ def get_worker_ui(worker):
                     lines=1,
                 )
             if "paused" in worker_info:
-                gr.Textbox(f"Paused: {worker_info['paused']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Paused: {worker_info['paused']}", interactive=False, lines=1
+                )
             if "info" in worker_info:
                 gr.Textbox(f"Info: {worker_info['info']}", interactive=False, lines=1)
             if "nsfw" in worker_info:
@@ -240,12 +253,18 @@ def get_worker_ui(worker):
                     f"IP Address: {worker_info['ipaddr']}", interactive=False, lines=1
                 )
             if "trusted" in worker_info:
-                gr.Textbox(f"Trusted: {worker_info['trusted']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Trusted: {worker_info['trusted']}", interactive=False, lines=1
+                )
             if "flagged" in worker_info:
-                gr.Textbox(f"Flagged: {worker_info['flagged']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Flagged: {worker_info['flagged']}", interactive=False, lines=1
+                )
             if "suspicious" in worker_info:
                 gr.Textbox(
-                    f"Suspicious: {worker_info['suspicious']}", interactive=False, lines=1
+                    f"Suspicious: {worker_info['suspicious']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "uncompleted_jobs" in worker_info:
                 gr.Textbox(
@@ -261,18 +280,24 @@ def get_worker_ui(worker):
                 )
             if "forms" in worker_info:
                 gr.Textbox(
-                    f"Forms: {', '.join(worker_info['forms'])}", interactive=False, lines=1
+                    f"Forms: {', '.join(worker_info['forms'])}",
+                    interactive=False,
+                    lines=1,
                 )
             if "team" in worker_info and "name" in worker_info["team"]:
                 gr.Textbox(
-                    f"Team Name: {worker_info['team']['name']}", interactive=False, lines=1
+                    f"Team Name: {worker_info['team']['name']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "team" in worker_info and "id" in worker_info["team"]:
                 gr.Textbox(
                     f"Team ID: {worker_info['team']['id']}", interactive=False, lines=1
                 )
             if "contact" in worker_info:
-                gr.Textbox(f"Contact: {worker_info['contact']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Contact: {worker_info['contact']}", interactive=False, lines=1
+                )
             if "bridge_agent" in worker_info:
                 gr.Textbox(
                     f"Bridge Agent: {worker_info['bridge_agent']}",
@@ -281,7 +306,9 @@ def get_worker_ui(worker):
                 )
             if "max_pixels" in worker_info:
                 gr.Textbox(
-                    f"Max Pixels: {worker_info['max_pixels']}", interactive=False, lines=1
+                    f"Max Pixels: {worker_info['max_pixels']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "megapixelsteps_generated" in worker_info:
                 gr.Textbox(
@@ -290,7 +317,9 @@ def get_worker_ui(worker):
                     lines=1,
                 )
             if "img2img" in worker_info:
-                gr.Textbox(f"Img2Img: {worker_info['img2img']}", interactive=False, lines=1)
+                gr.Textbox(
+                    f"Img2Img: {worker_info['img2img']}", interactive=False, lines=1
+                )
             if "painting" in worker_info:
                 gr.Textbox(
                     f"Painting: {worker_info['painting']}", interactive=False, lines=1
@@ -305,7 +334,9 @@ def get_worker_ui(worker):
                 gr.Textbox(f"Lora: {worker_info['lora']}", interactive=False, lines=1)
             if "controlnet" in worker_info:
                 gr.Textbox(
-                    f"Controlnet: {worker_info['controlnet']}", interactive=False, lines=1
+                    f"Controlnet: {worker_info['controlnet']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "sdxl_controlnet" in worker_info:
                 gr.Textbox(
@@ -315,7 +346,9 @@ def get_worker_ui(worker):
                 )
             if "max_length" in worker_info:
                 gr.Textbox(
-                    f"Max Length: {worker_info['max_length']}", interactive=False, lines=1
+                    f"Max Length: {worker_info['max_length']}",
+                    interactive=False,
+                    lines=1,
                 )
             if "max_context_length" in worker_info:
                 gr.Textbox(
@@ -982,9 +1015,7 @@ def on_ui_tabs():
                 user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 for worker in worker_ids:
-                    worker_info = api.get_worker_info(
-                        session, config.apikey, worker
-                    )
+                    worker_info = api.get_worker_info(session, config.apikey, worker)
                     worker_name = worker_info["name"]
                     if worker_name == config.name:
                         print(f"Current Worker: {worker_name}")
@@ -1069,9 +1100,7 @@ def on_ui_tabs():
                 settings_ui.save_images,
                 settings_ui.save_images_folder,
             ],
-            output=[
-                status, running_type
-            ],
+            output=[status, running_type],
         )
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)

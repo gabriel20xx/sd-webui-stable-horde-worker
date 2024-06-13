@@ -195,17 +195,20 @@ def get_worker_ui(worker):
             worker_update = gr.Button(
                 "Update Worker Details", elem_id=f"{tab_prefix}worker-update"
             )
+        worker_info_components = {}
         with gr.Column():
             for key, value in worker_info.items():
                 if value is not None:
-                    gr.Textbox(
-                        value, label=key.capitalize(), interactive=False, lines=1
-                    )
-        
+                    worker_info_components[key] = gr.Textbox(value, label=key.capitalize(), interactive=False, lines=1)
+
         # Click function wrapped in a lambda
+        def update_worker_info():
+            new_worker_info = horde_worker.get_worker_info(session, config.apikey, worker)
+            return [new_worker_info.get(key) for key in worker_info_components.keys()]
+        
         worker_update.click(
-            fn=lambda: horde_worker.get_worker_info(session, config.apikey, worker),
-            outputs=worker_info,
+            fn=update_worker_info,
+            outputs=[worker_info_components[key] for key in worker_info_components.keys()],
         )
 
     return worker_ui

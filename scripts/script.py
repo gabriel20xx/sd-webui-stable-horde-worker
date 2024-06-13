@@ -830,6 +830,7 @@ def get_settings_ui(status):
                     config.apikey,
                     label="Stable Horde API Key",
                     elem_id=tab_prefix + "apikey",
+                    visible=False,
                 )
                 allow_img2img = gr.Checkbox(config.allow_img2img, label="Allow img2img")
                 allow_painting = gr.Checkbox(

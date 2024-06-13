@@ -493,6 +493,12 @@ def get_settings_ui(status):
                 )
                 save_images = gr.Checkbox(config.save_images, label="Save Images")
 
+                running_type = gr.Textbox(
+                    "",
+                    label="Running Type",
+                    visible=False,
+                )
+
             with gr.Box():
 
                 def on_apply_selected_models(local_selected_models):
@@ -535,6 +541,29 @@ def get_settings_ui(status):
                 visible=True,
                 elem_id=tab_prefix + "apply-settings",
             )
+
+            # Settings click
+        apply_settings.click(
+            fn=apply_stable_horde_settings,
+            inputs=[
+                enable,
+                name,
+                apikey,
+                allow_img2img,
+                allow_painting,
+                allow_unsafe_ipaddr,
+                allow_post_processing,
+                restore_settings,
+                nsfw,
+                interval,
+                max_pixels,
+                endpoint,
+                show_images,
+                save_images,
+                save_images_folder,
+            ],
+            output=[status, running_type],
+        )
 
     return settings_ui
 
@@ -617,41 +646,12 @@ def on_ui_tabs():
             with gr.Tab("News"):
                 get_news_ui()
             with gr.Tab("Stats"):
-                stats_ui, stats_update, stats_outputs = get_stats_ui()
+                get_stats_ui()
             with gr.Tab("Settings"):
-                settings_ui, settings_update = get_settings_ui(status)
+                get_settings_ui(status)
 
         save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
-
-        # Stats click
-        stats_update.click(
-            fn=lambda: horde_stats(api, session),
-            outputs=stats_outputs,
-        )
-
-        # Settings click
-        settings_ui.apply_settings.click(
-            fn=apply_stable_horde_settings,
-            inputs=[
-                settings_ui.enable,
-                settings_ui.name,
-                apikey,
-                settings_ui.allow_img2img,
-                settings_ui.allow_painting,
-                settings_ui.allow_unsafe_ipaddr,
-                settings_ui.allow_post_processing,
-                settings_ui.restore_settings,
-                settings_ui.nsfw,
-                settings_ui.interval,
-                settings_ui.max_pixels,
-                settings_ui.endpoint,
-                settings_ui.show_images,
-                settings_ui.save_images,
-                settings_ui.save_images_folder,
-            ],
-            output=[status, running_type],
-        )
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

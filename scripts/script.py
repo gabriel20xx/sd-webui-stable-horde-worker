@@ -125,20 +125,37 @@ def fetch_and_update_user_info():
 
 
 # Stats
-def horde_stats(api, session):
+def fetch_and_update_stats_info():
     stats_info = api.get_horde_stats(session)
-    return (
-        stats_info["minute"]["images"],
-        stats_info["minute"]["ps"],
-        stats_info["hour"]["images"],
-        stats_info["hour"]["ps"],
-        stats_info["day"]["images"],
-        stats_info["day"]["ps"],
-        stats_info["month"]["images"],
-        stats_info["month"]["ps"],
-        stats_info["total"]["images"],
-        stats_info["total"]["ps"],
-    )
+    return [
+        (
+            stats_info[key]
+            if isinstance(stats_info[key], str)
+            else (
+                ", ".join(stats_info[key])
+                if isinstance(stats_info[key], list)
+                else str(stats_info[key])
+            )
+        )
+        for key in stats_info.keys()
+    ]
+
+
+# News
+def fetch_and_update_news_info():
+    news_info = api.get_horde_stats(session)
+    return [
+        (
+            news_info[key]
+            if isinstance(news_info[key], str)
+            else (
+                ", ".join(news_info[key])
+                if isinstance(news_info[key], list)
+                else str(news_info[key])
+            )
+        )
+        for key in news_info.keys()
+    ]
 
 
 tab_prefix = "stable-horde-"
@@ -213,6 +230,31 @@ def get_generator_ui():
                     readonly=True,
                     columns=4,
                 )
+
+            # Click functions
+        if generator_ui.current_id and generator_ui.log and generator_ui.state:
+            generator_ui.refresh.click(
+                fn=lambda: generator_ui.on_refresh(),
+                outputs=[generator_ui.current_id, generator_ui.log, generator_ui.state],
+                show_progress=False,
+            )
+
+        if (
+            generator_ui.current_id
+            and generator_ui.log
+            and generator_ui.state
+            and generator_ui.preview
+        ):
+            generator_ui.refresh_image.click(
+                fn=lambda: generator_ui.on_refresh(True),
+                outputs=[
+                    generator_ui.current_id,
+                    generator_ui.log,
+                    generator_ui.state,
+                    generator_ui.preview,
+                ],
+                show_progress=False,
+            )
 
     return generator_ui
 
@@ -331,12 +373,7 @@ def get_kudos_ui():
 # News UI
 def get_news_ui():
     with gr.Blocks() as news_ui:
-        # News functions
-        api = API()
-        news_info = api.get_horde_news(session)
-        status_info = api.get_horde_status(session)
-
-        # News UI
+        news_info = api.get_news_info(session)
         gr.Markdown(
             "## News",
             elem_id="news_title",
@@ -344,38 +381,19 @@ def get_news_ui():
         with gr.Row():
             news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
 
-        with gr.Box(scale=2):
-            with gr.Column():
-                status_modes = {
-                    "maintenance_mode": "Maintenance mode",
-                    "invite_only_mode": "Invite only mode",
-                    "raid_mode": "Raid mode",
-                }
+        details = []
+        for key in news_info.keys():
+            detail = gr.Textbox(
+                value=f"{key.capitalize()}: {news_info[key]}",
+                interactive=False,
+                lines=1,
+            )
+            details.append(detail)
 
-            for mode, label in status_modes.items():
-                if mode in status_info:
-                    gr.Textbox(
-                        status_info[mode],
-                        label=label,
-                        elem_id=tab_prefix + f"status_{mode}",
-                        visible=True,
-                        interactive=False,
-                    )
-        with gr.Box(scale=2):
-            with gr.Column():
-                for news_item in news_info[:3]:
-                    if "title" and "newspiece" and "date_published" in news_item:
-                        gr.Textbox(
-                            news_item["newspiece"],
-                            label=news_item["date_published"]
-                            + " - "
-                            + news_item["title"],
-                            elem_id=tab_prefix + "news_title",
-                            visible=True,
-                            interactive=False,
-                        )
-        news_ui.news_update.click(
-            fn=api.get_horde_news(session), outputs=[news_ui.news_info]
+        news_update.click(
+            fn=lambda: fetch_and_update_news_info(),
+            inputs=[],
+            outputs=details,
         )
 
     return news_ui
@@ -383,38 +401,24 @@ def get_news_ui():
 
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
+        stats_info = api.get_stats_info(session, config.apikey)
         gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():
             stats_update = gr.Button("Update Stats", elem_id="stats-update")
 
-        with gr.Box(scale=2):
-            with gr.Column():
-                gradio_minute_images = gr.Textbox(interactive=False, lines=1)
-                gradio_minute_ps = gr.Textbox(interactive=False, lines=1)
-                gradio_hour_images = gr.Textbox(interactive=False, lines=1)
-                gradio_hour_ps = gr.Textbox(interactive=False, lines=1)
-                gradio_day_images = gr.Textbox(interactive=False, lines=1)
-                gradio_day_ps = gr.Textbox(interactive=False, lines=1)
-                gradio_month_images = gr.Textbox(interactive=False, lines=1)
-                gradio_month_ps = gr.Textbox(interactive=False, lines=1)
-                gradio_total_images = gr.Textbox(interactive=False, lines=1)
-                gradio_total_ps = gr.Textbox(interactive=False, lines=1)
+        details = []
+        for key in stats_info.keys():
+            detail = gr.Textbox(
+                value=f"{key.capitalize()}: {stats_info[key]}",
+                interactive=False,
+                lines=1,
+            )
+            details.append(detail)
 
-        return (
-            stats_ui,
-            stats_update,
-            [
-                gradio_minute_images,
-                gradio_minute_ps,
-                gradio_hour_images,
-                gradio_hour_ps,
-                gradio_day_images,
-                gradio_day_ps,
-                gradio_month_images,
-                gradio_month_ps,
-                gradio_total_images,
-                gradio_total_ps,
-            ],
+        stats_update.click(
+            fn=lambda: fetch_and_update_stats_info(),
+            inputs=[],
+            outputs=details,
         )
 
 
@@ -603,44 +607,20 @@ def on_ui_tabs():
 
             # General tabs
             with gr.Tab("Generation"):
-                generator_ui = get_generator_ui()
+                get_generator_ui()
             with gr.Tab("Worker"):
                 get_worker_ui(worker)
             with gr.Tab("User"):
                 get_user_ui()
             with gr.Tab("Kudos"):
-                kudos_ui = get_kudos_ui()
+                get_kudos_ui()
             with gr.Tab("News"):
-                news_ui = get_news_ui()
+                get_news_ui()
             with gr.Tab("Stats"):
                 stats_ui, stats_update, stats_outputs = get_stats_ui()
             with gr.Tab("Settings"):
-                settings_ui = get_settings_ui(status)
+                settings_ui, settings_update = get_settings_ui(status)
 
-        # Click functions
-        if generator_ui.current_id and generator_ui.log and generator_ui.state:
-            generator_ui.refresh.click(
-                fn=lambda: generator_ui.on_refresh(),
-                outputs=[generator_ui.current_id, generator_ui.log, generator_ui.state],
-                show_progress=False,
-            )
-
-        if (
-            generator_ui.current_id
-            and generator_ui.log
-            and generator_ui.state
-            and generator_ui.preview
-        ):
-            generator_ui.refresh_image.click(
-                fn=lambda: generator_ui.on_refresh(True),
-                outputs=[
-                    generator_ui.current_id,
-                    generator_ui.log,
-                    generator_ui.state,
-                    generator_ui.preview,
-                ],
-                show_progress=False,
-            )
         save_apikey.click(fn=save_apikey_fn(apikey))
         toggle_running.click(fn=toggle_running_fn)
 

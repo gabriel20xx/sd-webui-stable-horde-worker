@@ -38,7 +38,7 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def get_horde_news(session: requests.Session):
+    def get_news_info(session: requests.Session):
         """
         Get horde news
         """
@@ -51,7 +51,7 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def get_horde_status(session: requests.Session):
+    def get_status_info(session: requests.Session):
         """
         Get horde status
         """
@@ -87,7 +87,7 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def get_horde_stats(session: requests.Session):
+    def get_stats_info(session: requests.Session):
         headers = {
             "accept": "application/json",
         }

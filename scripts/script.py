@@ -368,6 +368,14 @@ def get_stats_ui(stats_info):
             stats_update = gr.Button(
                 "Update Stats", elem_id=f"{tab_prefix}stats-update"
             )
+
+        stats_info = gr.JSON(
+            value=stats_info,
+            label="Stats",
+            interactive=False,
+            elem_id=f"{tab_prefix}stats-info",
+            visible=False,
+        )    
         with gr.Box(scale=2):
             with gr.Column():
                 for period, data in stats_info.items():

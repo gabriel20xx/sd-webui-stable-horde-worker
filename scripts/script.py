@@ -381,21 +381,31 @@ def get_kudos_ui():
 def get_news_ui():
     with gr.Blocks() as news_ui:
         news_info = api.get_news_info(session)
+        
+        if not isinstance(news_info, list):
+            raise ValueError("Expected news_info to be a list of dictionaries")
+
         gr.Markdown(
             "## News",
             elem_id="news_title",
         )
+
         with gr.Row():
             news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
 
         details = []
-        for key in news_info.keys():
-            detail = gr.Textbox(
-                value=f"{key.capitalize()}: {news_info[key]}",
-                interactive=False,
-                lines=1,
-            )
-            details.append(detail)
+        for news_item in news_info:
+            if isinstance(news_item, dict):
+                for key, value in news_item.items():
+                    detail_value = value if isinstance(value, str) else ", ".join(value) if isinstance(value, list) else str(value)
+                    detail = gr.Textbox(
+                        value=f"{key.capitalize()}: {detail_value}",
+                        interactive=False,
+                        lines=1,
+                    )
+                    details.append(detail)
+            else:
+                raise ValueError("Each item in news_info is expected to be a dictionary")
 
         news_update.click(
             fn=lambda: fetch_and_update_news_info(),
@@ -404,6 +414,7 @@ def get_news_ui():
         )
 
     return news_ui
+
 
 
 def get_stats_ui():

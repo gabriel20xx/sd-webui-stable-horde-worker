@@ -419,7 +419,7 @@ def get_news_ui():
 
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
-        stats_info = api.get_stats_info(session, config.apikey)
+        stats_info = api.get_stats_info(session)
         gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():
             stats_update = gr.Button("Update Stats", elem_id="stats-update")
@@ -438,6 +438,7 @@ def get_stats_ui():
             inputs=[],
             outputs=details,
         )
+    return stats_ui
 
 
 # Settings UI

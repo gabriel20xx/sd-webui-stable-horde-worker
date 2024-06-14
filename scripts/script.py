@@ -363,8 +363,15 @@ def get_kudos_ui():
                 variant="primary",
                 elem_id="kudos_transfer_button",
             )
+
+        def transfer_kudos_wrapper(username, kudos_amount):
+            return api.transfer_kudos(session, config.apikey, username, kudos_amount)
+
+
         transfer.click(
-            fn=api.transfer_kudos(session, config.apikey, username, kudos_amount)
+            fn=transfer_kudos_wrapper,
+            inputs=[username, kudos_amount],
+            outputs=None
         )
 
     return kudos_ui

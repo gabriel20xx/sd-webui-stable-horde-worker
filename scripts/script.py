@@ -165,49 +165,6 @@ def fetch_and_update_user_info(length):
     return updated_values
 
 
-# Kudos
-def fetch_and_update_kudos():
-    user_info = api.get_user_info(session, config.apikey)
-    if user_info["kudos"]:
-        kudos = user_info["kudos"]
-        return kudos
-
-
-# worker
-def fetch_and_update_worker_info(length):
-    # Fetch the worker information from the API
-    worker_info = api.get_worker_info(session)
-    
-    # Convert dictionary values to a list of values
-    worker_info_list = list(worker_info.values())
-    worker_info_keys = list(worker_info.keys())
-    
-    # Ensure the list is of the specified length
-    if len(worker_info_list) < length:
-        worker_info_list.extend(["Unavailable"] * (length - len(worker_info_list)))
-        worker_info_keys.extend([None] * (length - len(worker_info_keys)))
-    
-    # Create a list of values in the order of textboxes
-    updated_values = []
-    for key, value in zip(worker_info_keys, worker_info_list):
-        if key is None:
-            # Generate new values for any additional "Unavailable" values
-            value = "Unavailable"
-        
-        if isinstance(value, dict):
-            images_value = value.get('images', 'Unavailable')
-            ps_value = value.get('ps', 'Unavailable')
-            updated_values.extend([str(images_value), str(ps_value)])
-        else:
-            updated_values.append(str(value))
-    
-    # Ensure we have exactly the number of values expected by the UI
-    while len(updated_values) < length:
-        updated_values.append("Unavailable")
-    
-    return updated_values
-
-
 # News
 def fetch_and_update_news_info(length):
     # Fetch the news information from the API
@@ -241,6 +198,49 @@ def fetch_and_update_news_info(length):
         updated_values.append("Unavailable")
     
     return updated_values
+
+
+# Stats
+def fetch_and_update_stats_info(length):
+    # Fetch the stats information from the API
+    stats_info = api.get_stats_info(session)
+    
+    # Convert dictionary values to a list of values
+    stats_info_list = list(stats_info.values())
+    stats_info_keys = list(stats_info.keys())
+    
+    # Ensure the list is of the specified length
+    if len(stats_info_list) < length:
+        stats_info_list.extend(["Unavailable"] * (length - len(stats_info_list)))
+        stats_info_keys.extend([None] * (length - len(stats_info_keys)))
+    
+    # Create a list of values in the order of textboxes
+    updated_values = []
+    for key, value in zip(stats_info_keys, stats_info_list):
+        if key is None:
+            # Generate new values for any additional "Unavailable" values
+            value = "Unavailable"
+        
+        if isinstance(value, dict):
+            images_value = value.get('images', 'Unavailable')
+            ps_value = value.get('ps', 'Unavailable')
+            updated_values.extend([str(images_value), str(ps_value)])
+        else:
+            updated_values.append(str(value))
+    
+    # Ensure we have exactly the number of values expected by the UI
+    while len(updated_values) < length:
+        updated_values.append("Unavailable")
+    
+    return updated_values
+
+
+# Kudos
+def fetch_and_update_kudos():
+    user_info = api.get_user_info(session, config.apikey)
+    if user_info["kudos"]:
+        kudos = user_info["kudos"]
+        return kudos
 
 
 tab_prefix = "stable-horde-"
@@ -665,15 +665,15 @@ def get_news_ui():
     return news_ui
 
 
-def get_worker_ui():
-    with gr.Blocks() as worker_ui:
-        worker_info = api.get_worker_info(session)
-        gr.Markdown("## worker", elem_id="worker_title")
+def get_stats_ui():
+    with gr.Blocks() as stats_ui:
+        stats_info = api.get_stats_info(session)
+        gr.Markdown("## stats", elem_id="stats_title")
         with gr.Row():
-            worker_update = gr.Button("Update worker", elem_id="worker-update")
+            stats_update = gr.Button("Update stats", elem_id="stats-update")
 
         details = []
-        for key in worker_info.keys():
+        for key in stats_info.keys():
             with gr.Accordion(key.capitalize()):
                 images = gr.Textbox(
                     label="Images",
@@ -693,12 +693,12 @@ def get_worker_ui():
                 )
                 details.append(pixelsteps)
 
-        worker_update.click(
-            fn=lambda: fetch_and_update_worker_info(len(details)),
+        stats_update.click(
+            fn=lambda: fetch_and_update_stats_info(len(details)),
             inputs=[],
             outputs=details,
         )
-    return worker_ui
+    return stats_ui
 
 
 # Settings UI

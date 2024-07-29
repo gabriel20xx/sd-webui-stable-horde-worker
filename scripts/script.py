@@ -910,6 +910,7 @@ def on_ui_tabs():
                     worker_name = worker_info["name"]
                     if worker_name == config.name:
                         print(f"Current Worker: {worker_name}")
+                        print("-" * 20)
                         break
 
         # General tabs

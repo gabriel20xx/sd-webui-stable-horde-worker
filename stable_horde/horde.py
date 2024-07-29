@@ -153,7 +153,7 @@ class StableHorde:
     async def run(self):
         await self.get_supported_models()
         self.current_models = self.config.current_models
-        print("-" * 50)
+        print("-" * 64)
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         with requests.Session() as session:
@@ -178,7 +178,7 @@ class StableHorde:
                     print(f"Worker id: {worker_id}")
                     print(f"Worker name: {worker_name}")
                     print(f"Worker models: {models}")
-                    print("-" * 50)
+                    print("-" * 64)
 
         start_time = time.time()
         while True:

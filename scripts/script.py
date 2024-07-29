@@ -830,21 +830,22 @@ def on_ui_tabs():
                     elem_id=f"{tab_prefix}disable",
                 )
 
+                def get_worker(session, apikey, worker_ids):
+                    for worker in worker_ids:
+                        worker_info = api.get_worker_info(session, apikey, worker)
+                        worker_name = worker_info["name"]
+                        if worker_name == config.name:
+                            print(f"Current Worker: {worker_name}")
+                            print("-" * 64)
+                            return worker
+
+
                 # TODO Move this somewhere else
                 user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
                 if worker_ids:
-                    for worker in worker_ids:
-                        worker_info = api.get_worker_info(session, config.apikey, worker)
-                        worker_name = worker_info["name"]
-                        if worker_name == config.name:
-                            print(f"Current Worker: {worker_name}")
-                            print("-" * 50)
-                            break
-                        else:
-                            worker = "Unavailable"
-                else:
-                    worker = "Unavailable"
+                    worker = get_worker(session, config.apikey, worker_ids)
+                
 
         # General tabs
         with gr.Row():

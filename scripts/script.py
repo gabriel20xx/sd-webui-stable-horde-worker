@@ -845,6 +845,8 @@ def on_ui_tabs():
                 worker_ids = user_info["worker_ids"]
                 if worker_ids:
                     worker = get_worker(session, config.apikey, worker_ids)
+                else:
+                    worker = "Unavailable"
                 
 
         # General tabs

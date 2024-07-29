@@ -269,7 +269,7 @@ def get_worker_ui(worker):
 
         details = []
         for key in worker_info.keys():
-            if key.capitalize() in ["Kudos_details"]:
+            if key.capitalize() in ["Kudos_details", "Team"]:
                 with gr.Accordion(key.capitalize()):
                     for secondkey in worker_info[key].keys():
                         detail = gr.Textbox(
@@ -279,6 +279,14 @@ def get_worker_ui(worker):
                             lines=1,
                         )
                         details.append(detail)
+            elif key.capitalize() in ["Models"]:
+                stripped_worker_info = worker_info[key].replace("'", "").replace("[", "").replace("]", "")
+                detail = gr.Textbox(
+                    label=key.capitalize(),
+                    value=f"{stripped_worker_info}",
+                    interactive=False,
+                    lines=1,
+                )
             else:
                 detail = gr.Textbox(
                     label=key.capitalize(),

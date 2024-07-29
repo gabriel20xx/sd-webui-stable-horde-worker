@@ -581,7 +581,7 @@ def get_settings_ui(status):
                 save_images,
                 save_images_folder,
             ],
-            output=[status, running_type],
+            outputs=[status, running_type],
         )
 
     return settings_ui

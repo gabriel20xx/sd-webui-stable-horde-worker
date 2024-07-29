@@ -482,6 +482,7 @@ def get_kudos_ui():
 
         def validate_username(username):
             # Todo
+            return "Currently in development"
             pass
 
         def transfer_kudos_wrapper(username, kudos_amount):

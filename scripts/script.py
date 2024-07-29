@@ -413,6 +413,14 @@ def get_kudos_ui():
                 )
 
             with gr.Column():
+                gr.Button(
+                    "Validate",
+                    variant="secondary",
+                    elem_id="kudos_validate_button",
+                )
+            
+        with gr.Row():
+            with gr.Column():
                 # Kudo amount display
                 gr.Textbox(
                     user_info["kudos"],
@@ -421,17 +429,19 @@ def get_kudos_ui():
                     elem_id="kudos_display",
                     interactive=False,
                 )
-        with gr.Row():
-            # Transfer Kudo amount
-            kudos_amount = gr.Slider(
-                label="Kudos",
-                minimum=0,
-                maximum=user_info["kudos"],
-                step=1,
-                value=10,
-                elem_id="kudos_amount",
-                interactive=True,
-            )
+
+            with gr.Column():
+                # Transfer Kudo amount
+                kudos_amount = gr.Slider(
+                    label="Kudos",
+                    minimum=0,
+                    maximum=user_info["kudos"],
+                    step=1,
+                    value=10,
+                    elem_id="kudos_amount",
+                    interactive=True,
+                )
+
         with gr.Row():
             # Transfer Button
             transfer = gr.Button(

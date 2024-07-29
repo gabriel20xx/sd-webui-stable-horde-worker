@@ -131,7 +131,7 @@ def fetch_and_update_user_info():
 
 # Stats
 def fetch_and_update_stats_info():
-    stats_info = api.get_horde_stats(session)
+    stats_info = api.get_stats_info(session)
     return [
         (
             stats_info[key]
@@ -148,7 +148,7 @@ def fetch_and_update_stats_info():
 
 # News
 def fetch_and_update_news_info():
-    news_info = api.get_horde_stats(session)
+    news_info = api.get_news_info(session)
     return [
         (
             news_info[key]

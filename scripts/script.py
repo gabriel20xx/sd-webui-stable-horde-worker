@@ -434,18 +434,22 @@ def get_stats_ui():
 
         details = []
         for key in stats_info.keys():
-            gr.Dropdown(
-                [f"Images: {stats_info[key]['images']}", f"Pixelsteps: {stats_info[key]['ps']}"], 
-                label=key.capitalize(), 
-                info="Will add more later!"
-            ),
-            detail = gr.Textbox(
-                label=key.capitalize(),
-                value=f"{stats_info[key]}",
-                interactive=False,
-                lines=1,
-            )
-            details.append(detail)
+            with gr.Accordion(key.capitalize()):
+                detail1 = gr.Textbox(
+                    label="Images",
+                    value=f"{stats_info[key]['images']}",
+                    interactive=False,
+                    lines=1,
+                )
+                detail2 = gr.Textbox(
+                    label="Pixelsteps",
+                    value=f"{stats_info[key]['ps']}",
+                    interactive=False,
+                    lines=1,
+                )
+
+            details.append(detail1)
+            details.append(detail2)
 
         stats_update.click(
             fn=lambda: fetch_and_update_stats_info(),

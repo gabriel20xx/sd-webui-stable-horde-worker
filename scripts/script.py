@@ -841,6 +841,8 @@ def on_ui_tabs():
                             print(f"Current Worker: {worker_name}")
                             print("-" * 20)
                             break
+                        else:
+                            worker = "Unavailable"
                 else:
                     worker = "Unavailable"
 

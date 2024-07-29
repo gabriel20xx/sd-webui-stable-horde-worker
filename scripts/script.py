@@ -303,12 +303,36 @@ def get_user_ui():
 
         details = []
         for key in user_info.keys():
-            detail = gr.Textbox(
-                label=key.capitalize(),
-                value=f"{user_info[key]}",
-                interactive=False,
-                lines=1,
-            )
+            if key in ["Records"]:
+                with gr.Accordion(key.capitalize()):
+                    for secondkey in user_info[key].keys():
+                        with gr.Accordion(secondkey.capitalize()):
+                            for thirdkey in user_info[key][secondkey].keys():
+                                detail = gr.Textbox(
+                                    label=thirdkey.capitalize(),
+                                    value=f"{user_info[key][thirdkey]}",
+                                    interactive=False,
+                                    lines=1,
+                                )
+                    
+            if key in ["Kudos_details", "Worker_ids", "Sharedkey_ids", "Usage", "Contributions"]:
+                with gr.Accordion(key.capitalize()):
+                    for secondkey in user_info[key].keys():
+                        detail = gr.Textbox(
+                            label=secondkey.capitalize(),
+                            value=f"{user_info[key][secondkey]}",
+                            interactive=False,
+                            lines=1,
+                        )
+                
+            else:
+                detail = gr.Textbox(
+                    label=key.capitalize(),
+                    value=f"{user_info[key]}",
+                    interactive=False,
+                    lines=1,
+                )
+                
             details.append(detail)
 
         user_update.click(

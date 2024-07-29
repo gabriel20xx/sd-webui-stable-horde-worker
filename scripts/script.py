@@ -111,6 +111,12 @@ def fetch_and_update_worker_info(worker):
         for key in worker_info.keys()
     ]
 
+# Kudos
+def fetch_and_update_kudos():
+    user_info = api.get_user_info(session, config.apikey)
+    if user_info:
+        return user_info
+
 
 # User
 def fetch_and_update_user_info(length):
@@ -125,7 +131,7 @@ def fetch_and_update_user_info(length):
         (
             value if isinstance(value, str)
             else (
-                ", ".join(value )
+                ", ".join(value)
                 if isinstance(value, list)
                 else str(value)
             )
@@ -506,7 +512,7 @@ def get_kudos_ui():
             return api.transfer_kudos(session, config.apikey, username, kudos_amount)
         
         update_kudos.click(
-            fn=lambda: fetch_and_update_user_info(),
+            fn=lambda: fetch_and_update_kudos(),
             inputs=[],
             outputs=details,
         )

@@ -431,6 +431,7 @@ def get_kudos_ui():
                     variant="secondary",
                     elem_id="kudos_validate_button",
                 )
+                validate_output = gr.Markdown("")
             
         with gr.Row():
             with gr.Column():
@@ -464,6 +465,10 @@ def get_kudos_ui():
                 elem_id="kudos_transfer_button",
             )
 
+        def validate_username(username):
+            # Todo
+            pass
+
         def transfer_kudos_wrapper(username, kudos_amount):
             return api.transfer_kudos(session, config.apikey, username, kudos_amount)
         
@@ -474,7 +479,7 @@ def get_kudos_ui():
         )
 
         validate.click(
-            # Todo
+            fn=validate_username, inputs=[recipient], outputs=validate_output
         )
 
         transfer.click(

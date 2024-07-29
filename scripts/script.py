@@ -175,7 +175,18 @@ def fetch_and_update_stats_info(length):
         else:
             updated_stats_info[key] = str(value)
     
-    return updated_stats_info
+    return [
+        (
+            updated_stats_info[key]
+            if isinstance(updated_stats_info[key], str)
+            else (
+                ", ".join(updated_stats_info[key])
+                if isinstance(updated_stats_info[key], list)
+                else str(updated_stats_info[key])
+            )
+        )
+        for key in updated_stats_info.keys()
+    ]
 
 
 # News

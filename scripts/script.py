@@ -148,19 +148,24 @@ def fetch_and_update_kudos():
 
 
 # Stats
-def fetch_and_update_stats_info():
+def fetch_and_update_stats_info(length):
     stats_info = api.get_stats_info(session)
+    # Assuming you want to convert dictionary values to a list of values
+    stats_info_list = list(stats_info.values())
+    
+    # Ensure the list is of the specified length
+    if len(stats_info_list) < length:
+        stats_info_list.extend(["Unavailable"] * (length - len(stats_info_list)))
     return [
         (
-            stats_info[key]
-            if isinstance(stats_info[key], str)
+            value if isinstance(value, str)
             else (
-                ", ".join(stats_info[key])
-                if isinstance(stats_info[key], list)
-                else str(stats_info[key])
+                ", ".join(value)
+                if isinstance(value, list)
+                else str(value)
             )
         )
-        for key in stats_info.keys()
+        for value in stats_info_list
     ]
 
 
@@ -608,7 +613,7 @@ def get_stats_ui():
         details = []
         for key in stats_info.keys():
             with gr.Accordion(key.capitalize()):
-                detail1 = gr.Textbox(
+                images = gr.Textbox(
                     label="Images",
                     value=f"{stats_info[key]['images']}",
                     elem_id=tab_prefix + "images",
@@ -616,7 +621,9 @@ def get_stats_ui():
                     lines=1,
                     max_lines=1,
                 )
-                detail2 = gr.Textbox(
+                details.append(images)
+
+                pixelsteps = gr.Textbox(
                     label="Pixelsteps",
                     value=f"{stats_info[key]['ps']}",
                     elem_id=tab_prefix + "user-images",
@@ -624,12 +631,10 @@ def get_stats_ui():
                     lines=1,
                     max_lines=1,
                 )
-
-                details.append(detail1)
-                details.append(detail2)
+                details.append(pixelsteps)
 
         stats_update.click(
-            fn=lambda: fetch_and_update_stats_info(),
+            fn=lambda: fetch_and_update_stats_info(len(details)),
             inputs=[],
             outputs=details,
         )

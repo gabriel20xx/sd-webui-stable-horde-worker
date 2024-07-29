@@ -434,6 +434,11 @@ def get_stats_ui():
 
         details = []
         for key in stats_info.keys():
+            gr.Dropdown(
+                [f"Images: {stats_info["key"]["images"]}", f"Pixelsteps: {stats_info["key"]["ps"]}"], 
+                label=key.capitalize(), 
+                info="Will add more animals later!"
+            ),
             detail = gr.Textbox(
                 label=key.capitalize(),
                 value=f"{stats_info[key]}",

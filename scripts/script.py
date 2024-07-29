@@ -469,8 +469,9 @@ def get_news_ui():
         details = []
         for news_item in news_info:
             if isinstance(news_item, dict):
-                with gr.Accordion("News"):
-                    for key, value in news_item.items():
+                title = news_item.get('title', 'No Title Available')
+                with gr.Accordion(title): # Get the title form the newspiece
+                    """for key, value in news_item.items():
                         detail_value = (
                             value
                             if isinstance(value, str)
@@ -485,8 +486,24 @@ def get_news_ui():
                             value=f"{detail_value}",
                             interactive=False,
                             lines=1,
-                        )
-                        details.append(detail)
+                        ) """
+                    message_value = news_item.get('newspiece', 'No Message Available')
+                    message = gr.Textbox(
+                        label="Message",
+                        value=message_value,
+                        interactive=False,
+                        lines=3,
+                    )
+                    details.append(message)
+
+                    tags_value = news_item.get('tags', 'No Tags Available')
+                    tags = gr.Textbox(
+                        label="Tags",
+                        value=tags_value,
+                        interactive=False,
+                        lines=1,
+                    )
+                    details.append(tags)
             else:
                 raise ValueError(
                     "Each item in news_info is expected to be a dictionary"

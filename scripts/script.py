@@ -142,8 +142,9 @@ def fetch_and_update_user_info(length):
 # Kudos
 def fetch_and_update_kudos():
     user_info = api.get_user_info(session, config.apikey)
-    if user_info:
-        return user_info
+    if user_info["kudos"]:
+        kudos = user_info["kudos"]
+        return kudos
 
 
 # Stats
@@ -166,17 +167,22 @@ def fetch_and_update_stats_info():
 # News
 def fetch_and_update_news_info():
     news_info = api.get_news_info(session)
+    # Ensure news_info is a list
+    if not isinstance(news_info, list):
+        raise ValueError("Expected a list of news items")
+
     return [
         (
-            news_info[key]
-            if isinstance(news_info[key], str)
+            news_item[key]
+            if isinstance(news_item[key], str)
             else (
-                ", ".join(news_info[key])
-                if isinstance(news_info[key], list)
-                else str(news_info[key])
+                ", ".join(news_item[key])
+                if isinstance(news_item[key], list)
+                else str(news_item[key])
             )
         )
-        for key in news_info.keys()
+        for news_item in news_info  # Iterate over each news item (assumed to be a dict)
+        for key in news_item.keys()
     ]
 
 
@@ -556,26 +562,23 @@ def get_news_ui():
                 importance = news_item.get('importance', 'No importance available')
                 title = news_item.get('title', 'No title available')
                 date_published = news_item.get('date_published', 'No published date available')
-                with gr.Accordion(f"{importance} - {title} - {date_published}"): # Get the title form the newspiece
+                with gr.Accordion(f"{importance} - {title} - {date_published}"): # Get the title from the newspiece
                     message_value = news_item.get('newspiece', 'No message available')
                     message = gr.TextArea(
                         label="Message",
                         value=message_value,
-                        elem_id=tab_prefix + "newspiece",
                         interactive=False,
                     )
                     details.append(message)
 
-                    tags_value = news_item.get('tags', 'No tags available')
-                    if tags_value == 'No tags available' or tags_value is None or not isinstance(tags_value, list):
+                    tags_value = news_item.get('tags', [])
+                    if not isinstance(tags_value, list):
                         tags_value = []
 
                     tags_string = ', '.join(map(str, tags_value))
-                    stripped_tags_value = tags_string.replace("'", "").replace("[", "").replace("]", "")
                     tags = gr.Textbox(
                         label="Tags",
-                        value=stripped_tags_value,
-                        elem_id=tab_prefix + "tags",
+                        value=tags_string,
                         interactive=False,
                         lines=1,
                         max_lines=1,

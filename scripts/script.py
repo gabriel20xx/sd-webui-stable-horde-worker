@@ -113,19 +113,20 @@ def fetch_and_update_worker_info(worker):
 
 
 # User
-def fetch_and_update_user_info():
+def fetch_and_update_user_info(length):
     user_info = api.get_user_info(session, config.apikey)
+    outputs = user_info + ["Unavailable"] * (length - len(user_info))
     return [
         (
-            user_info[key]
-            if isinstance(user_info[key], str)
+            outputs[key]
+            if isinstance(outputs[key], str)
             else (
-                ", ".join(user_info[key])
-                if isinstance(user_info[key], list)
-                else str(user_info[key])
+                ", ".join(outputs[key])
+                if isinstance(outputs[key], list)
+                else str(outputs[key])
             )
         )
-        for key in user_info.keys()
+        for key in outputs.keys()
     ]
 
 
@@ -396,7 +397,7 @@ def get_user_ui():
                 details.append(detail)
 
         user_update.click(
-            fn=lambda: fetch_and_update_user_info(),
+            fn=lambda: fetch_and_update_user_info(len(details)),
             inputs=[],
             outputs=details,
         )

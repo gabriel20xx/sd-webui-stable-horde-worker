@@ -535,57 +535,79 @@ def get_kudos_ui():
     return kudos_ui
 
 
+def fetch_news_info():
+    """Fetches the latest news info."""
+    news_info = api.get_news_info(session)
+    if not isinstance(news_info, list):
+        raise ValueError("Expected news_info to be a list of dictionaries")
+    return news_info
+
+
+def update_news_ui():
+    """Fetches and updates the news UI."""
+    news_info = fetch_news_info()
+    # Return a list of updated components
+    return create_news_ui(news_info)
+
+
+# Inner News UI
+def create_news_ui(news_info):
+    """Creates and returns Gradio UI components based on the news info."""
+    details = []
+
+    for news_item in news_info:
+        if isinstance(news_item, dict):
+            importance = news_item.get('importance', 'No importance available')
+            title = news_item.get('title', 'No title available')
+            date_published = news_item.get('date_published', 'No published date available')
+            with gr.Accordion(f"{importance} - {title} - {date_published}"): 
+                message_value = news_item.get('newspiece', 'No message available')
+                message = gr.TextArea(
+                    label="Message",
+                    value=message_value,
+                    interactive=False,
+                )
+                details.append(message)
+
+                tags_value = news_item.get('tags', [])
+                if not isinstance(tags_value, list):
+                    tags_value = []
+
+                tags_string = ', '.join(map(str, tags_value))
+                tags = gr.Textbox(
+                    label="Tags",
+                    value=tags_string,
+                    interactive=False,
+                    lines=1,
+                    max_lines=1,
+                )
+                details.append(tags)
+        else:
+            raise ValueError("Each item in news_info is expected to be a dictionary")
+
+    return details
+
+
 # News UI
 def get_news_ui():
+    """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as news_ui:
-        news_info = api.get_news_info(session)
+        news_info = fetch_news_info()
 
         if not isinstance(news_info, list):
             raise ValueError("Expected news_info to be a list of dictionaries")
 
-        gr.Markdown(
-            "## News",
-            elem_id="news_title",
-        )
+        gr.Markdown("## News", elem_id="news_title")
 
         with gr.Row():
-            news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
+            news_update = gr.Button("Update News", elem_id="news-update")
 
-        details = []
-        for news_item in news_info:
-            if isinstance(news_item, dict):
-                importance = news_item.get('importance', 'No importance available')
-                title = news_item.get('title', 'No title available')
-                date_published = news_item.get('date_published', 'No published date available')
-                with gr.Accordion(f"{importance} - {title} - {date_published}"): # Get the title from the newspiece
-                    message_value = news_item.get('newspiece', 'No message available')
-                    message = gr.TextArea(
-                        label="Message",
-                        value=message_value,
-                        interactive=False,
-                    )
-                    details.append(message)
+        # Create the initial UI components
+        details = create_news_ui(news_info)
 
-                    tags_value = news_item.get('tags', [])
-                    if not isinstance(tags_value, list):
-                        tags_value = []
-
-                    tags_string = ', '.join(map(str, tags_value))
-                    tags = gr.Textbox(
-                        label="Tags",
-                        value=tags_string,
-                        interactive=False,
-                        lines=1,
-                        max_lines=1,
-                    )
-                    details.append(tags)
-            else:
-                raise ValueError(
-                    "Each item in news_info is expected to be a dictionary"
-                )
-
+        # Update button action
         news_update.click(
-            fn=lambda: fetch_and_update_news_info(),
+            fn=lambda: update_news_ui(),
             inputs=[],
             outputs=details,
         )

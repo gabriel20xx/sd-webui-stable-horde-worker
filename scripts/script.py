@@ -262,12 +262,13 @@ def get_generator_ui():
 # Worker UI
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
+        details = []
+
         worker_info = api.get_worker_info(session, config.apikey, worker)
 
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
 
-        details = []
         for key in worker_info.keys():
             if key.capitalize() in ["Kudos_details", "Team"]:
                 with gr.Accordion(key.capitalize()):
@@ -308,6 +309,8 @@ def get_worker_ui(worker):
 # User UI
 def get_user_ui():
     with gr.Blocks() as user_ui:
+        details = []
+
         user_info = api.get_user_info(session, config.apikey)
 
         gr.Markdown("## User Details", elem_id="user_title")
@@ -315,7 +318,6 @@ def get_user_ui():
             "Update User Details", elem_id=f"{tab_prefix}user-update"
         )
 
-        details = []
         for key in user_info.keys():
             # Handle nested dictionaries
             if isinstance(user_info[key], dict):
@@ -391,6 +393,8 @@ def get_user_ui():
 # Kudos UI
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
+        details = []
+
         # Kudos functions
         horde_user = API()
         user_info = horde_user.get_user_info(session, config.apikey)
@@ -401,6 +405,13 @@ def get_kudos_ui():
             gr.Markdown(
                 "## Transfer Kudos",
                 elem_id="kudos_title",
+            )
+
+        with gr.Row():
+            update_kudos = gr.Button(
+                "Update Kudos",
+                variant="secondary",
+                elem_id="update_kudos_button",
             )
         with gr.Row():
             with gr.Column():
@@ -413,7 +424,7 @@ def get_kudos_ui():
                 )
 
             with gr.Column():
-                gr.Button(
+                validate = gr.Button(
                     "Validate",
                     variant="secondary",
                     elem_id="kudos_validate_button",
@@ -422,13 +433,14 @@ def get_kudos_ui():
         with gr.Row():
             with gr.Column():
                 # Kudo amount display
-                gr.Textbox(
+                your_kudos = gr.Textbox(
                     user_info["kudos"],
                     label="Your Kudos",
                     placeholder="0",
                     elem_id="kudos_display",
                     interactive=False,
                 )
+                details.append(your_kudos)
 
             with gr.Column():
                 # Transfer Kudo amount
@@ -452,6 +464,16 @@ def get_kudos_ui():
 
         def transfer_kudos_wrapper(username, kudos_amount):
             return api.transfer_kudos(session, config.apikey, username, kudos_amount)
+        
+        update_kudos.click(
+            fn=lambda: fetch_and_update_user_info(),
+            inputs=[],
+            outputs=details,
+        )
+
+        validate.click(
+            # Todo
+        )
 
         transfer.click(
             fn=transfer_kudos_wrapper, inputs=[recipient, kudos_amount], outputs=None

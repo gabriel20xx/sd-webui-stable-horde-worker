@@ -538,9 +538,18 @@ def get_kudos_ui():
                 return "Success"
 
         def transfer_kudos_wrapper(username, kudos_amount):
-            if username and kudos_amount:
-                result = api.transfer_kudos(session, config.apikey, username, kudos_amount)
-                return result
+            if username:
+                validation = validate_username(username)
+                if validation == "Success":
+                    if kudos_amount and kudos_amount != 0:
+                        result = api.transfer_kudos(session, config.apikey, username, kudos_amount)
+                        return result
+                    else:
+                        return "Can't transfer 0 Kudos"
+                else:
+                    return validation
+            else:
+                return "No username specified"
         
         update_kudos.click(
             fn=lambda: fetch_and_update_kudos(),

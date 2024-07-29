@@ -275,7 +275,8 @@ def get_worker_ui(worker):
         details = []
         for key in worker_info.keys():
             detail = gr.Textbox(
-                value=f"{key.capitalize()}: {worker_info[key]}",
+                label=key.capitalize(),
+                value=f"{worker_info[key]}",
                 interactive=False,
                 lines=1,
             )
@@ -303,7 +304,8 @@ def get_user_ui():
         details = []
         for key in user_info.keys():
             detail = gr.Textbox(
-                value=f"{key.capitalize()}: {user_info[key]}",
+                label=key.capitalize(),
+                value=f"{user_info[key]}",
                 interactive=False,
                 lines=1,
             )
@@ -404,7 +406,8 @@ def get_news_ui():
                 for key, value in news_item.items():
                     detail_value = value if isinstance(value, str) else ", ".join(value) if isinstance(value, list) else str(value)
                     detail = gr.Textbox(
-                        value=f"{key.capitalize()}: {detail_value}",
+                        label=key.capitalize(),
+                        value=f"{detail_value}",
                         interactive=False,
                         lines=1,
                     )

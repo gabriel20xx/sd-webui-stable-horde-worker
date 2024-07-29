@@ -96,143 +96,71 @@ def apply_stable_horde_settings(
 
 
 # Worker
-def fetch_and_update_worker_info(length, worker):
-    # Fetch the worker information from the API
-    worker_info = api.get_worker_info(session)
-    
-    # Convert dictionary values to a list of values
-    worker_info_list = list(worker_info.values())
-    worker_info_keys = list(worker_info.keys())
-    
-    # Ensure the list is of the specified length
-    if len(worker_info_list) < length:
-        worker_info_list.extend(["Unavailable"] * (length - len(worker_info_list)))
-        worker_info_keys.extend([None] * (length - len(worker_info_keys)))
-    
-    # Create a list of values in the order of textboxes
-    updated_values = []
-    for key, value in zip(worker_info_keys, worker_info_list):
-        if key is None:
-            # Generate new values for any additional "Unavailable" values
-            value = "Unavailable"
-        
-        if isinstance(value, dict):
-            images_value = value.get('images', 'Unavailable')
-            ps_value = value.get('ps', 'Unavailable')
-            updated_values.extend([str(images_value), str(ps_value)])
-        else:
-            updated_values.append(str(value))
-    
-    # Ensure we have exactly the number of values expected by the UI
-    while len(updated_values) < length:
-        updated_values.append("Unavailable")
-    
-    return updated_values
+def fetch_and_update_worker_info(worker):
+    worker_info = api.get_worker_info(session, config.apikey, worker)
+    return [
+        (
+            worker_info[key]
+            if isinstance(worker_info[key], str)
+            else (
+                ", ".join(worker_info[key])
+                if isinstance(worker_info[key], list)
+                else str(worker_info[key])
+            )
+        )
+        for key in worker_info.keys()
+    ]
 
 
 # User
-def fetch_and_update_user_info(length):
-    # Fetch the user information from the API
-    user_info = api.get_user_info(session)
-    
-    # Convert dictionary values to a list of values
-    user_info_list = list(user_info.values())
-    user_info_keys = list(user_info.keys())
-    
-    # Ensure the list is of the specified length
-    if len(user_info_list) < length:
-        user_info_list.extend(["Unavailable"] * (length - len(user_info_list)))
-        user_info_keys.extend([None] * (length - len(user_info_keys)))
-    
-    # Create a list of values in the order of textboxes
-    updated_values = []
-    for key, value in zip(user_info_keys, user_info_list):
-        if key is None:
-            # Generate new values for any additional "Unavailable" values
-            value = "Unavailable"
-        
-        if isinstance(value, dict):
-            images_value = value.get('images', 'Unavailable')
-            ps_value = value.get('ps', 'Unavailable')
-            updated_values.extend([str(images_value), str(ps_value)])
-        else:
-            updated_values.append(str(value))
-    
-    # Ensure we have exactly the number of values expected by the UI
-    while len(updated_values) < length:
-        updated_values.append("Unavailable")
-    
-    return updated_values
+def fetch_and_update_user_info():
+    user_info = api.get_user_info(session, config.apikey)
+    return [
+        (
+            user_info[key]
+            if isinstance(user_info[key], str)
+            else (
+                ", ".join(user_info[key])
+                if isinstance(user_info[key], list)
+                else str(user_info[key])
+            )
+        )
+        for key in user_info.keys()
+    ]
 
 
 # News
-def fetch_and_update_news_info(length):
-    # Fetch the news information from the API
-    news_info = api.get_news_info(session)
-    
-    # Convert dictionary values to a list of values
-    news_info_list = list(news_info.values())
-    news_info_keys = list(news_info.keys())
-    
-    # Ensure the list is of the specified length
-    if len(news_info_list) < length:
-        news_info_list.extend(["Unavailable"] * (length - len(news_info_list)))
-        news_info_keys.extend([None] * (length - len(news_info_keys)))
-    
-    # Create a list of values in the order of textboxes
-    updated_values = []
-    for key, value in zip(news_info_keys, news_info_list):
-        if key is None:
-            # Generate new values for any additional "Unavailable" values
-            value = "Unavailable"
-        
-        if isinstance(value, dict):
-            images_value = value.get('images', 'Unavailable')
-            ps_value = value.get('ps', 'Unavailable')
-            updated_values.extend([str(images_value), str(ps_value)])
-        else:
-            updated_values.append(str(value))
-    
-    # Ensure we have exactly the number of values expected by the UI
-    while len(updated_values) < length:
-        updated_values.append("Unavailable")
-    
-    return updated_values
+def fetch_and_update_news_info():
+    stats_info = api.get_stats_info(session)
+    return [
+        (
+            stats_info[key]
+            if isinstance(stats_info[key], str)
+            else (
+                ", ".join(stats_info[key])
+                if isinstance(stats_info[key], list)
+                else str(stats_info[key])
+            )
+        )
+        for key in stats_info.keys()
+    ]
 
 
 # Stats
-def fetch_and_update_stats_info(length):
-    # Fetch the stats information from the API
+def fetch_and_update_stats_info():
     stats_info = api.get_stats_info(session)
-    
-    # Convert dictionary values to a list of values
-    stats_info_list = list(stats_info.values())
-    stats_info_keys = list(stats_info.keys())
-    
-    # Ensure the list is of the specified length
-    if len(stats_info_list) < length:
-        stats_info_list.extend(["Unavailable"] * (length - len(stats_info_list)))
-        stats_info_keys.extend([None] * (length - len(stats_info_keys)))
-    
-    # Create a list of values in the order of textboxes
-    updated_values = []
-    for key, value in zip(stats_info_keys, stats_info_list):
-        if key is None:
-            # Generate new values for any additional "Unavailable" values
-            value = "Unavailable"
-        
-        if isinstance(value, dict):
-            images_value = value.get('images', 'Unavailable')
-            ps_value = value.get('ps', 'Unavailable')
-            updated_values.extend([str(images_value), str(ps_value)])
-        else:
-            updated_values.append(str(value))
-    
-    # Ensure we have exactly the number of values expected by the UI
-    while len(updated_values) < length:
-        updated_values.append("Unavailable")
-    
-    return updated_values
+    return [
+        (
+            stats_info[key]
+            if isinstance(stats_info[key], str)
+            else (
+                ", ".join(stats_info[key])
+                if isinstance(stats_info[key], list)
+                else str(stats_info[key])
+            )
+        )
+        for key in stats_info.keys()
+    ]
 
 
 # Kudos
@@ -390,7 +318,7 @@ def get_worker_ui(worker):
                 details.append(detail)
 
         worker_update.click(
-            fn=lambda: fetch_and_update_worker_info(worker, len(details)),
+            fn=lambda: fetch_and_update_worker_info(worker),
             inputs=[],
             outputs=details,
         )
@@ -483,7 +411,7 @@ def get_user_ui():
                 details.append(detail)
 
         user_update.click(
-            fn=lambda: fetch_and_update_user_info(len(details)),
+            fn=lambda: fetch_and_update_user_info(),
             inputs=[],
             outputs=details,
         )
@@ -657,7 +585,7 @@ def get_news_ui():
                 )
 
         news_update.click(
-            fn=lambda: fetch_and_update_news_info(len(details)),
+            fn=lambda: fetch_and_update_news_info(),
             inputs=[],
             outputs=details,
         )
@@ -694,7 +622,7 @@ def get_stats_ui():
                 details.append(pixelsteps)
 
         stats_update.click(
-            fn=lambda: fetch_and_update_stats_info(len(details)),
+            fn=lambda: fetch_and_update_stats_info(),
             inputs=[],
             outputs=details,
         )

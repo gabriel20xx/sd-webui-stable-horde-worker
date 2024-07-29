@@ -586,6 +586,9 @@ def get_settings_ui(status):
 
     return settings_ui
 
+def save_apikey_fn(apikey: str):
+    config.apikey = apikey
+    config.save()
 
 # General UI
 def on_ui_tabs():
@@ -593,9 +596,8 @@ def on_ui_tabs():
         theme=gr.themes.Default(primary_hue="green", secondary_hue="red")
     ) as ui_tabs:
         # General functions
-        def save_apikey_fn(apikey: str):
-            config.apikey = apikey
-            config.save()
+        def save_apikey_value(apikey_value: str):
+            save_apikey_fn(apikey_value)
 
         def toggle_running_fn():
             if config.enabled:
@@ -668,7 +670,7 @@ def on_ui_tabs():
             with gr.Tab("Settings"):
                 get_settings_ui(status)
 
-        save_apikey.click(fn=save_apikey_fn(apikey))
+        save_apikey.click(fn=save_apikey_value, inputs=[apikey])
         toggle_running.click(fn=toggle_running_fn)
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)

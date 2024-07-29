@@ -96,26 +96,25 @@ def apply_stable_horde_settings(
 
 
 # Worker
-def fetch_and_update_worker_info(worker):
+def fetch_and_update_worker_info(worker, length):
     worker_info = api.get_worker_info(session, config.apikey, worker)
+    # Assuming you want to convert dictionary values to a list of values
+    worker_info_list = list(worker_info.values())
+    
+    # Ensure the list is of the specified length
+    if len(worker_info_list) < length:
+        worker_info_list.extend(["Unavailable"] * (length - len(worker_info_list)))
     return [
         (
-            worker_info[key]
-            if isinstance(worker_info[key], str)
+            value if isinstance(value, str)
             else (
-                ", ".join(worker_info[key])
-                if isinstance(worker_info[key], list)
-                else str(worker_info[key])
+                ", ".join(value)
+                if isinstance(value, list)
+                else str(value)
             )
         )
-        for key in worker_info.keys()
+        for value in worker_info_list
     ]
-
-# Kudos
-def fetch_and_update_kudos():
-    user_info = api.get_user_info(session, config.apikey)
-    if user_info:
-        return user_info
 
 
 # User
@@ -138,6 +137,13 @@ def fetch_and_update_user_info(length):
         )
         for value in user_info_list
     ]
+
+
+# Kudos
+def fetch_and_update_kudos():
+    user_info = api.get_user_info(session, config.apikey)
+    if user_info:
+        return user_info
 
 
 # Stats

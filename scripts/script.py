@@ -175,18 +175,7 @@ def fetch_and_update_stats_info(length):
         else:
             updated_stats_info[key] = str(value)
     
-    return [
-        (
-            updated_stats_info[key]
-            if isinstance(updated_stats_info[key], str)
-            else (
-                ", ".join(updated_stats_info[key])
-                if isinstance(updated_stats_info[key], list)
-                else str(updated_stats_info[key])
-            )
-        )
-        for key in updated_stats_info.keys()
-    ]
+    return updated_stats_info
 
 
 # News
@@ -633,9 +622,16 @@ def get_stats_ui():
         details = []
         for key in stats_info.keys():
             with gr.Accordion(key.capitalize()):
+                if isinstance(stats_info[key], dict):
+                    images_value = stats_info[key].get('images', 'Unavailable')
+                    ps_value = stats_info[key].get('ps', 'Unavailable')
+                else:
+                    images_value = 'Unavailable'
+                    ps_value = 'Unavailable'
+
                 images = gr.Textbox(
                     label="Images",
-                    value=f"{stats_info[key]['images']}",
+                    value=str(images_value),
                     elem_id=tab_prefix + "images",
                     interactive=False,
                     lines=1,
@@ -645,8 +641,8 @@ def get_stats_ui():
 
                 pixelsteps = gr.Textbox(
                     label="Pixelsteps",
-                    value=f"{stats_info[key]['ps']}",
-                    elem_id=tab_prefix + "user-images",
+                    value=str(ps_value),
+                    elem_id=tab_prefix + "pixelsteps",
                     interactive=False,
                     lines=1,
                     max_lines=1,

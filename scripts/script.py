@@ -115,18 +115,22 @@ def fetch_and_update_worker_info(worker):
 # User
 def fetch_and_update_user_info(length):
     user_info = api.get_user_info(session, config.apikey)
-    outputs = user_info + ["Unavailable"] * (length - len(user_info))
+    # Assuming you want to convert dictionary values to a list of values
+    user_info_list = list(user_info.values())
+    
+    # Ensure the list is of the specified length
+    if len(user_info_list) < length:
+        user_info_list.extend(["Unavailable"] * (length - len(user_info_list)))
     return [
         (
-            outputs[key]
-            if isinstance(outputs[key], str)
+            value if isinstance(value, str)
             else (
-                ", ".join(outputs[key])
-                if isinstance(outputs[key], list)
-                else str(outputs[key])
+                ", ".join(value )
+                if isinstance(value, list)
+                else str(value)
             )
         )
-        for key in outputs.keys()
+        for value in user_info_list
     ]
 
 

@@ -3,7 +3,7 @@ import requests
 
 class API:
     @staticmethod
-    def get_user_info(session: requests.Session, apikey: str):
+    def get_user_info(session: requests.Session, apikey: str) -> dict:
         """
         Get user info
         """
@@ -38,7 +38,7 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def get_news_info(session: requests.Session):
+    def get_news_info(session: requests.Session) -> list:
         """
         Get horde news
         """
@@ -49,9 +49,23 @@ class API:
             return data
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
+        
+    @staticmethod
+    def get_stats_info(session: requests.Session) -> dict:
+        headers = {
+            "accept": "application/json",
+        }
+        r = session.get(
+            "https://stablehorde.net/api/v2/stats/img/totals", headers=headers
+        )
+        data = r.json()
+        if r.status_code == 200:
+            return data
+        else:
+            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def get_status_info(session: requests.Session):
+    def get_status_info(session: requests.Session) -> dict:
         """
         Get horde status
         """
@@ -87,19 +101,5 @@ class API:
             return "ValidationError"
         elif r.status_code == 401:
             return "InvalidAPIKeyError"
-        else:
-            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
-
-    @staticmethod
-    def get_stats_info(session: requests.Session):
-        headers = {
-            "accept": "application/json",
-        }
-        r = session.get(
-            "https://stablehorde.net/api/v2/stats/img/totals", headers=headers
-        )
-        data = r.json()
-        if r.status_code == 200:
-            return data
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")

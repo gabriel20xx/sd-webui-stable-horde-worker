@@ -199,8 +199,6 @@ def get_generator_ui():
 def fetch_worker_info(worker):
     """Fetches the latest worker info."""
     worker_info = api.get_worker_info(session, config.apikey, worker)
-    if not isinstance(worker_info, list):
-        raise ValueError("Expected worker_info to be a list of dictionaries")
     return worker_info
 
 
@@ -259,9 +257,6 @@ def get_worker_ui(worker):
 
         worker_info = fetch_worker_info(worker)
 
-        if not isinstance(worker_info, list):
-            raise ValueError("Expected worker_info to be a list of dictionaries")
-
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
 
@@ -280,8 +275,6 @@ def get_worker_ui(worker):
 def fetch_user_info():
     """Fetches the latest user info."""
     user_info = api.get_user_info(session, config.apikey)
-    if not isinstance(user_info, list):
-        raise ValueError("Expected user_info to be a list of dictionaries")
     return user_info
 
 
@@ -374,9 +367,6 @@ def get_user_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as user_ui:
         user_info = fetch_user_info()
-
-        if not isinstance(user_info, list):
-            raise ValueError("Expected user_info to be a list of dictionaries")
 
         gr.Markdown("## User Details", elem_id="user_title")
 
@@ -523,8 +513,6 @@ def get_kudos_ui():
 def fetch_news_info():
     """Fetches the latest news info."""
     news_info = api.get_news_info(session, config.apikey)
-    if not isinstance(news_info, list):
-        raise ValueError("Expected news_info to be a list of dictionaries")
     return news_info
 
 
@@ -577,9 +565,6 @@ def get_news_ui():
     with gr.Blocks() as news_ui:
         news_info = fetch_news_info()
 
-        if not isinstance(news_info, list):
-            raise ValueError("Expected news_info to be a list of dictionaries")
-
         gr.Markdown("## News", elem_id="news_title")
 
         with gr.Row():
@@ -602,8 +587,6 @@ def get_news_ui():
 def fetch_stats_info():
     """Fetches the latest stats info."""
     stats_info = api.get_stats_info(session, config.apikey)
-    if not isinstance(stats_info, list):
-        raise ValueError("Expected stats_info to be a list of dictionaries")
     return stats_info
 
 
@@ -635,8 +618,6 @@ def create_stats_ui(stats_info):
 def update_stats_ui():
     """Fetches and updates the stats UI."""
     stats_info = fetch_stats_info()
-    if not isinstance(stats_info, list):
-        raise ValueError("Expected stats_info to be a list of dictionaries")
     # Return a list of updated components
     return create_stats_ui(stats_info)
 
@@ -644,9 +625,6 @@ def update_stats_ui():
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
         stats_info = fetch_stats_info()
-
-        if not isinstance(stats_info, list):
-            raise ValueError("Expected stats_info to be a list of dictionaries")
         
         gr.Markdown("## stats", elem_id="stats_title")
         with gr.Row():

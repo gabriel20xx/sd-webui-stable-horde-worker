@@ -327,7 +327,7 @@ def get_worker_ui(worker):
                 details.append(detail)
 
         worker_update.click(
-            fn=lambda: fetch_and_update_worker_info(worker),
+            fn=lambda: fetch_and_update_worker_info(worker, len(details)),
             inputs=[],
             outputs=details,
         )

@@ -276,10 +276,10 @@ def get_worker_ui(worker):
         for key in worker_info.keys():
             if key.capitalize() in ["Kudos_details"]:
                 with gr.Accordion(key.capitalize()):
-                    for secondkey in user_info[key].keys():
+                    for secondkey in worker_info[key].keys():
                         detail = gr.Textbox(
                             label=secondkey.capitalize(),
-                            value=f"{user_info[key][secondkey]}",
+                            value=f"{worker_info[key][secondkey]}",
                             interactive=False,
                             lines=1,
                         )

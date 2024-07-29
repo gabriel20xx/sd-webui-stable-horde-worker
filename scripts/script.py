@@ -440,14 +440,15 @@ def get_news_ui():
         for news_item in news_info:
             if isinstance(news_item, dict):
                 for key, value in news_item.items():
-                    detail_value = value if isinstance(value, str) else ", ".join(value) if isinstance(value, list) else str(value)
-                    detail = gr.Textbox(
-                        label=key.capitalize(),
-                        value=f"{detail_value}",
-                        interactive=False,
-                        lines=1,
-                    )
-                    details.append(detail)
+                    with gr.Accordion(key.capitalize()):
+                        detail_value = value if isinstance(value, str) else ", ".join(value) if isinstance(value, list) else str(value)
+                        detail = gr.Textbox(
+                            label=key.capitalize(),
+                            value=f"{detail_value}",
+                            interactive=False,
+                            lines=1,
+                        )
+                        details.append(detail)
             else:
                 raise ValueError("Each item in news_info is expected to be a dictionary")
 

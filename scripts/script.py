@@ -183,25 +183,38 @@ def fetch_and_update_stats_info(length):
 
 
 # News
-def fetch_and_update_news_info():
+def fetch_and_update_news_info(length):
+    # Fetch the news information from the API
     news_info = api.get_news_info(session)
-    # Ensure news_info is a list
-    if not isinstance(news_info, list):
-        raise ValueError("Expected a list of news items")
-
-    return [
-        (
-            news_item[key]
-            if isinstance(news_item[key], str)
-            else (
-                ", ".join(news_item[key])
-                if isinstance(news_item[key], list)
-                else str(news_item[key])
-            )
-        )
-        for news_item in news_info  # Iterate over each news item (assumed to be a dict)
-        for key in news_item.keys()
-    ]
+    
+    # Convert dictionary values to a list of values
+    news_info_list = list(news_info.values())
+    news_info_keys = list(news_info.keys())
+    
+    # Ensure the list is of the specified length
+    if len(news_info_list) < length:
+        news_info_list.extend(["Unavailable"] * (length - len(news_info_list)))
+        news_info_keys.extend([None] * (length - len(news_info_keys)))
+    
+    # Create a list of values in the order of textboxes
+    updated_values = []
+    for key, value in zip(news_info_keys, news_info_list):
+        if key is None:
+            # Generate new values for any additional "Unavailable" values
+            value = "Unavailable"
+        
+        if isinstance(value, dict):
+            images_value = value.get('images', 'Unavailable')
+            ps_value = value.get('ps', 'Unavailable')
+            updated_values.extend([str(images_value), str(ps_value)])
+        else:
+            updated_values.append(str(value))
+    
+    # Ensure we have exactly the number of values expected by the UI
+    while len(updated_values) < length:
+        updated_values.append("Unavailable")
+    
+    return updated_values
 
 
 tab_prefix = "stable-horde-"
@@ -618,7 +631,7 @@ def get_news_ui():
                 )
 
         news_update.click(
-            fn=lambda: fetch_and_update_news_info(),
+            fn=lambda: fetch_and_update_news_info(len(details)),
             inputs=[],
             outputs=details,
         )

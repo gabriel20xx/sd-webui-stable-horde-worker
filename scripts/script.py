@@ -483,8 +483,13 @@ def get_kudos_ui():
 
         def validate_username(username):
             # Todo
-            return "Currently in development"
-            pass
+            result = api.transfer_kudos(session, config.apikey, username, 0)
+            if result == "ValidationError":
+                return "User does not exist"
+            elif result == "InvalidAPIKeyError":
+                return "Invalid API Key"
+            else:
+                return "Success"
 
         def transfer_kudos_wrapper(username, kudos_amount):
             return api.transfer_kudos(session, config.apikey, username, kudos_amount)

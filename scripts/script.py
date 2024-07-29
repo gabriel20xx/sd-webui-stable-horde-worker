@@ -161,21 +161,25 @@ def fetch_and_update_stats_info(length):
         stats_info_list.extend(["Unavailable"] * (length - len(stats_info_list)))
         stats_info_keys.extend([None] * (length - len(stats_info_keys)))
     
-    # Create a new dictionary with the original keys and updated values
-    updated_stats_info = {}
+    # Create a list of values in the order of textboxes
+    updated_values = []
     for key, value in zip(stats_info_keys, stats_info_list):
         if key is None:
-            # Generate new keys for any additional "Unavailable" values
-            key = f"extra_{len(updated_stats_info) + 1}"
+            # Generate new values for any additional "Unavailable" values
+            value = "Unavailable"
         
-        if isinstance(value, str):
-            updated_stats_info[key] = value
-        elif isinstance(value, list):
-            updated_stats_info[key] = ", ".join(value)
+        if isinstance(value, dict):
+            images_value = value.get('images', 'Unavailable')
+            ps_value = value.get('ps', 'Unavailable')
+            updated_values.extend([str(images_value), str(ps_value)])
         else:
-            updated_stats_info[key] = str(value)
+            updated_values.append(str(value))
     
-    return updated_stats_info
+    # Ensure we have exactly the number of values expected by the UI
+    while len(updated_values) < length:
+        updated_values.append("Unavailable")
+    
+    return updated_values
 
 
 # News
@@ -622,16 +626,8 @@ def get_stats_ui():
         details = []
         for key in stats_info.keys():
             with gr.Accordion(key.capitalize()):
-                if isinstance(stats_info[key], dict):
-                    images_value = stats_info[key].get('images', 'Unavailable')
-                    ps_value = stats_info[key].get('ps', 'Unavailable')
-                else:
-                    images_value = 'Unavailable'
-                    ps_value = 'Unavailable'
-
                 images = gr.Textbox(
                     label="Images",
-                    value=str(images_value),
                     elem_id=tab_prefix + "images",
                     interactive=False,
                     lines=1,
@@ -641,7 +637,6 @@ def get_stats_ui():
 
                 pixelsteps = gr.Textbox(
                     label="Pixelsteps",
-                    value=str(ps_value),
                     elem_id=tab_prefix + "pixelsteps",
                     interactive=False,
                     lines=1,

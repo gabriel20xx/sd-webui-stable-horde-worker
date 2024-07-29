@@ -512,7 +512,7 @@ def get_kudos_ui():
 # News UI
 def fetch_news_info():
     """Fetches the latest news info."""
-    news_info = api.get_news_info(session, config.apikey)
+    news_info = api.get_news_info(session)
     return news_info
 
 
@@ -586,7 +586,7 @@ def get_news_ui():
 # Stats UI
 def fetch_stats_info():
     """Fetches the latest stats info."""
-    stats_info = api.get_stats_info(session, config.apikey)
+    stats_info = api.get_stats_info(session)
     return stats_info
 
 

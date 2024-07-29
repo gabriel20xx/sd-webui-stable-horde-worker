@@ -49,6 +49,11 @@ def horde_thread():
     asyncio.run(horde.run())
 
 
+def apply_stable_horde_apikey(apikey: str):
+    config.apikey = apikey
+    config.save()
+
+
 # Settings
 def apply_stable_horde_settings(
     enable: bool,
@@ -586,9 +591,6 @@ def get_settings_ui(status):
 
     return settings_ui
 
-def save_apikey_fn(apikey: str):
-    config.apikey = apikey
-    config.save()
 
 # General UI
 def on_ui_tabs():
@@ -597,7 +599,7 @@ def on_ui_tabs():
     ) as ui_tabs:
         # General functions
         def save_apikey_value(apikey_value: str):
-            save_apikey_fn(apikey_value)
+            apply_stable_horde_apikey(apikey_value)
 
         def toggle_running_fn():
             if config.enabled:
@@ -654,7 +656,8 @@ def on_ui_tabs():
                         print(f"Current Worker: {worker_name}")
                         break
 
-            # General tabs
+        # General tabs
+        with gr.Row():
             with gr.Tab("Generation"):
                 get_generator_ui()
             with gr.Tab("Worker"):

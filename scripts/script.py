@@ -448,8 +448,8 @@ def get_stats_ui():
                     lines=1,
                 )
 
-            details.append(detail1)
-            details.append(detail2)
+                details.append(detail1)
+                details.append(detail2)
 
         stats_update.click(
             fn=lambda: fetch_and_update_stats_info(),

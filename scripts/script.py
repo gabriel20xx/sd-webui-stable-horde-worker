@@ -283,6 +283,7 @@ def get_worker_ui(worker):
                             interactive=False,
                             lines=1,
                         )
+                        details.append(detail)
             else:
                 detail = gr.Textbox(
                     label=key.capitalize(),
@@ -290,8 +291,7 @@ def get_worker_ui(worker):
                     interactive=False,
                     lines=1,
                 )
-
-            details.append(detail)
+                details.append(detail)
 
         worker_update.click(
             fn=lambda: fetch_and_update_worker_info(worker),
@@ -325,6 +325,7 @@ def get_user_ui():
                                     interactive=False,
                                     lines=1,
                                 )
+                                details.append(detail)
                     
             if key.capitalize() in ["Kudos_details", "Worker_ids", "Sharedkey_ids", "Usage", "Contributions"]:
                 with gr.Accordion(key.capitalize()):
@@ -335,6 +336,7 @@ def get_user_ui():
                             interactive=False,
                             lines=1,
                         )
+                        details.append(detail)
                 
             else:
                 detail = gr.Textbox(
@@ -343,8 +345,7 @@ def get_user_ui():
                     interactive=False,
                     lines=1,
                 )
-                
-            details.append(detail)
+                details.append(detail)
 
         user_update.click(
             fn=lambda: fetch_and_update_user_info(),
@@ -371,10 +372,10 @@ def get_kudos_ui():
         with gr.Row():
             with gr.Column():
                 # Username
-                username = gr.Textbox(
+                recipient = gr.Textbox(
                     label="Recipient Username",
-                    placeholder="Enter username",
-                    elem_id="kudos_username",
+                    placeholder="Enter recipient username",
+                    elem_id="kudos_recipient",
                     interactive=True,
                 )
 
@@ -412,7 +413,7 @@ def get_kudos_ui():
 
         transfer.click(
             fn=transfer_kudos_wrapper,
-            inputs=[username, kudos_amount],
+            inputs=[recipient, kudos_amount],
             outputs=None
         )
 

@@ -543,6 +543,8 @@ def get_news_ui():
                     details.append(message)
 
                     tags_value = news_item.get('tags', 'No tags available')
+                    if tags_value == 'No tags available':
+                        tags_value = []
                     tags_string = ', '.join(map(str, tags_value))
                     stripped_tags_value = tags_string.replace("'", "").replace("[", "").replace("]", "")
                     tags = gr.Textbox(

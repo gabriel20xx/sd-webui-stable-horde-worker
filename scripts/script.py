@@ -833,13 +833,14 @@ def on_ui_tabs():
                 # TODO Move this somewhere else
                 user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
-                for worker in worker_ids:
-                    worker_info = api.get_worker_info(session, config.apikey, worker)
-                    worker_name = worker_info["name"]
-                    if worker_name == config.name:
-                        print(f"Current Worker: {worker_name}")
-                        print("-" * 20)
-                        break
+                if worker_ids:
+                    for worker in worker_ids:
+                        worker_info = api.get_worker_info(session, config.apikey, worker)
+                        worker_name = worker_info["name"]
+                        if worker_name == config.name:
+                            print(f"Current Worker: {worker_name}")
+                            print("-" * 20)
+                            break
 
         # General tabs
         with gr.Row():

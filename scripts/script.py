@@ -95,48 +95,6 @@ def apply_stable_horde_settings(
     )
 
 
-# Worker
-def fetch_and_update_worker_info(worker):
-    worker_info = api.get_worker_info(session, config.apikey, worker)
-    return [
-        (
-            worker_info[key]
-            if isinstance(worker_info[key], str)
-            else (
-                ", ".join(worker_info[key])
-                if isinstance(worker_info[key], list)
-                else str(worker_info[key])
-            )
-        )
-        for key in worker_info.keys()
-    ]
-
-
-# User
-def fetch_and_update_user_info():
-    user_info = api.get_user_info(session, config.apikey)
-    return [
-        (
-            user_info[key]
-            if isinstance(user_info[key], str)
-            else (
-                ", ".join(user_info[key])
-                if isinstance(user_info[key], list)
-                else str(user_info[key])
-            )
-        )
-        for key in user_info.keys()
-    ]
-
-
-# Kudos
-def fetch_and_update_kudos():
-    user_info = api.get_user_info(session, config.apikey)
-    if user_info["kudos"]:
-        kudos = user_info["kudos"]
-        return kudos
-
-
 tab_prefix = "stable-horde-"
 
 
@@ -240,7 +198,7 @@ def get_generator_ui():
 # Worker UI
 def fetch_worker_info(worker):
     """Fetches the latest worker info."""
-    worker_info = api.get_worker_info(session, worker)
+    worker_info = api.get_worker_info(session, config.apikey, worker)
     if not isinstance(worker_info, list):
         raise ValueError("Expected worker_info to be a list of dictionaries")
     return worker_info
@@ -321,7 +279,7 @@ def get_worker_ui(worker):
 # User UI
 def fetch_user_info():
     """Fetches the latest user info."""
-    user_info = api.get_user_info(session)
+    user_info = api.get_user_info(session, config.apikey)
     if not isinstance(user_info, list):
         raise ValueError("Expected user_info to be a list of dictionaries")
     return user_info
@@ -438,6 +396,13 @@ def get_user_ui():
 
 
 # Kudos UI
+def fetch_and_update_kudos():
+    user_info = api.get_user_info(session, config.apikey)
+    if user_info["kudos"]:
+        kudos = user_info["kudos"]
+        return kudos
+    
+
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
         details = []
@@ -557,7 +522,7 @@ def get_kudos_ui():
 # News UI
 def fetch_news_info():
     """Fetches the latest news info."""
-    news_info = api.get_news_info(session)
+    news_info = api.get_news_info(session, config.apikey)
     if not isinstance(news_info, list):
         raise ValueError("Expected news_info to be a list of dictionaries")
     return news_info
@@ -636,7 +601,7 @@ def get_news_ui():
 # Stats UI
 def fetch_stats_info():
     """Fetches the latest stats info."""
-    stats_info = api.get_stats_info(session)
+    stats_info = api.get_stats_info(session, config.apikey)
     if not isinstance(stats_info, list):
         raise ValueError("Expected stats_info to be a list of dictionaries")
     return stats_info

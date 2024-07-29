@@ -857,6 +857,7 @@ def on_ui_tabs():
                         worker_info = api.get_worker_info(session, apikey, worker)
                         worker_name = worker_info["name"]
                         if worker_name == config.name:
+                            print("-" * 64)
                             print(f"Current Worker: {worker_name}")
                             print("-" * 64)
                             return worker
@@ -883,8 +884,8 @@ def on_ui_tabs():
                 get_kudos_ui()
             with gr.Tab("News"):
                 get_news_ui()
-            with gr.Tab("worker"):
-                get_worker_ui()
+            with gr.Tab("Stats"):
+                get_stats_ui()
             with gr.Tab("Settings"):
                 get_settings_ui(status)
 

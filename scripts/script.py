@@ -432,7 +432,8 @@ def get_stats_ui():
         details = []
         for key in stats_info.keys():
             detail = gr.Textbox(
-                value=f"{key.capitalize()}: {stats_info[key]}",
+                label=key.capitalize(),
+                value=f"{stats_info[key]}",
                 interactive=False,
                 lines=1,
             )

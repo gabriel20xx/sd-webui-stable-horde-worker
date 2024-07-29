@@ -310,7 +310,7 @@ def get_user_ui():
                             for thirdkey in user_info[key][secondkey].keys():
                                 detail = gr.Textbox(
                                     label=thirdkey.capitalize(),
-                                    value=f"{user_info[key][thirdkey]}",
+                                    value=f"{user_info[key][secondkey][thirdkey]}",
                                     interactive=False,
                                     lines=1,
                                 )

@@ -543,13 +543,6 @@ def fetch_news_info():
     return news_info
 
 
-def update_news_ui():
-    """Fetches and updates the news UI."""
-    news_info = fetch_news_info()
-    # Return a list of updated components
-    return create_news_ui(news_info)
-
-
 # Inner News UI
 def create_news_ui(news_info):
     """Creates and returns Gradio UI components based on the news info."""
@@ -586,6 +579,13 @@ def create_news_ui(news_info):
             raise ValueError("Each item in news_info is expected to be a dictionary")
 
     return details
+
+
+def update_news_ui():
+    """Fetches and updates the news UI."""
+    news_info = fetch_news_info()
+    # Return a list of updated components
+    return create_news_ui(news_info)
 
 
 # News UI

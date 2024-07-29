@@ -129,40 +129,6 @@ def fetch_and_update_user_info():
     ]
 
 
-# News
-def fetch_and_update_news_info():
-    stats_info = api.get_stats_info(session)
-    return [
-        (
-            stats_info[key]
-            if isinstance(stats_info[key], str)
-            else (
-                ", ".join(stats_info[key])
-                if isinstance(stats_info[key], list)
-                else str(stats_info[key])
-            )
-        )
-        for key in stats_info.keys()
-    ]
-
-
-# Stats
-def fetch_and_update_stats_info():
-    stats_info = api.get_stats_info(session)
-    return [
-        (
-            stats_info[key]
-            if isinstance(stats_info[key], str)
-            else (
-                ", ".join(stats_info[key])
-                if isinstance(stats_info[key], list)
-                else str(stats_info[key])
-            )
-        )
-        for key in stats_info.keys()
-    ]
-
-
 # Kudos
 def fetch_and_update_kudos():
     user_info = api.get_user_info(session, config.apikey)
@@ -272,110 +238,118 @@ def get_generator_ui():
 
 
 # Worker UI
+def fetch_worker_info(worker):
+    """Fetches the latest worker info."""
+    worker_info = api.get_worker_info(session, worker)
+    if not isinstance(worker_info, list):
+        raise ValueError("Expected worker_info to be a list of dictionaries")
+    return worker_info
+
+
+def create_worker_ui(worker_info):
+    """Creates and returns Gradio UI components based on the worker info."""
+    details = []
+
+    for key in worker_info.keys():
+        if key.capitalize() in ["Kudos_details", "Team"]:
+            with gr.Accordion(key.capitalize()):
+                for secondkey in worker_info[key].keys():
+                    detail = gr.Textbox(
+                        label=secondkey.capitalize(),
+                        elem_id=tab_prefix + "worker-info",
+                        value=f"{worker_info[key][secondkey]}",
+                        interactive=False,
+                        lines=1,
+                        max_lines=1,
+                    )
+                    details.append(detail)
+        elif key.capitalize() in ["Models"]:
+            value = worker_info[key]
+            worker_string = ', '.join(map(str, value))
+            stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=f"{stripped_worker_info}",
+                elem_id=tab_prefix + "worker-info",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        else:
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=f"{worker_info[key]}",
+                elem_id=tab_prefix + "worker-info",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            details.append(detail)
+    return details
+
+
+def update_worker_ui(worker):
+    """Fetches and updates the worker UI."""
+    worker_info = fetch_worker_info(worker)
+    # Return a list of updated components
+    return create_worker_ui(worker_info)
+
+
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         details = []
 
-        worker_info = api.get_worker_info(session, config.apikey, worker)
+        worker_info = fetch_worker_info(worker)
+
+        if not isinstance(worker_info, list):
+            raise ValueError("Expected worker_info to be a list of dictionaries")
 
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
 
-        for key in worker_info.keys():
-            if key.capitalize() in ["Kudos_details", "Team"]:
-                with gr.Accordion(key.capitalize()):
-                    for secondkey in worker_info[key].keys():
-                        detail = gr.Textbox(
-                            label=secondkey.capitalize(),
-                            elem_id=tab_prefix + "worker-info",
-                            value=f"{worker_info[key][secondkey]}",
-                            interactive=False,
-                            lines=1,
-                            max_lines=1,
-                        )
-                        details.append(detail)
-            elif key.capitalize() in ["Models"]:
-                value = worker_info[key]
-                worker_string = ', '.join(map(str, value))
-                stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
-                detail = gr.Textbox(
-                    label=key.capitalize(),
-                    value=f"{stripped_worker_info}",
-                    elem_id=tab_prefix + "worker-info",
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-            else:
-                detail = gr.Textbox(
-                    label=key.capitalize(),
-                    value=f"{worker_info[key]}",
-                    elem_id=tab_prefix + "worker-info",
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-                details.append(detail)
+        # Create the initial UI components
+        details = create_worker_ui(worker_info)
 
         worker_update.click(
-            fn=lambda: fetch_and_update_worker_info(worker),
+            fn=lambda: update_worker_ui()(worker),
             inputs=[],
             outputs=details,
         )
 
     return worker_ui
 
-
 # User UI
-def get_user_ui():
-    with gr.Blocks() as user_ui:
-        details = []
+def fetch_user_info():
+    """Fetches the latest user info."""
+    user_info = api.get_user_info(session)
+    if not isinstance(user_info, list):
+        raise ValueError("Expected user_info to be a list of dictionaries")
+    return user_info
 
-        user_info = api.get_user_info(session, config.apikey)
 
-        gr.Markdown("## User Details", elem_id="user_title")
-        user_update = gr.Button(
-            "Update User Details", elem_id=f"{tab_prefix}user-update"
-        )
+def create_user_ui(user_info):
+    """Creates and returns Gradio UI components based on the user info."""
+    details = []
 
-        for key in user_info.keys():
-            # Handle nested dictionaries
-            if isinstance(user_info[key], dict):
-                if key.capitalize() in ["Records"]:
-                    with gr.Accordion(key.capitalize()):
-                        for secondkey in user_info[key].keys():
-                            if isinstance(user_info[key][secondkey], dict):
-                                with gr.Accordion(secondkey.capitalize()):
-                                    for thirdkey in user_info[key][secondkey].keys():
-                                        detail = gr.Textbox(
-                                            label=thirdkey.capitalize(),
-                                            value=f"{user_info[key][secondkey][thirdkey]}",
-                                            elem_id=tab_prefix + "user-info",
-                                            interactive=False,
-                                            lines=1,
-                                            max_lines=1,
-                                        )
-                                        details.append(detail)
-                            else:
-                                detail = gr.Textbox(
-                                    label=secondkey.capitalize(),
-                                    value=f"{user_info[key][secondkey]}",
-                                    elem_id=tab_prefix + "user-info",
-                                    interactive=False,
-                                    lines=1,
-                                    max_lines=1,
-                                )
-                                details.append(detail)
-                
-                elif key.capitalize() in [
-                    "Kudos_details",
-                    "Worker_ids",
-                    "Sharedkey_ids",
-                    "Usage",
-                    "Contributions",
-                ]:
-                    with gr.Accordion(key.capitalize()):
-                        for secondkey in user_info[key].keys():
+    for key in user_info.keys():
+        # Handle nested dictionaries
+        if isinstance(user_info[key], dict):
+            if key.capitalize() in ["Records"]:
+                with gr.Accordion(key.capitalize()):
+                    for secondkey in user_info[key].keys():
+                        if isinstance(user_info[key][secondkey], dict):
+                            with gr.Accordion(secondkey.capitalize()):
+                                for thirdkey in user_info[key][secondkey].keys():
+                                    detail = gr.Textbox(
+                                        label=thirdkey.capitalize(),
+                                        value=f"{user_info[key][secondkey][thirdkey]}",
+                                        elem_id=tab_prefix + "user-info",
+                                        interactive=False,
+                                        lines=1,
+                                        max_lines=1,
+                                    )
+                                    details.append(detail)
+                        else:
                             detail = gr.Textbox(
                                 label=secondkey.capitalize(),
                                 value=f"{user_info[key][secondkey]}",
@@ -386,32 +360,77 @@ def get_user_ui():
                             )
                             details.append(detail)
             
-            # Handle lists or other data structures
-            elif isinstance(user_info[key], list):
+            elif key.capitalize() in [
+                "Kudos_details",
+                "Worker_ids",
+                "Sharedkey_ids",
+                "Usage",
+                "Contributions",
+            ]:
                 with gr.Accordion(key.capitalize()):
-                    for i, item in enumerate(user_info[key]):
+                    for secondkey in user_info[key].keys():
                         detail = gr.Textbox(
-                            label=f"Item {i+1}",
-                            value=f"{item}",
+                            label=secondkey.capitalize(),
+                            value=f"{user_info[key][secondkey]}",
                             elem_id=tab_prefix + "user-info",
                             interactive=False,
                             lines=1,
                             max_lines=1,
                         )
                         details.append(detail)
+        
+        # Handle lists or other data structures
+        elif isinstance(user_info[key], list):
+            with gr.Accordion(key.capitalize()):
+                for i, item in enumerate(user_info[key]):
+                    detail = gr.Textbox(
+                        label=f"Item {i+1}",
+                        value=f"{item}",
+                        elem_id=tab_prefix + "user-info",
+                        interactive=False,
+                        lines=1,
+                        max_lines=1,
+                    )
+                    details.append(detail)
 
-            # Handle other data types
-            else:
-                detail = gr.Textbox(
-                    label=key.capitalize(),
-                    value=f"{user_info[key]}",
-                    interactive=False,
-                    lines=1
-                )
-                details.append(detail)
+        # Handle other data types
+        else:
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=f"{user_info[key]}",
+                interactive=False,
+                lines=1
+            )
+            details.append(detail)
+    return details
+
+
+def update_user_ui():
+    """Fetches and updates the user UI."""
+    user_info = fetch_user_info()
+    # Return a list of updated components
+    return create_user_ui(user_info)
+
+
+def get_user_ui():
+    """Creates and returns the Gradio UI with an update button."""
+    with gr.Blocks() as user_ui:
+        user_info = fetch_user_info()
+
+        if not isinstance(user_info, list):
+            raise ValueError("Expected user_info to be a list of dictionaries")
+
+        gr.Markdown("## User Details", elem_id="user_title")
+
+        user_update = gr.Button(
+            "Update User Details", elem_id=f"{tab_prefix}user-update"
+        )
+
+        # Create the initial UI components
+        details = create_user_ui(user_info)
 
         user_update.click(
-            fn=lambda: fetch_and_update_user_info(),
+            fn=lambda: update_user_ui(),
             inputs=[],
             outputs=details,
         )
@@ -535,6 +554,7 @@ def get_kudos_ui():
     return kudos_ui
 
 
+# News UI
 def fetch_news_info():
     """Fetches the latest news info."""
     news_info = api.get_news_info(session)
@@ -543,7 +563,6 @@ def fetch_news_info():
     return news_info
 
 
-# Inner News UI
 def create_news_ui(news_info):
     """Creates and returns Gradio UI components based on the news info."""
     details = []
@@ -588,7 +607,6 @@ def update_news_ui():
     return create_news_ui(news_info)
 
 
-# News UI
 def get_news_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as news_ui:
@@ -615,36 +633,65 @@ def get_news_ui():
     return news_ui
 
 
+# Stats UI
+def fetch_stats_info():
+    """Fetches the latest stats info."""
+    stats_info = api.get_stats_info(session)
+    if not isinstance(stats_info, list):
+        raise ValueError("Expected stats_info to be a list of dictionaries")
+    return stats_info
+
+
+def create_stats_ui(stats_info):
+    details = []
+    for key in stats_info.keys():
+        with gr.Accordion(key.capitalize()):
+            images = gr.Textbox(
+                label="Images",
+                elem_id=tab_prefix + "images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            details.append(images)
+
+            pixelsteps = gr.Textbox(
+                label="Pixelsteps",
+                elem_id=tab_prefix + "pixelsteps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            details.append(pixelsteps)
+
+    return details
+
+
+def update_stats_ui():
+    """Fetches and updates the stats UI."""
+    stats_info = fetch_stats_info()
+    if not isinstance(stats_info, list):
+        raise ValueError("Expected stats_info to be a list of dictionaries")
+    # Return a list of updated components
+    return create_stats_ui(stats_info)
+
+
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
-        stats_info = api.get_stats_info(session)
+        stats_info = fetch_stats_info()
+
+        if not isinstance(stats_info, list):
+            raise ValueError("Expected stats_info to be a list of dictionaries")
+        
         gr.Markdown("## stats", elem_id="stats_title")
         with gr.Row():
             stats_update = gr.Button("Update stats", elem_id="stats-update")
 
-        details = []
-        for key in stats_info.keys():
-            with gr.Accordion(key.capitalize()):
-                images = gr.Textbox(
-                    label="Images",
-                    elem_id=tab_prefix + "images",
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-                details.append(images)
-
-                pixelsteps = gr.Textbox(
-                    label="Pixelsteps",
-                    elem_id=tab_prefix + "pixelsteps",
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-                details.append(pixelsteps)
+        # Create the initial UI components
+        details = create_stats_ui(stats_info)
 
         stats_update.click(
-            fn=lambda: fetch_and_update_stats_info(),
+            fn=lambda: update_stats_ui(),
             inputs=[],
             outputs=details,
         )

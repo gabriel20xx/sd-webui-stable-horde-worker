@@ -277,9 +277,10 @@ def get_worker_ui(worker):
         for key in worker_info.keys():
             if key.capitalize() in ["Kudos_details", "Team"]:
                 with gr.Accordion(key.capitalize()):
-                    for secondkey in worker_info[key].keys():
+                    for i, secondkey in worker_info[key].keys():
                         detail = gr.Textbox(
                             label=secondkey.capitalize(),
+                            elem_id=tab_prefix + i + "worker-info",
                             value=f"{worker_info[key][secondkey]}",
                             interactive=False,
                             lines=1,
@@ -293,6 +294,7 @@ def get_worker_ui(worker):
                 detail = gr.Textbox(
                     label=key.capitalize(),
                     value=f"{stripped_worker_info}",
+                    elem_id=tab_prefix + "worker-info",
                     interactive=False,
                     lines=1,
                     max_lines=1,
@@ -301,6 +303,7 @@ def get_worker_ui(worker):
                 detail = gr.Textbox(
                     label=key.capitalize(),
                     value=f"{worker_info[key]}",
+                    elem_id=tab_prefix + "worker-info",
                     interactive=False,
                     lines=1,
                     max_lines=1,
@@ -336,10 +339,11 @@ def get_user_ui():
                         for secondkey in user_info[key].keys():
                             if isinstance(user_info[key][secondkey], dict):
                                 with gr.Accordion(secondkey.capitalize()):
-                                    for thirdkey in user_info[key][secondkey].keys():
+                                    for i, thirdkey in user_info[key][secondkey].keys():
                                         detail = gr.Textbox(
                                             label=thirdkey.capitalize(),
                                             value=f"{user_info[key][secondkey][thirdkey]}",
+                                            elem_id=tab_prefix + i + "user-info",
                                             interactive=False,
                                             lines=1,
                                             max_lines=1,
@@ -349,6 +353,7 @@ def get_user_ui():
                                 detail = gr.Textbox(
                                     label=secondkey.capitalize(),
                                     value=f"{user_info[key][secondkey]}",
+                                    elem_id=tab_prefix + "user-info",
                                     interactive=False,
                                     lines=1,
                                     max_lines=1,
@@ -363,10 +368,11 @@ def get_user_ui():
                     "Contributions",
                 ]:
                     with gr.Accordion(key.capitalize()):
-                        for secondkey in user_info[key].keys():
+                        for i, secondkey in user_info[key].keys():
                             detail = gr.Textbox(
                                 label=secondkey.capitalize(),
                                 value=f"{user_info[key][secondkey]}",
+                                elem_id=tab_prefix + i + "user-info",
                                 interactive=False,
                                 lines=1,
                                 max_lines=1,
@@ -376,10 +382,11 @@ def get_user_ui():
             # Handle lists or other data structures
             elif isinstance(user_info[key], list):
                 with gr.Accordion(key.capitalize()):
-                    for index, item in enumerate(user_info[key]):
+                    for i, item in enumerate(user_info[key]):
                         detail = gr.Textbox(
-                            label=f"Item {index+1}",
+                            label=f"Item {i+1}",
                             value=f"{item}",
+                            elem_id=tab_prefix + i + "user-info",
                             interactive=False,
                             lines=1,
                             max_lines=1,
@@ -528,7 +535,7 @@ def get_news_ui():
             news_update = gr.Button("Update News", elem_id=f"{tab_prefix}news-update")
 
         details = []
-        for news_item in news_info:
+        for i, news_item in news_info:
             if isinstance(news_item, dict):
                 importance = news_item.get('importance', 'No importance available')
                 title = news_item.get('title', 'No title available')
@@ -538,6 +545,7 @@ def get_news_ui():
                     message = gr.TextArea(
                         label="Message",
                         value=message_value,
+                        elem_id=tab_prefix + i + "newspiece",
                         interactive=False,
                     )
                     details.append(message)
@@ -550,6 +558,7 @@ def get_news_ui():
                     tags = gr.Textbox(
                         label="Tags",
                         value=stripped_tags_value,
+                        elem_id=tab_prefix + i + "tags",
                         interactive=False,
                         lines=1,
                         max_lines=1,
@@ -577,11 +586,12 @@ def get_stats_ui():
             stats_update = gr.Button("Update Stats", elem_id="stats-update")
 
         details = []
-        for key in stats_info.keys():
+        for i, key in stats_info.keys():
             with gr.Accordion(key.capitalize()):
                 detail1 = gr.Textbox(
                     label="Images",
                     value=f"{stats_info[key]['images']}",
+                    elem_id=tab_prefix + i + "images",
                     interactive=False,
                     lines=1,
                     max_lines=1,
@@ -589,6 +599,7 @@ def get_stats_ui():
                 detail2 = gr.Textbox(
                     label="Pixelsteps",
                     value=f"{stats_info[key]['ps']}",
+                    elem_id=tab_prefix + i + "user-images",
                     interactive=False,
                     lines=1,
                     max_lines=1,

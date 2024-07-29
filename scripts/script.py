@@ -181,6 +181,8 @@ def get_generator_ui():
                     label="",
                     elem_id=tab_prefix + "current-id",
                     readonly=True,
+                    lines=1,
+                    max_lines=1,
                 )
 
                 running_type = gr.Textbox(
@@ -189,6 +191,8 @@ def get_generator_ui():
                     elem_id=tab_prefix + "running-type",
                     readonly=True,
                     visible=False,
+                    lines=1,
+                    max_lines=1,
                 )
 
                 state = gr.HTML(
@@ -278,17 +282,19 @@ def get_worker_ui(worker):
                             value=f"{worker_info[key][secondkey]}",
                             interactive=False,
                             lines=1,
+                            max_lines=1,
                         )
                         details.append(detail)
             elif key.capitalize() in ["Models"]:
                 value = worker_info[key]
-                worker_string = ','.join(map(str, value))
+                worker_string = ', '.join(map(str, value))
                 stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
                 detail = gr.Textbox(
                     label=key.capitalize(),
                     value=f"{stripped_worker_info}",
                     interactive=False,
                     lines=1,
+                    max_lines=1,
                 )
             else:
                 detail = gr.Textbox(
@@ -296,6 +302,7 @@ def get_worker_ui(worker):
                     value=f"{worker_info[key]}",
                     interactive=False,
                     lines=1,
+                    max_lines=1,
                 )
                 details.append(detail)
 
@@ -333,7 +340,8 @@ def get_user_ui():
                                             label=thirdkey.capitalize(),
                                             value=f"{user_info[key][secondkey][thirdkey]}",
                                             interactive=False,
-                                            lines=1
+                                            lines=1,
+                                            max_lines=1,
                                         )
                                         details.append(detail)
                             else:
@@ -341,7 +349,8 @@ def get_user_ui():
                                     label=secondkey.capitalize(),
                                     value=f"{user_info[key][secondkey]}",
                                     interactive=False,
-                                    lines=1
+                                    lines=1,
+                                    max_lines=1,
                                 )
                                 details.append(detail)
                 
@@ -358,7 +367,8 @@ def get_user_ui():
                                 label=secondkey.capitalize(),
                                 value=f"{user_info[key][secondkey]}",
                                 interactive=False,
-                                lines=1
+                                lines=1,
+                                max_lines=1,
                             )
                             details.append(detail)
             
@@ -370,7 +380,8 @@ def get_user_ui():
                             label=f"Item {index+1}",
                             value=f"{item}",
                             interactive=False,
-                            lines=1
+                            lines=1,
+                            max_lines=1,
                         )
                         details.append(detail)
 
@@ -423,6 +434,8 @@ def get_kudos_ui():
                     placeholder="Enter recipient username",
                     elem_id="kudos_recipient",
                     interactive=True,
+                    lines=1,
+                    max_lines=1,
                 )
 
             with gr.Column():
@@ -442,6 +455,8 @@ def get_kudos_ui():
                     placeholder="0",
                     elem_id="kudos_display",
                     interactive=False,
+                    lines=1,
+                    max_lines=1,
                 )
                 details.append(your_kudos)
 
@@ -512,37 +527,23 @@ def get_news_ui():
                 title = news_item.get('title', 'No title available')
                 date_published = news_item.get('date_published', 'No published date available')
                 with gr.Accordion(f"{importance} - {title} - {date_published}"): # Get the title form the newspiece
-                    """for key, value in news_item.items():
-                        detail_value = (
-                            value
-                            if isinstance(value, str)
-                            else (
-                                ", ".join(value)
-                                if isinstance(value, list)
-                                else str(value)
-                            )
-                        )
-                        detail = gr.Textbox(
-                            label=key.capitalize(),
-                            value=f"{detail_value}",
-                            interactive=False,
-                            lines=1,
-                        ) """
                     message_value = news_item.get('newspiece', 'No message available')
-                    message = gr.Textbox(
+                    message = gr.TextArea(
                         label="Message",
                         value=message_value,
                         interactive=False,
-                        lines=3,
                     )
                     details.append(message)
 
                     tags_value = news_item.get('tags', 'No tags available')
+                    tags_string = ', '.join(map(str, tags_value))
+                    stripped_tags_value = tags_string.replace("'", "").replace("[", "").replace("]", "")
                     tags = gr.Textbox(
                         label="Tags",
-                        value=tags_value,
+                        value=stripped_tags_value,
                         interactive=False,
                         lines=1,
+                        max_lines=1,
                     )
                     details.append(tags)
             else:
@@ -574,12 +575,14 @@ def get_stats_ui():
                     value=f"{stats_info[key]['images']}",
                     interactive=False,
                     lines=1,
+                    max_lines=1,
                 )
                 detail2 = gr.Textbox(
                     label="Pixelsteps",
                     value=f"{stats_info[key]['ps']}",
                     interactive=False,
                     lines=1,
+                    max_lines=1,
                 )
 
                 details.append(detail1)
@@ -618,6 +621,8 @@ def get_settings_ui(status):
             config.name,
             label="Worker Name",
             elem_id=tab_prefix + "name",
+            lines=1,
+            max_lines=1,
         )
         apikey = gr.Textbox(
             config.apikey,
@@ -651,16 +656,22 @@ def get_settings_ui(status):
             str(config.max_pixels),
             label="Max Pixels",
             elem_id=tab_prefix + "max-pixels",
+            lines=1,
+            max_lines=1,
         )
         endpoint = gr.Textbox(
             config.endpoint,
             label="Stable Horde Endpoint",
             elem_id=tab_prefix + "endpoint",
+            lines=1,
+            max_lines=1,
         )
         save_images_folder = gr.Textbox(
             config.save_images_folder,
             label="Folder to Save Generation Images",
             elem_id=tab_prefix + "save-images-folder",
+            lines=1,
+            max_lines=1,
         )
         show_images = gr.Checkbox(config.show_image_preview, label="Show Images")
         save_images = gr.Checkbox(config.save_images, label="Save Images")

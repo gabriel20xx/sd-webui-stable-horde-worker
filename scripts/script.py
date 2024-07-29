@@ -469,8 +469,10 @@ def get_news_ui():
         details = []
         for news_item in news_info:
             if isinstance(news_item, dict):
-                title = news_item.get('title', 'No Title Available')
-                with gr.Accordion(title): # Get the title form the newspiece
+                importance = news_item.get('importance', 'No importance available')
+                title = news_item.get('title', 'No title available')
+                date_published = news_item.get('date_published', 'No published date available')
+                with gr.Accordion(f"{importance} - {title} - {date_published}"): # Get the title form the newspiece
                     """for key, value in news_item.items():
                         detail_value = (
                             value
@@ -487,7 +489,7 @@ def get_news_ui():
                             interactive=False,
                             lines=1,
                         ) """
-                    message_value = news_item.get('newspiece', 'No Message Available')
+                    message_value = news_item.get('newspiece', 'No message available')
                     message = gr.Textbox(
                         label="Message",
                         value=message_value,
@@ -496,7 +498,7 @@ def get_news_ui():
                     )
                     details.append(message)
 
-                    tags_value = news_item.get('tags', 'No Tags Available')
+                    tags_value = news_item.get('tags', 'No tags available')
                     tags = gr.Textbox(
                         label="Tags",
                         value=tags_value,

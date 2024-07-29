@@ -170,12 +170,12 @@ tab_prefix = "stable-horde-"
 def get_generator_ui():
     with gr.Blocks() as generator_ui:
         with gr.Row():
-            with gr.Column(elem_id="stable-horde"):
-                gr.Markdown(
+            gr.Markdown(
                     "## Generations",
                     elem_id="kudos_title",
                 )
-
+        with gr.Row():
+            with gr.Column(elem_id="stable-horde"):
                 current_id = gr.Textbox(
                     "Current ID: ",
                     label="",
@@ -326,13 +326,13 @@ def get_kudos_ui():
 
         # Kudos UI
         with gr.Row():
+            # Transfer Kudos Title
+            gr.Markdown(
+                "## Transfer Kudos",
+                elem_id="kudos_title",
+            )
+        with gr.Row():
             with gr.Column():
-                # Transfer Kudos Title
-                gr.Markdown(
-                    "## Transfer Kudos",
-                    elem_id="kudos_title",
-                )
-
                 # Username
                 username = gr.Textbox(
                     label="Username",
@@ -350,17 +350,17 @@ def get_kudos_ui():
                     elem_id="kudos_display",
                     interactive=False,
                 )
-
-                # Transfer Kudo amount
-                kudos_amount = gr.Slider(
-                    label="Kudos",
-                    minimum=0,
-                    maximum=user_info["kudos"],
-                    step=1,
-                    value=10,
-                    elem_id="kudos_amount",
-                    interactive=True,
-                )
+        with gr.Row():
+            # Transfer Kudo amount
+            kudos_amount = gr.Slider(
+                label="Kudos",
+                minimum=0,
+                maximum=user_info["kudos"],
+                step=1,
+                value=10,
+                elem_id="kudos_amount",
+                interactive=True,
+            )
         with gr.Row():
             # Transfer Button
             transfer = gr.Button(

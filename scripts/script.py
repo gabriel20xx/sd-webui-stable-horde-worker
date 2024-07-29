@@ -457,8 +457,7 @@ def get_kudos_ui():
         details = []
 
         # Kudos functions
-        horde_user = API()
-        user_info = horde_user.get_user_info(session, config.apikey)
+        user_info = api.get_user_info(session, config.apikey)
 
         # Kudos UI
         with gr.Row():
@@ -539,7 +538,9 @@ def get_kudos_ui():
                 return "Success"
 
         def transfer_kudos_wrapper(username, kudos_amount):
-            return api.transfer_kudos(session, config.apikey, username, kudos_amount)
+            if username and kudos_amount:
+                result = api.transfer_kudos(session, config.apikey, username, kudos_amount)
+                return result
         
         update_kudos.click(
             fn=lambda: fetch_and_update_kudos(),

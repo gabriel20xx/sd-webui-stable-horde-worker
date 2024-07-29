@@ -149,24 +149,33 @@ def fetch_and_update_kudos():
 
 # Stats
 def fetch_and_update_stats_info(length):
+    # Fetch the stats information from the API
     stats_info = api.get_stats_info(session)
-    # Assuming you want to convert dictionary values to a list of values
+    
+    # Convert dictionary values to a list of values
     stats_info_list = list(stats_info.values())
+    stats_info_keys = list(stats_info.keys())
     
     # Ensure the list is of the specified length
     if len(stats_info_list) < length:
         stats_info_list.extend(["Unavailable"] * (length - len(stats_info_list)))
-    return [
-        (
-            value if isinstance(value, str)
-            else (
-                ", ".join(value)
-                if isinstance(value, list)
-                else str(value)
-            )
-        )
-        for value in stats_info_list
-    ]
+        stats_info_keys.extend([None] * (length - len(stats_info_keys)))
+    
+    # Create a new dictionary with the original keys and updated values
+    updated_stats_info = {}
+    for key, value in zip(stats_info_keys, stats_info_list):
+        if key is None:
+            # Generate new keys for any additional "Unavailable" values
+            key = f"extra_{len(updated_stats_info) + 1}"
+        
+        if isinstance(value, str):
+            updated_stats_info[key] = value
+        elif isinstance(value, list):
+            updated_stats_info[key] = ", ".join(value)
+        else:
+            updated_stats_info[key] = str(value)
+    
+    return updated_stats_info
 
 
 # News

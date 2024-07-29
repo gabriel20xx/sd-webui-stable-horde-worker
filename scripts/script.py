@@ -309,42 +309,66 @@ def get_user_ui():
 
         details = []
         for key in user_info.keys():
-            if key.capitalize() in ["Records"]:
-                with gr.Accordion(key.capitalize()):
-                    for secondkey in user_info[key].keys():
-                        with gr.Accordion(secondkey.capitalize()):
-                            for thirdkey in user_info[key][secondkey].keys():
+            # Handle nested dictionaries
+            if isinstance(user_info[key], dict):
+                if key.capitalize() in ["Records"]:
+                    with gr.Accordion(key.capitalize()):
+                        for secondkey in user_info[key].keys():
+                            if isinstance(user_info[key][secondkey], dict):
+                                with gr.Accordion(secondkey.capitalize()):
+                                    for thirdkey in user_info[key][secondkey].keys():
+                                        detail = gr.Textbox(
+                                            label=thirdkey.capitalize(),
+                                            value=f"{user_info[key][secondkey][thirdkey]}",
+                                            interactive=False,
+                                            lines=1
+                                        )
+                                        details.append(detail)
+                            else:
                                 detail = gr.Textbox(
-                                    label=thirdkey.capitalize(),
-                                    value=f"{user_info[key][secondkey][thirdkey]}",
+                                    label=secondkey.capitalize(),
+                                    value=f"{user_info[key][secondkey]}",
                                     interactive=False,
-                                    lines=1,
+                                    lines=1
                                 )
                                 details.append(detail)
-
-            if key.capitalize() in [
-                "Kudos_details",
-                "Worker_ids",
-                "Sharedkey_ids",
-                "Usage",
-                "Contributions",
-            ]:
+                
+                elif key.capitalize() in [
+                    "Kudos_details",
+                    "Worker_ids",
+                    "Sharedkey_ids",
+                    "Usage",
+                    "Contributions",
+                ]:
+                    with gr.Accordion(key.capitalize()):
+                        for secondkey in user_info[key].keys():
+                            detail = gr.Textbox(
+                                label=secondkey.capitalize(),
+                                value=f"{user_info[key][secondkey]}",
+                                interactive=False,
+                                lines=1
+                            )
+                            details.append(detail)
+            
+            # Handle lists or other data structures
+            elif isinstance(user_info[key], list):
                 with gr.Accordion(key.capitalize()):
-                    for secondkey in user_info[key].keys():
+                    for index, item in enumerate(user_info[key]):
                         detail = gr.Textbox(
-                            label=secondkey.capitalize(),
-                            value=f"{user_info[key][secondkey]}",
+                            label=f"Item {index+1}",
+                            value=f"{item}",
                             interactive=False,
-                            lines=1,
+                            lines=1
                         )
                         details.append(detail)
 
+            # Handle other data types
             else:
                 detail = gr.Textbox(
                     label=key.capitalize(),
                     value=f"{user_info[key]}",
                     interactive=False,
-                    lines=1,
+                    lines=1
                 )
                 details.append(detail)
 

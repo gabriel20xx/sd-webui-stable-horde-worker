@@ -303,7 +303,7 @@ def get_user_ui():
 
         details = []
         for key in user_info.keys():
-            if key in ["Records"]:
+            if key.capitalize() in ["Records"]:
                 with gr.Accordion(key.capitalize()):
                     for secondkey in user_info[key].keys():
                         with gr.Accordion(secondkey.capitalize()):
@@ -315,7 +315,7 @@ def get_user_ui():
                                     lines=1,
                                 )
                     
-            if key in ["Kudos_details", "Worker_ids", "Sharedkey_ids", "Usage", "Contributions"]:
+            if key.capitalize() in ["Kudos_details", "Worker_ids", "Sharedkey_ids", "Usage", "Contributions"]:
                 with gr.Accordion(key.capitalize()):
                     for secondkey in user_info[key].keys():
                         detail = gr.Textbox(
@@ -361,7 +361,7 @@ def get_kudos_ui():
             with gr.Column():
                 # Username
                 username = gr.Textbox(
-                    label="Username",
+                    label="Recipient Username",
                     placeholder="Enter username",
                     elem_id="kudos_username",
                     interactive=True,

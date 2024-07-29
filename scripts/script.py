@@ -281,7 +281,9 @@ def get_worker_ui(worker):
                         )
                         details.append(detail)
             elif key.capitalize() in ["Models"]:
-                stripped_worker_info = worker_info[key].replace("'", "").replace("[", "").replace("]", "")
+                value = worker_info[key]
+                worker_string = ','.join(map(str, value))
+                stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
                 detail = gr.Textbox(
                     label=key.capitalize(),
                     value=f"{stripped_worker_info}",

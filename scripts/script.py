@@ -187,8 +187,8 @@ def get_generator_ui():
                 )
 
                 running_type = gr.Textbox(
-                    "Running Type: Image Generation",
-                    label="",
+                    "Image Generation",
+                    label="Running Type",
                     elem_id=tab_prefix + "running-type",
                     readonly=True,
                     visible=False,

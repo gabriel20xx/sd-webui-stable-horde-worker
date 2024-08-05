@@ -264,7 +264,7 @@ def get_worker_ui(worker):
         details = create_worker_ui(worker_info)
 
         worker_update.click(
-            fn=lambda: update_worker_ui()(worker),
+            fn=lambda: update_worker_ui(worker),
             inputs=[],
             outputs=details,
         )
@@ -594,8 +594,10 @@ def create_stats_ui(stats_info):
     details = []
     for key in stats_info.keys():
         with gr.Accordion(key.capitalize()):
+            stats_value = stats_info.get('images', '')
             images = gr.Textbox(
                 label="Images",
+                value=stats_value,
                 elem_id=tab_prefix + "images",
                 interactive=False,
                 lines=1,
@@ -603,8 +605,10 @@ def create_stats_ui(stats_info):
             )
             details.append(images)
 
+            pixelsteps_value = stats_info.get('pixelsteps', '')
             pixelsteps = gr.Textbox(
                 label="Pixelsteps",
+                value=pixelsteps_value,
                 elem_id=tab_prefix + "pixelsteps",
                 interactive=False,
                 lines=1,

@@ -210,31 +210,34 @@ def create_worker_ui(worker_info):
         if key.capitalize() in ["Kudos_details", "Team"]:
             with gr.Accordion(key.capitalize()):
                 for secondkey in worker_info[key].keys():
+                    value=worker_info[key][secondkey]
                     detail = gr.Textbox(
                         label=secondkey.capitalize(),
                         elem_id=tab_prefix + "worker-info",
-                        value=f"{worker_info[key][secondkey]}",
+                        value=value,
                         interactive=False,
                         lines=1,
                         max_lines=1,
                     )
                     details.append(detail)
         elif key.capitalize() in ["Models"]:
-            value = worker_info[key]
-            worker_string = ', '.join(map(str, value))
+            pre_value = worker_info[key]
+            worker_string = ', '.join(map(str, pre_value))
             stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
+            value=stripped_worker_info
             detail = gr.Textbox(
                 label=key.capitalize(),
-                value=f"{stripped_worker_info}",
+                value=value,
                 elem_id=tab_prefix + "worker-info",
                 interactive=False,
                 lines=1,
                 max_lines=1,
             )
         else:
+            value=worker_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),
-                value=f"{worker_info[key]}",
+                value=value,
                 elem_id=tab_prefix + "worker-info",
                 interactive=False,
                 lines=1,
@@ -247,8 +250,23 @@ def create_worker_ui(worker_info):
 def update_worker_ui(worker):
     """Fetches and updates the worker UI."""
     worker_info = fetch_worker_info(worker)
+    updated_values = []
+    for key in worker_info.keys():
+        if key.capitalize() in ["Kudos_details", "Team"]:
+            for secondkey in worker_info[key].keys():
+                value=worker_info[key][secondkey]
+                updated_values.append(str(value))
+        elif key.capitalize() in ["Models"]:
+            pre_value = worker_info[key]
+            worker_string = ', '.join(map(str, pre_value))
+            stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
+            value=stripped_worker_info
+            updated_values.append(str(value))
+        else:
+            value=worker_info[key]
+            updated_values.append(str(value))
     # Return a list of updated components
-    return create_worker_ui(worker_info)
+    return updated_values
 
 
 def get_worker_ui(worker):

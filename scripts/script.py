@@ -615,9 +615,8 @@ def update_stats_ui():
     # Extract values for each stat in each period and return them as a list
     updated_values = []
     for period, stats in stats_info.items():
-        with gr.Accordion(period.capitalize()):
-            for stat_type, value in stats.items():
-                updated_values.append(str(value))
+        for stat_type, value in stats.items():
+            updated_values.append(str(value))
     return updated_values
 
 

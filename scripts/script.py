@@ -291,9 +291,10 @@ def create_user_ui(user_info):
                         if isinstance(user_info[key][secondkey], dict):
                             with gr.Accordion(secondkey.capitalize()):
                                 for thirdkey in user_info[key][secondkey].keys():
+                                    value=user_info[key][secondkey][thirdkey]
                                     detail = gr.Textbox(
                                         label=thirdkey.capitalize(),
-                                        value=f"{user_info[key][secondkey][thirdkey]}",
+                                        value=value,
                                         elem_id=tab_prefix + "user-info",
                                         interactive=False,
                                         lines=1,
@@ -301,9 +302,10 @@ def create_user_ui(user_info):
                                     )
                                     details.append(detail)
                         else:
+                            value=user_info[key][secondkey]
                             detail = gr.Textbox(
                                 label=secondkey.capitalize(),
-                                value=f"{user_info[key][secondkey]}",
+                                value=value,
                                 elem_id=tab_prefix + "user-info",
                                 interactive=False,
                                 lines=1,
@@ -320,9 +322,10 @@ def create_user_ui(user_info):
             ]:
                 with gr.Accordion(key.capitalize()):
                     for secondkey in user_info[key].keys():
+                        value=user_info[key][secondkey]
                         detail = gr.Textbox(
                             label=secondkey.capitalize(),
-                            value=f"{user_info[key][secondkey]}",
+                            value=value,
                             elem_id=tab_prefix + "user-info",
                             interactive=False,
                             lines=1,
@@ -334,9 +337,10 @@ def create_user_ui(user_info):
         elif isinstance(user_info[key], list):
             with gr.Accordion(key.capitalize()):
                 for i, item in enumerate(user_info[key]):
+                    value=item
                     detail = gr.Textbox(
                         label=f"Item {i+1}",
-                        value=f"{item}",
+                        value=value,
                         elem_id=tab_prefix + "user-info",
                         interactive=False,
                         lines=1,
@@ -346,9 +350,10 @@ def create_user_ui(user_info):
 
         # Handle other data types
         else:
+            value=user_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),
-                value=f"{user_info[key]}",
+                value=value,
                 interactive=False,
                 lines=1
             )
@@ -359,8 +364,39 @@ def create_user_ui(user_info):
 def update_user_ui():
     """Fetches and updates the user UI."""
     user_info = fetch_user_info()
+    updated_values = []
+    for key in user_info.keys():
+        # Handle nested dictionaries
+        if isinstance(user_info[key], dict):
+            if key.capitalize() in ["Records"]:
+                for secondkey in user_info[key].keys():
+                    if isinstance(user_info[key][secondkey], dict):
+                        for thirdkey in user_info[key][secondkey].keys():
+                            value=user_info[key][secondkey][thirdkey]
+                            updated_values.append(str(value))
+                    else:
+                        value=user_info[key][secondkey]
+                        updated_values.append(str(value))
+            elif key.capitalize() in [
+                "Kudos_details",
+                "Worker_ids",
+                "Sharedkey_ids",
+                "Usage",
+                "Contributions",
+            ]:
+                for secondkey in user_info[key].keys():
+                    value=user_info[key][secondkey]
+                    updated_values.append(str(value))
+        elif isinstance(user_info[key], list):
+            with gr.Accordion(key.capitalize()):
+                for i, item in enumerate(user_info[key]):
+                    value=item
+                    updated_values.append(str(value))
+        else:
+            value=user_info[key]
+            updated_values.append(str(value))
     # Return a list of updated components
-    return create_user_ui(user_info)
+    return updated_values
 
 
 def get_user_ui():

@@ -594,17 +594,18 @@ def create_stats_ui(stats_info):
     """Creates UI components for the stats info."""
     details = []
     for period, stats in stats_info.items():
-        for stat_type, value in stats.items():
-            label = f"{period.capitalize()} - {stat_type.capitalize()}"
-            textbox = gr.Textbox(
-                label=label,
-                value=str(value),
-                elem_id=f"{tab_prefix}_{period}_{stat_type}",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(textbox)
+        with gr.Accordion(period.capitalize()):
+            for stat_type, value in stats.items():
+                label = f"{stat_type.capitalize()}"
+                textbox = gr.Textbox(
+                    label=label,
+                    value=str(value),
+                    elem_id=f"{tab_prefix}_{period}_{stat_type}",
+                    interactive=False,
+                    lines=1,
+                    max_lines=1,
+                )
+                details.append(textbox)
     return details
 
 
@@ -614,8 +615,9 @@ def update_stats_ui():
     # Extract values for each stat in each period and return them as a list
     updated_values = []
     for period, stats in stats_info.items():
-        for stat_type, value in stats.items():
-            updated_values.append(str(value))
+        with gr.Accordion(period.capitalize()):
+            for stat_type, value in stats.items():
+                updated_values.append(str(value))
     return updated_values
 
 
@@ -846,7 +848,7 @@ def on_ui_tabs():
                         worker_info = api.get_worker_info(session, apikey, worker)
                         worker_name = worker_info["name"]
                         if worker_name == config.name:
-                            print("-" * 64)
+                            print("\n" + "-" * 64)
                             print(f"Current Worker: {worker_name}")
                             print("-" * 64)
                             return worker

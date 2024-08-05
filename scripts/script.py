@@ -580,10 +580,10 @@ def create_news_ui(news_info):
             title = news_item.get('title', 'No title available')
             date_published = news_item.get('date_published', 'No published date available')
             with gr.Accordion(f"{importance} - {title} - {date_published}"): 
-                message_value = news_item.get('newspiece', 'No message available')
+                value = news_item.get('newspiece', 'No message available')
                 message = gr.TextArea(
                     label="Message",
-                    value=message_value,
+                    value=value,
                     interactive=False,
                 )
                 details.append(message)
@@ -601,8 +601,6 @@ def create_news_ui(news_info):
                     max_lines=1,
                 )
                 details.append(tags)
-        else:
-            raise ValueError("Each item in news_info is expected to be a dictionary")
 
     return details
 
@@ -610,8 +608,20 @@ def create_news_ui(news_info):
 def update_news_ui():
     """Fetches and updates the news UI."""
     news_info = fetch_news_info()
-    # Return a list of updated components
-    return create_news_ui(news_info)
+    updated_values = []
+    for news_item in news_info:
+        if isinstance(news_item, dict):
+            value = news_item.get('newspiece', 'No message available')
+            updated_values.append(str(value))
+
+            tags_value = news_item.get('tags', [])
+            if not isinstance(tags_value, list):
+                tags_value = []
+
+            tags_string = ', '.join(map(str, tags_value))
+            updated_values.append(str(tags_string))
+
+    return updated_values
 
 
 def get_news_ui():

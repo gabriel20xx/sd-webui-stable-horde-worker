@@ -591,30 +591,36 @@ def fetch_stats_info():
 
 
 def create_stats_ui(stats_info):
+    """Creates UI components for the stats info."""
     details = []
-    for key, value in stats_info.items():
-        with gr.Accordion(key.capitalize()):
-            # Create a Textbox for each stat entry dynamically
-            detail = gr.Textbox(
-                label=key.capitalize(),
+    for period, stats in stats_info.items():
+        for stat_type, value in stats.items():
+            label = f"{period.capitalize()} - {stat_type.capitalize()}"
+            textbox = gr.Textbox(
+                label=label,
                 value=str(value),
-                elem_id=f"{tab_prefix}_{key}",
+                elem_id=f"{tab_prefix}_{period}_{stat_type}",
                 interactive=False,
                 lines=1,
                 max_lines=1,
             )
-            details.append(detail)
+            details.append(textbox)
     return details
 
 
 def update_stats_ui():
-    """Fetches and updates the stats UI."""
+    """Fetches the latest stats info and returns updated values for UI components."""
     stats_info = fetch_stats_info()
-    # Return a list of updated components
-    return [str(stats_info[key]) for key in stats_info]
+    # Extract values for each stat in each period and return them as a list
+    updated_values = []
+    for period, stats in stats_info.items():
+        for stat_type, value in stats.items():
+            updated_values.append(str(value))
+    return updated_values
 
 
 def get_stats_ui():
+    """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
         stats_info = fetch_stats_info()
         
@@ -631,6 +637,7 @@ def get_stats_ui():
             outputs=details,
         )
     return stats_ui
+
 
 
 # Settings UI

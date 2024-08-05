@@ -611,7 +611,7 @@ def update_stats_ui():
     """Fetches and updates the stats UI."""
     stats_info = fetch_stats_info()
     # Return a list of updated components
-    return [str(value) for value in stats_info.values()]
+    return [str(stats_info[key]) for key in stats_info]
 
 
 def get_stats_ui():

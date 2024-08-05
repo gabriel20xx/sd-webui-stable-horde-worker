@@ -660,10 +660,10 @@ def create_stats_ui(stats_info):
     for period, stats in stats_info.items():
         with gr.Accordion(period.capitalize()):
             for stat_type, value in stats.items():
-                label = f"{stat_type.capitalize()}"
+                value=str(value)
                 textbox = gr.Textbox(
-                    label=label,
-                    value=str(value),
+                    label=f"{stat_type.capitalize()}",
+                    value=value,
                     elem_id=f"{tab_prefix}_{period}_{stat_type}",
                     interactive=False,
                     lines=1,
@@ -680,6 +680,7 @@ def update_stats_ui():
     updated_values = []
     for period, stats in stats_info.items():
         for stat_type, value in stats.items():
+            value=str(value)
             updated_values.append(str(value))
     return updated_values
 
@@ -697,7 +698,7 @@ def get_stats_ui():
         details = create_stats_ui(stats_info)
 
         stats_update.click(
-            fn=update_stats_ui,
+            fn=lambda: update_stats_ui(),
             inputs=[],
             outputs=details,
         )

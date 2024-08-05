@@ -592,30 +592,18 @@ def fetch_stats_info():
 
 def create_stats_ui(stats_info):
     details = []
-    for key in stats_info.keys():
+    for key, value in stats_info.items():
         with gr.Accordion(key.capitalize()):
-            stats_value = stats_info.get('images', '')
-            images = gr.Textbox(
-                label="Images",
-                value=stats_value,
-                elem_id=tab_prefix + "images",
+            # Create a Textbox for each stat entry dynamically
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=str(value),
+                elem_id=f"{tab_prefix}_{key}",
                 interactive=False,
                 lines=1,
                 max_lines=1,
             )
-            details.append(images)
-
-            pixelsteps_value = stats_info.get('pixelsteps', '')
-            pixelsteps = gr.Textbox(
-                label="Pixelsteps",
-                value=pixelsteps_value,
-                elem_id=tab_prefix + "pixelsteps",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(pixelsteps)
-
+            details.append(detail)
     return details
 
 
@@ -623,22 +611,22 @@ def update_stats_ui():
     """Fetches and updates the stats UI."""
     stats_info = fetch_stats_info()
     # Return a list of updated components
-    return create_stats_ui(stats_info)
+    return [str(value) for value in stats_info.values()]
 
 
 def get_stats_ui():
     with gr.Blocks() as stats_ui:
         stats_info = fetch_stats_info()
         
-        gr.Markdown("## stats", elem_id="stats_title")
+        gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():
-            stats_update = gr.Button("Update stats", elem_id="stats-update")
+            stats_update = gr.Button("Update Stats", elem_id="stats-update")
 
         # Create the initial UI components
         details = create_stats_ui(stats_info)
 
         stats_update.click(
-            fn=lambda: update_stats_ui(),
+            fn=update_stats_ui,
             inputs=[],
             outputs=details,
         )

@@ -70,6 +70,7 @@ def apply_stable_horde_settings(
     endpoint: str,
     show_images: bool,
     save_images: bool,
+    save_source_images: bool,
     save_images_folder: str,
 ):
     config.enabled = enable
@@ -86,6 +87,7 @@ def apply_stable_horde_settings(
     config.nsfw = nsfw
     config.show_image_preview = show_images
     config.save_images = save_images
+    config.save_source_images = save_source_images
     config.save_images_folder = save_images_folder
     config.save()
 
@@ -210,7 +212,7 @@ def create_worker_ui(worker_info):
         if key.capitalize() in ["Kudos_details", "Team"]:
             with gr.Accordion(key.capitalize()):
                 for secondkey in worker_info[key].keys():
-                    value=worker_info[key][secondkey]
+                    value = worker_info[key][secondkey]
                     detail = gr.Textbox(
                         label=secondkey.capitalize(),
                         elem_id=tab_prefix + "worker-info",
@@ -222,9 +224,11 @@ def create_worker_ui(worker_info):
                     details.append(detail)
         elif key.capitalize() in ["Models"]:
             pre_value = worker_info[key]
-            worker_string = ', '.join(map(str, pre_value))
-            stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
-            value=stripped_worker_info
+            worker_string = ", ".join(map(str, pre_value))
+            stripped_worker_info = (
+                worker_string.replace("'", "").replace("[", "").replace("]", "")
+            )
+            value = stripped_worker_info
             detail = gr.Textbox(
                 label=key.capitalize(),
                 value=value,
@@ -234,7 +238,7 @@ def create_worker_ui(worker_info):
                 max_lines=1,
             )
         else:
-            value=worker_info[key]
+            value = worker_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),
                 value=value,
@@ -254,16 +258,18 @@ def update_worker_ui(worker):
     for key in worker_info.keys():
         if key.capitalize() in ["Kudos_details", "Team"]:
             for secondkey in worker_info[key].keys():
-                value=worker_info[key][secondkey]
+                value = worker_info[key][secondkey]
                 updated_values.append(str(value))
         elif key.capitalize() in ["Models"]:
             pre_value = worker_info[key]
-            worker_string = ', '.join(map(str, pre_value))
-            stripped_worker_info = worker_string.replace("'", "").replace("[", "").replace("]", "")
-            value=stripped_worker_info
+            worker_string = ", ".join(map(str, pre_value))
+            stripped_worker_info = (
+                worker_string.replace("'", "").replace("[", "").replace("]", "")
+            )
+            value = stripped_worker_info
             updated_values.append(str(value))
         else:
-            value=worker_info[key]
+            value = worker_info[key]
             updated_values.append(str(value))
     # Return a list of updated components
     return updated_values
@@ -289,6 +295,7 @@ def get_worker_ui(worker):
 
     return worker_ui
 
+
 # User UI
 def fetch_user_info():
     """Fetches the latest user info."""
@@ -309,7 +316,7 @@ def create_user_ui(user_info):
                         if isinstance(user_info[key][secondkey], dict):
                             with gr.Accordion(secondkey.capitalize()):
                                 for thirdkey in user_info[key][secondkey].keys():
-                                    value=user_info[key][secondkey][thirdkey]
+                                    value = user_info[key][secondkey][thirdkey]
                                     detail = gr.Textbox(
                                         label=thirdkey.capitalize(),
                                         value=value,
@@ -320,7 +327,7 @@ def create_user_ui(user_info):
                                     )
                                     details.append(detail)
                         else:
-                            value=user_info[key][secondkey]
+                            value = user_info[key][secondkey]
                             detail = gr.Textbox(
                                 label=secondkey.capitalize(),
                                 value=value,
@@ -330,7 +337,7 @@ def create_user_ui(user_info):
                                 max_lines=1,
                             )
                             details.append(detail)
-            
+
             elif key.capitalize() in [
                 "Kudos_details",
                 "Worker_ids",
@@ -340,7 +347,7 @@ def create_user_ui(user_info):
             ]:
                 with gr.Accordion(key.capitalize()):
                     for secondkey in user_info[key].keys():
-                        value=user_info[key][secondkey]
+                        value = user_info[key][secondkey]
                         detail = gr.Textbox(
                             label=secondkey.capitalize(),
                             value=value,
@@ -350,12 +357,12 @@ def create_user_ui(user_info):
                             max_lines=1,
                         )
                         details.append(detail)
-        
+
         # Handle lists or other data structures
         elif isinstance(user_info[key], list):
             with gr.Accordion(key.capitalize()):
                 for i, item in enumerate(user_info[key]):
-                    value=item
+                    value = item
                     detail = gr.Textbox(
                         label=f"Item {i+1}",
                         value=value,
@@ -368,12 +375,9 @@ def create_user_ui(user_info):
 
         # Handle other data types
         else:
-            value=user_info[key]
+            value = user_info[key]
             detail = gr.Textbox(
-                label=key.capitalize(),
-                value=value,
-                interactive=False,
-                lines=1
+                label=key.capitalize(), value=value, interactive=False, lines=1
             )
             details.append(detail)
     return details
@@ -390,10 +394,10 @@ def update_user_ui():
                 for secondkey in user_info[key].keys():
                     if isinstance(user_info[key][secondkey], dict):
                         for thirdkey in user_info[key][secondkey].keys():
-                            value=user_info[key][secondkey][thirdkey]
+                            value = user_info[key][secondkey][thirdkey]
                             updated_values.append(str(value))
                     else:
-                        value=user_info[key][secondkey]
+                        value = user_info[key][secondkey]
                         updated_values.append(str(value))
             elif key.capitalize() in [
                 "Kudos_details",
@@ -403,15 +407,15 @@ def update_user_ui():
                 "Contributions",
             ]:
                 for secondkey in user_info[key].keys():
-                    value=user_info[key][secondkey]
+                    value = user_info[key][secondkey]
                     updated_values.append(str(value))
         elif isinstance(user_info[key], list):
             with gr.Accordion(key.capitalize()):
                 for i, item in enumerate(user_info[key]):
-                    value=item
+                    value = item
                     updated_values.append(str(value))
         else:
-            value=user_info[key]
+            value = user_info[key]
             updated_values.append(str(value))
     # Return a list of updated components
     return updated_values
@@ -445,7 +449,7 @@ def fetch_and_update_kudos():
     if user_info["kudos"]:
         kudos = user_info["kudos"]
         return kudos
-    
+
 
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
@@ -487,7 +491,7 @@ def get_kudos_ui():
                     elem_id="kudos_validate_button",
                 )
                 validate_output = gr.Markdown("")
-            
+
         with gr.Row():
             with gr.Column():
                 # Kudo amount display
@@ -537,7 +541,9 @@ def get_kudos_ui():
                 validation = validate_username(username)
                 if validation == "Success":
                     if kudos_amount and kudos_amount != 0:
-                        result = api.transfer_kudos(session, config.apikey, username, kudos_amount)
+                        result = api.transfer_kudos(
+                            session, config.apikey, username, kudos_amount
+                        )
                         return result
                     else:
                         return "Can't transfer 0 Kudos"
@@ -545,7 +551,7 @@ def get_kudos_ui():
                     return validation
             else:
                 return "No username specified"
-        
+
         update_kudos.click(
             fn=lambda: fetch_and_update_kudos(),
             inputs=[],
@@ -576,11 +582,13 @@ def create_news_ui(news_info):
 
     for news_item in news_info:
         if isinstance(news_item, dict):
-            importance = news_item.get('importance', 'No importance available')
-            title = news_item.get('title', 'No title available')
-            date_published = news_item.get('date_published', 'No published date available')
-            with gr.Accordion(f"{importance} - {title} - {date_published}"): 
-                value = news_item.get('newspiece', 'No message available')
+            importance = news_item.get("importance", "No importance available")
+            title = news_item.get("title", "No title available")
+            date_published = news_item.get(
+                "date_published", "No published date available"
+            )
+            with gr.Accordion(f"{importance} - {title} - {date_published}"):
+                value = news_item.get("newspiece", "No message available")
                 message = gr.TextArea(
                     label="Message",
                     value=value,
@@ -588,11 +596,11 @@ def create_news_ui(news_info):
                 )
                 details.append(message)
 
-                tags_value = news_item.get('tags', [])
+                tags_value = news_item.get("tags", [])
                 if not isinstance(tags_value, list):
                     tags_value = []
 
-                tags_string = ', '.join(map(str, tags_value))
+                tags_string = ", ".join(map(str, tags_value))
                 tags = gr.Textbox(
                     label="Tags",
                     value=tags_string,
@@ -611,14 +619,14 @@ def update_news_ui():
     updated_values = []
     for news_item in news_info:
         if isinstance(news_item, dict):
-            value = news_item.get('newspiece', 'No message available')
+            value = news_item.get("newspiece", "No message available")
             updated_values.append(str(value))
 
-            tags_value = news_item.get('tags', [])
+            tags_value = news_item.get("tags", [])
             if not isinstance(tags_value, list):
                 tags_value = []
 
-            tags_string = ', '.join(map(str, tags_value))
+            tags_string = ", ".join(map(str, tags_value))
             updated_values.append(str(tags_string))
 
     return updated_values
@@ -660,7 +668,7 @@ def create_stats_ui(stats_info):
     for period, stats in stats_info.items():
         with gr.Accordion(period.capitalize()):
             for stat_type, value in stats.items():
-                value=str(value)
+                value = str(value)
                 textbox = gr.Textbox(
                     label=f"{stat_type.capitalize()}",
                     value=value,
@@ -680,7 +688,7 @@ def update_stats_ui():
     updated_values = []
     for period, stats in stats_info.items():
         for stat_type, value in stats.items():
-            value=str(value)
+            value = str(value)
             updated_values.append(str(value))
     return updated_values
 
@@ -689,7 +697,7 @@ def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
         stats_info = fetch_stats_info()
-        
+
         gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():
             stats_update = gr.Button("Update Stats", elem_id="stats-update")
@@ -703,7 +711,6 @@ def get_stats_ui():
             outputs=details,
         )
     return stats_ui
-
 
 
 # Settings UI
@@ -720,7 +727,7 @@ def get_settings_ui(status):
             visible=True,
             elem_id=tab_prefix + "apply-settings",
         )
-    
+
         enable = gr.Checkbox(
             config.enabled,
             label="Enable",
@@ -785,6 +792,9 @@ def get_settings_ui(status):
         )
         show_images = gr.Checkbox(config.show_image_preview, label="Show Images")
         save_images = gr.Checkbox(config.save_images, label="Save Images")
+        save_source_images = gr.Checkbox(
+            config.save_source_images, label="Save Source Images"
+        )
 
         running_type = gr.Textbox(
             "",
@@ -799,9 +809,7 @@ def get_settings_ui(status):
             Updating selected models...'
             )
             selected_models = horde.set_current_models(local_selected_models)
-            local_selected_models_dropdown.update(
-                value=list(selected_models.values())
-            )
+            local_selected_models_dropdown.update(value=list(selected_models.values()))
             return f'Status: \
             {"Running" if config.enabled else "Stopped"}, \
             Selected models \
@@ -827,7 +835,7 @@ def get_settings_ui(status):
         )
         gr.Markdown("Once you select a model it will take some time to load.")
 
-            # Settings click
+        # Settings click
         apply_settings.click(
             fn=apply_stable_horde_settings,
             inputs=[
@@ -845,6 +853,7 @@ def get_settings_ui(status):
                 endpoint,
                 show_images,
                 save_images,
+                save_source_images,
                 save_images_folder,
             ],
             outputs=[status, running_type],
@@ -917,7 +926,6 @@ def on_ui_tabs():
                             print("-" * 64)
                             return worker
 
-
                 # TODO Move this somewhere else
                 user_info = api.get_user_info(session, config.apikey)
                 worker_ids = user_info["worker_ids"]
@@ -925,7 +933,6 @@ def on_ui_tabs():
                     worker = get_worker(session, config.apikey, worker_ids)
                 else:
                     worker = "Unavailable"
-                
 
         # General tabs
         with gr.Row():

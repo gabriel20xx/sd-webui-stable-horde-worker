@@ -18,6 +18,7 @@ class StableHordeConfig(object):
     allow_post_processing: bool = True
     show_image_preview: bool = False
     save_images: bool = False
+    save_source_images: bool = False
     save_images_folder: str = "horde"
     current_models: dict = {}
     hires_firstphase_resolution: int = 512
@@ -53,6 +54,7 @@ class StableHordeConfig(object):
                 "restore_settings": True,
                 "show_image_preview": False,
                 "save_images": False,
+                "save_source_images": False,
                 "save_images_folder": "horde",
                 "endpoint": "https://stablehorde.net/",
                 "apikey": "00000000",

@@ -760,7 +760,7 @@ def create_status_ui(status_info):
         with gr.Accordion(key.capitalize()):
             value = status_info[key]
             textbox = gr.Textbox(
-                label=f"{value.capitalize()}",
+                label=f"{key.capitalize()}",
                 value=value,
                 elem_id=f"{tab_prefix}_{value}",
                 interactive=False,

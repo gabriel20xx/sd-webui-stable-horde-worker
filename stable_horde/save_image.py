@@ -7,6 +7,91 @@ from modules import script_callbacks, shared, sd_samplers
 from modules.shared import opts
 
 
+class FilenameGenerator:
+    replacements = {
+        "basename": lambda self: self.basename or "img",
+        "seed": lambda self: self.seed if self.seed is not None else "",
+        "seed_first": lambda self: (
+            self.seed if self.p.batch_size == 1 else self.p.all_seeds[0]
+        ),
+        "seed_last": lambda self: (
+            NOTHING_AND_SKIP_PREVIOUS_TEXT
+            if self.p.batch_size == 1
+            else self.p.all_seeds[-1]
+        ),
+        "steps": lambda self: self.p and self.p.steps,
+        "cfg": lambda self: self.p and self.p.cfg_scale,
+        "width": lambda self: self.image.width,
+        "height": lambda self: self.image.height,
+        "styles": lambda self: self.p
+        and sanitize_filename_part(
+            ", ".join([style for style in self.p.styles if not style == "None"])
+            or "None",
+            replace_spaces=False,
+        ),
+        "sampler": lambda self: self.p
+        and sanitize_filename_part(self.p.sampler_name, replace_spaces=False),
+        "sampler_scheduler": lambda self: self.p
+        and get_sampler_scheduler(self.p, True),
+        "scheduler": lambda self: self.p and get_sampler_scheduler(self.p, False),
+        "model_hash": lambda self: getattr(
+            self.p, "sd_model_hash", shared.sd_model.sd_model_hash
+        ),
+        "model_name": lambda self: sanitize_filename_part(
+            shared.sd_model.sd_checkpoint_info.name_for_extra, replace_spaces=False
+        ),
+        "date": lambda self: datetime.datetime.now().strftime("%Y-%m-%d"),
+        "datetime": lambda self, *args: self.datetime(
+            *args
+        ),  # accepts formats: [datetime], [datetime<Format>], [datetime<Format>
+        # <Time Zone>]
+        "job_timestamp": lambda self: getattr(
+            self.p, "job_timestamp", shared.state.job_timestamp
+        ),
+        "prompt_hash": lambda self, *args: self.string_hash(self.prompt, *args),
+        "negative_prompt_hash": lambda self, *args: self.string_hash(
+            self.p.negative_prompt, *args
+        ),
+        "full_prompt_hash": lambda self, *args: self.string_hash(
+            f"{self.p.prompt} {self.p.negative_prompt}", *args
+        ),  # a space in between to create a unique string
+        "prompt": lambda self: sanitize_filename_part(self.prompt),
+        "prompt_no_styles": lambda self: self.prompt_no_style(),
+        "prompt_spaces": lambda self: sanitize_filename_part(
+            self.prompt, replace_spaces=False
+        ),
+        "prompt_words": lambda self: self.prompt_words(),
+        "batch_number": lambda self: (
+            NOTHING_AND_SKIP_PREVIOUS_TEXT
+            if self.p.batch_size == 1 or self.zip
+            else self.p.batch_index + 1
+        ),
+        "batch_size": lambda self: self.p.batch_size,
+        "generation_number": lambda self: (
+            NOTHING_AND_SKIP_PREVIOUS_TEXT
+            if (self.p.n_iter == 1 and self.p.batch_size == 1) or self.zip
+            else self.p.iteration * self.p.batch_size + self.p.batch_index + 1
+        ),
+        "hasprompt": lambda self, *args: self.hasprompt(
+            *args
+        ),  # accepts formats:[hasprompt<prompt1|default><prompt2>..]
+        "clip_skip": lambda self: opts.data["CLIP_stop_at_last_layers"],
+        "denoising": lambda self: (
+            self.p.denoising_strength
+            if self.p and self.p.denoising_strength
+            else NOTHING_AND_SKIP_PREVIOUS_TEXT
+        ),
+        "user": lambda self: self.p.user,
+        "vae_filename": lambda self: self.get_vae_filename(),
+        "none": lambda self: "",  # Overrides the default, so you can get just the
+        # sequence number
+        "image_hash": lambda self, *args: self.image_hash(
+            *args
+        ),  # accepts formats: [image_hash<length>] default full hash
+    }
+    default_time_format = "%Y%m%d%H%M%S"
+
+
 def save_image(
     image,
     path,
@@ -195,91 +280,6 @@ def get_sampler_scheduler(p, sampler):
             sampler_scheduler = get_scheduler_str(p.sampler_name, p.scheduler)
         return sanitize_filename_part(sampler_scheduler, replace_spaces=False)
     return NOTHING_AND_SKIP_PREVIOUS_TEXT
-
-
-class FilenameGenerator:
-    replacements = {
-        "basename": lambda self: self.basename or "img",
-        "seed": lambda self: self.seed if self.seed is not None else "",
-        "seed_first": lambda self: (
-            self.seed if self.p.batch_size == 1 else self.p.all_seeds[0]
-        ),
-        "seed_last": lambda self: (
-            NOTHING_AND_SKIP_PREVIOUS_TEXT
-            if self.p.batch_size == 1
-            else self.p.all_seeds[-1]
-        ),
-        "steps": lambda self: self.p and self.p.steps,
-        "cfg": lambda self: self.p and self.p.cfg_scale,
-        "width": lambda self: self.image.width,
-        "height": lambda self: self.image.height,
-        "styles": lambda self: self.p
-        and sanitize_filename_part(
-            ", ".join([style for style in self.p.styles if not style == "None"])
-            or "None",
-            replace_spaces=False,
-        ),
-        "sampler": lambda self: self.p
-        and sanitize_filename_part(self.p.sampler_name, replace_spaces=False),
-        "sampler_scheduler": lambda self: self.p
-        and get_sampler_scheduler(self.p, True),
-        "scheduler": lambda self: self.p and get_sampler_scheduler(self.p, False),
-        "model_hash": lambda self: getattr(
-            self.p, "sd_model_hash", shared.sd_model.sd_model_hash
-        ),
-        "model_name": lambda self: sanitize_filename_part(
-            shared.sd_model.sd_checkpoint_info.name_for_extra, replace_spaces=False
-        ),
-        "date": lambda self: datetime.datetime.now().strftime("%Y-%m-%d"),
-        "datetime": lambda self, *args: self.datetime(
-            *args
-        ),  # accepts formats: [datetime], [datetime<Format>], [datetime<Format>
-        # <Time Zone>]
-        "job_timestamp": lambda self: getattr(
-            self.p, "job_timestamp", shared.state.job_timestamp
-        ),
-        "prompt_hash": lambda self, *args: self.string_hash(self.prompt, *args),
-        "negative_prompt_hash": lambda self, *args: self.string_hash(
-            self.p.negative_prompt, *args
-        ),
-        "full_prompt_hash": lambda self, *args: self.string_hash(
-            f"{self.p.prompt} {self.p.negative_prompt}", *args
-        ),  # a space in between to create a unique string
-        "prompt": lambda self: sanitize_filename_part(self.prompt),
-        "prompt_no_styles": lambda self: self.prompt_no_style(),
-        "prompt_spaces": lambda self: sanitize_filename_part(
-            self.prompt, replace_spaces=False
-        ),
-        "prompt_words": lambda self: self.prompt_words(),
-        "batch_number": lambda self: (
-            NOTHING_AND_SKIP_PREVIOUS_TEXT
-            if self.p.batch_size == 1 or self.zip
-            else self.p.batch_index + 1
-        ),
-        "batch_size": lambda self: self.p.batch_size,
-        "generation_number": lambda self: (
-            NOTHING_AND_SKIP_PREVIOUS_TEXT
-            if (self.p.n_iter == 1 and self.p.batch_size == 1) or self.zip
-            else self.p.iteration * self.p.batch_size + self.p.batch_index + 1
-        ),
-        "hasprompt": lambda self, *args: self.hasprompt(
-            *args
-        ),  # accepts formats:[hasprompt<prompt1|default><prompt2>..]
-        "clip_skip": lambda self: opts.data["CLIP_stop_at_last_layers"],
-        "denoising": lambda self: (
-            self.p.denoising_strength
-            if self.p and self.p.denoising_strength
-            else NOTHING_AND_SKIP_PREVIOUS_TEXT
-        ),
-        "user": lambda self: self.p.user,
-        "vae_filename": lambda self: self.get_vae_filename(),
-        "none": lambda self: "",  # Overrides the default, so you can get just the
-        # sequence number
-        "image_hash": lambda self, *args: self.image_hash(
-            *args
-        ),  # accepts formats: [image_hash<length>] default full hash
-    }
-    default_time_format = "%Y%m%d%H%M%S"
 
 
 if not shared.cmd_opts.unix_filenames_sanitization:

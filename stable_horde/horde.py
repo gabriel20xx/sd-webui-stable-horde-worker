@@ -303,6 +303,18 @@ class StableHorde:
             p = processing.StableDiffusionProcessingImg2Img(
                 init_images=[job.source_image], mask=job.source_mask, **params
             )
+            if self.config.save_images:
+                save_image(
+                    job.source_image,
+                    self.config.save_images_folder,
+                    "",
+                    job.seed,
+                    job.prompt,
+                    "png",
+                    p=p,
+                    suffix="-Source",
+                )
+
         else:
             p = processing.StableDiffusionProcessingTxt2Img(**params)
 

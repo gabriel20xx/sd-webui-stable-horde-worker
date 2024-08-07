@@ -38,6 +38,24 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
+    def get_team_info(session: requests.Session, apikey: str, team_id: str) -> dict:
+        """
+        Get worker info
+        """
+        headers = {
+            "accept": "application/json",
+            "apikey": apikey,
+        }
+        r = session.get(
+            f"https://stablehorde.net/api/v2/workers/{team_id}", headers=headers
+        )
+        data = r.json()
+        if r.status_code == 200:
+            return data
+        else:
+            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
+
+    @staticmethod
     def get_news_info(session: requests.Session) -> list:
         """
         Get horde news
@@ -49,7 +67,7 @@ class API:
             return data
         else:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
-        
+
     @staticmethod
     def get_stats_info(session: requests.Session) -> dict:
         headers = {

@@ -442,6 +442,115 @@ def get_user_ui():
         )
     return user_ui
 
+# Team UI
+def fetch_team_info(team):
+    """Fetches the latest team info."""
+    team_info = api.get_team_info(session, config.apikey, team)
+    return team_info
+
+
+def create_team_ui(team_info):
+    """Creates and returns Gradio UI components based on the team info."""
+    details = []
+
+    for key in team_info.keys():
+        if key.capitalize() in ["Kudos_details", "Team"]:
+            with gr.Accordion(key.capitalize()):
+                for secondkey in team_info[key].keys():
+                    value = team_info[key][secondkey]
+                    detail = gr.Textbox(
+                        label=secondkey.capitalize(),
+                        elem_id=tab_prefix + "team-info",
+                        value=value,
+                        interactive=False,
+                        lines=1,
+                        max_lines=1,
+                    )
+                    details.append(detail)
+        elif key.capitalize() in ["Models"]:
+            pre_value = team_info[key]
+            team_string = ", ".join(map(str, pre_value))
+            stripped_team_info = (
+                team_string.replace("'", "").replace("[", "").replace("]", "")
+            )
+            value = stripped_team_info
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=value,
+                elem_id=tab_prefix + "team-info",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        else:
+            value = team_info[key]
+            detail = gr.Textbox(
+                label=key.capitalize(),
+                value=value,
+                elem_id=tab_prefix + "team-info",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            details.append(detail)
+    return details
+
+
+def update_team_ui(team):
+    """Fetches and updates the team UI."""
+    team_info = fetch_team_info(team)
+    updated_values = []
+    for key in team_info.keys():
+        if key.capitalize() in ["Kudos_details", "Team"]:
+            for secondkey in team_info[key].keys():
+                value = team_info[key][secondkey]
+                updated_values.append(str(value))
+        elif key.capitalize() in ["Models"]:
+            pre_value = team_info[key]
+            team_string = ", ".join(map(str, pre_value))
+            stripped_team_info = (
+                team_string.replace("'", "").replace("[", "").replace("]", "")
+            )
+            value = stripped_team_info
+            updated_values.append(str(value))
+        else:
+            value = team_info[key]
+            updated_values.append(str(value))
+    # Return a list of updated components
+    return updated_values
+
+
+def get_team_ui(team):
+    with gr.Blocks() as team_ui:
+        details = []
+
+        team_info = fetch_team_info(team)
+
+        gr.Markdown("## Team Details")
+        team_update = gr.Button("Update Team Details", elem_id="team-update")
+
+        with gr.Column():
+            # Team ID
+            team = gr.Textbox(
+                label="Team ID",
+                placeholder="Enter Team ID",
+                elem_id="team_id",
+                interactive=True,
+                lines=1,
+                max_lines=1,
+            )
+
+        # Create the initial UI components
+        details = create_team_ui(team_info)
+
+        team_update.click(
+            fn=lambda: update_team_ui(team),
+            inputs=[],
+            outputs=details,
+        )
+
+    return team_ui
+
 
 # Kudos UI
 def fetch_and_update_kudos():

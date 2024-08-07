@@ -762,7 +762,7 @@ def create_status_ui(status_info):
             textbox = gr.Textbox(
                 label=f"{key.capitalize()}",
                 value=value,
-                elem_id=f"{tab_prefix}_{value}",
+                elem_id=f"{tab_prefix}_{key}",
                 interactive=False,
                 lines=1,
                 max_lines=1,

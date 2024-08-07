@@ -522,7 +522,7 @@ def get_team_ui():
                 max_lines=1,
             )
             team_update = gr.Button("Update Team Details", elem_id="team-update")
-            details = gr.Column()  # Placeholder for dynamic team details
+            details = create_team_ui(team_id)  # Placeholder for dynamic team details
 
         team_update.click(
             fn=lambda team_id: update_team_ui(team_id),

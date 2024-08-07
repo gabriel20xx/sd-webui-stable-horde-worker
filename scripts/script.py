@@ -238,6 +238,8 @@ def create_worker_ui(worker_info):
                 max_lines=1,
             )
         else:
+            if worker_info[key] == "id":
+                worker_info[key] = "worker_id"
             value = worker_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),
@@ -375,6 +377,8 @@ def create_user_ui(user_info):
 
         # Handle other data types
         else:
+            if user_info[key] == "id":
+                user_info[key] = "user_id"
             value = user_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(), value=value, interactive=False, lines=1
@@ -486,6 +490,8 @@ def create_team_ui(team_info):
             )
             details.append(detail)
         else:
+            if team_info[key] == "id":
+                team_info[key] = "team_id"
             value = team_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),

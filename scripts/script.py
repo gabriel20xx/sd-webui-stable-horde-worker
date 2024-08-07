@@ -443,9 +443,11 @@ def get_user_ui():
     return user_ui
 
 # Team UI
-def fetch_team_info(team):
+def fetch_team_info(team_id):
     """Fetches the latest team info."""
-    team_info = api.get_team_info(session, config.apikey, team)
+    if not team_id:
+        return {}
+    team_info = api.get_team_info(session, config.apikey, team_id)
     return team_info
 
 
@@ -482,6 +484,7 @@ def create_team_ui(team_info):
                 lines=1,
                 max_lines=1,
             )
+            details.append(detail)
         else:
             value = team_info[key]
             detail = gr.Textbox(
@@ -496,40 +499,21 @@ def create_team_ui(team_info):
     return details
 
 
-def update_team_ui(team):
+def update_team_ui(team_id):
     """Fetches and updates the team UI."""
-    team_info = fetch_team_info(team)
-    updated_values = []
-    for key in team_info.keys():
-        if key.capitalize() in ["Kudos_details", "Team"]:
-            for secondkey in team_info[key].keys():
-                value = team_info[key][secondkey]
-                updated_values.append(str(value))
-        elif key.capitalize() in ["Models"]:
-            pre_value = team_info[key]
-            team_string = ", ".join(map(str, pre_value))
-            stripped_team_info = (
-                team_string.replace("'", "").replace("[", "").replace("]", "")
-            )
-            value = stripped_team_info
-            updated_values.append(str(value))
-        else:
-            value = team_info[key]
-            updated_values.append(str(value))
-    # Return a list of updated components
-    return updated_values
+    team_info = fetch_team_info(team_id)
+    if not team_info:
+        return []  # Return an empty list if team_info is empty
+    return create_team_ui(team_info)
 
 
 def get_team_ui():
     with gr.Blocks() as team_ui:
-        details = []
-
         gr.Markdown("## Team Details")
-        team_update = gr.Button("Update Team Details", elem_id="team-update")
-
+        
         with gr.Column():
             # Team ID
-            team = gr.Textbox(
+            team_id = gr.Textbox(
                 label="Team ID",
                 placeholder="Enter Team ID",
                 elem_id="team_id",
@@ -537,18 +521,17 @@ def get_team_ui():
                 lines=1,
                 max_lines=1,
             )
-
-        # Create the initial UI components
-        if team:
-            details = create_team_ui(team)
+            team_update = gr.Button("Update Team Details", elem_id="team-update")
+            details = gr.Column()  # Placeholder for dynamic team details
 
         team_update.click(
-            fn=lambda: update_team_ui(team),
-            inputs=[],
-            outputs=details,
+            fn=lambda team_id: update_team_ui(team_id),
+            inputs=[team_id],
+            outputs=[details],
         )
 
     return team_ui
+
 
 
 # Kudos UI

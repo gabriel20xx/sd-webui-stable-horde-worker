@@ -520,11 +520,9 @@ def update_team_ui(team):
     return updated_values
 
 
-def get_team_ui(team):
+def get_team_ui():
     with gr.Blocks() as team_ui:
         details = []
-
-        team_info = fetch_team_info(team)
 
         gr.Markdown("## Team Details")
         team_update = gr.Button("Update Team Details", elem_id="team-update")
@@ -541,7 +539,8 @@ def get_team_ui(team):
             )
 
         # Create the initial UI components
-        details = create_team_ui(team_info)
+        if team:
+            details = create_team_ui(team)
 
         team_update.click(
             fn=lambda: update_team_ui(team),
@@ -1048,6 +1047,8 @@ def on_ui_tabs():
                 get_worker_ui(worker)
             with gr.Tab("User"):
                 get_user_ui()
+            with gr.Tab("Team"):
+                get_team_ui()
             with gr.Tab("Kudos"):
                 get_kudos_ui()
             with gr.Tab("News"):

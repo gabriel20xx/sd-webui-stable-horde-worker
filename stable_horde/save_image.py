@@ -1,9 +1,11 @@
 import os
 import re
+import pytz
 import string
 import datetime
 import functools
-from modules import script_callbacks, shared, sd_samplers
+import hashlib
+from modules import script_callbacks, shared, sd_samplers, errors
 from modules.shared import opts
 
 
@@ -90,6 +92,139 @@ class FilenameGenerator:
         ),  # accepts formats: [image_hash<length>] default full hash
     }
     default_time_format = "%Y%m%d%H%M%S"
+
+    def __init__(self, p, seed, prompt, image, zip=False, basename=""):
+        self.p = p
+        self.seed = seed
+        self.prompt = prompt
+        self.image = image
+        self.zip = zip
+        self.basename = basename
+
+    def get_vae_filename(self):
+        """Get the name of the VAE file."""
+
+        import modules.sd_vae as sd_vae
+
+        if sd_vae.loaded_vae_file is None:
+            return "NoneType"
+
+        file_name = os.path.basename(sd_vae.loaded_vae_file)
+        split_file_name = file_name.split(".")
+        if len(split_file_name) > 1 and split_file_name[0] == "":
+            return split_file_name[1]  # if the first character of the filename is "."
+        # then [1] is obtained.
+        else:
+            return split_file_name[0]
+
+    def hasprompt(self, *args):
+        lower = self.prompt.lower()
+        if self.p is None or self.prompt is None:
+            return None
+        outres = ""
+        for arg in args:
+            if arg != "":
+                division = arg.split("|")
+                expected = division[0].lower()
+                default = division[1] if len(division) > 1 else ""
+                if lower.find(expected) >= 0:
+                    outres = f"{outres}{expected}"
+                else:
+                    outres = outres if default == "" else f"{outres}{default}"
+        return sanitize_filename_part(outres)
+
+    def prompt_no_style(self):
+        if self.p is None or self.prompt is None:
+            return None
+
+        prompt_no_style = self.prompt
+        for style in shared.prompt_styles.get_style_prompts(self.p.styles):
+            if style:
+                for part in style.split("{prompt}"):
+                    prompt_no_style = (
+                        prompt_no_style.replace(part, "")
+                        .replace(", ,", ",")
+                        .strip()
+                        .strip(",")
+                    )
+
+                prompt_no_style = (
+                    prompt_no_style.replace(style, "").strip().strip(",").strip()
+                )
+
+        return sanitize_filename_part(prompt_no_style, replace_spaces=False)
+
+    def prompt_words(self):
+        words = [x for x in re_nonletters.split(self.prompt or "") if x]
+        if len(words) == 0:
+            words = ["empty"]
+        return sanitize_filename_part(
+            " ".join(words[0: opts.directories_max_prompt_words]), replace_spaces=False
+        )
+
+    def datetime(self, *args):
+        time_datetime = datetime.datetime.now()
+
+        time_format = args[0] if (args and args[0] != "") else self.default_time_format
+        try:
+            time_zone = pytz.timezone(args[1]) if len(args) > 1 else None
+        except pytz.exceptions.UnknownTimeZoneError:
+            time_zone = None
+
+        time_zone_time = time_datetime.astimezone(time_zone)
+        try:
+            formatted_time = time_zone_time.strftime(time_format)
+        except (ValueError, TypeError):
+            formatted_time = time_zone_time.strftime(self.default_time_format)
+
+        return sanitize_filename_part(formatted_time, replace_spaces=False)
+
+    def image_hash(self, *args):
+        length = int(args[0]) if (args and args[0] != "") else None
+        return hashlib.sha256(self.image.tobytes()).hexdigest()[0:length]
+
+    def string_hash(self, text, *args):
+        length = int(args[0]) if (args and args[0] != "") else 8
+        return hashlib.sha256(text.encode()).hexdigest()[0:length]
+
+    def apply(self, x):
+        res = ""
+
+        for m in re_pattern.finditer(x):
+            text, pattern = m.groups()
+
+            if pattern is None:
+                res += text
+                continue
+
+            pattern_args = []
+            while True:
+                m = re_pattern_arg.match(pattern)
+                if m is None:
+                    break
+
+                pattern, arg = m.groups()
+                pattern_args.insert(0, arg)
+
+            fun = self.replacements.get(pattern.lower())
+            if fun is not None:
+                try:
+                    replacement = fun(self, *pattern_args)
+                except Exception:
+                    replacement = None
+                    errors.report(
+                        f"Error adding [{pattern}] to filename", exc_info=True
+                    )
+
+                if replacement == NOTHING_AND_SKIP_PREVIOUS_TEXT:
+                    continue
+                elif replacement is not None:
+                    res += text + str(replacement)
+                    continue
+
+            res += f"{text}[{pattern}]"
+
+        return res
 
 
 def save_image(
@@ -224,13 +359,13 @@ def get_next_sequence_number(path, basename):
     The sequence starts at 0.
     """
     result = -1
-    if basename != '':
+    if basename != "":
         basename = f"{basename}-"
 
     prefix_length = len(basename)
     for p in os.listdir(path):
         if p.startswith(basename):
-            parts = os.path.splitext(p[prefix_length:])[0].split('-')  # splits the
+            parts = os.path.splitext(p[prefix_length:])[0].split("-")  # splits the
             # filename (removing the basename first if one is defined, so the sequence
             # number is always the first element)
             try:
@@ -246,9 +381,9 @@ def sanitize_filename_part(text, replace_spaces=True):
         return None
 
     if replace_spaces:
-        text = text.replace(' ', '_')
+        text = text.replace(" ", "_")
 
-    text = text.translate({ord(x): '_' for x in invalid_filename_chars})
+    text = text.translate({ord(x): "_" for x in invalid_filename_chars})
     text = text.lstrip(invalid_filename_prefix)[:max_filename_part_length]
     text = text.rstrip(invalid_filename_postfix)
     return text
@@ -257,9 +392,9 @@ def sanitize_filename_part(text, replace_spaces=True):
 @functools.cache
 def get_scheduler_str(sampler_name, scheduler_name):
     """Returns {Scheduler} if the scheduler is applicable to the sampler"""
-    if scheduler_name == 'Automatic':
+    if scheduler_name == "Automatic":
         config = sd_samplers.find_sampler_config(sampler_name)
-        scheduler_name = config.options.get('scheduler', 'Automatic')
+        scheduler_name = config.options.get("scheduler", "Automatic")
     return scheduler_name.capitalize()
 
 
@@ -267,13 +402,13 @@ def get_scheduler_str(sampler_name, scheduler_name):
 def get_sampler_scheduler_str(sampler_name, scheduler_name):
     """Returns the '{Sampler} {Scheduler}' if the scheduler is applicable to the
     sampler"""
-    return f'{sampler_name} {get_scheduler_str(sampler_name, scheduler_name)}'
+    return f"{sampler_name} {get_scheduler_str(sampler_name, scheduler_name)}"
 
 
 def get_sampler_scheduler(p, sampler):
     """Returns '{Sampler} {Scheduler}' / '{Scheduler}' /
     'NOTHING_AND_SKIP_PREVIOUS_TEXT'"""
-    if hasattr(p, 'scheduler') and hasattr(p, 'sampler_name'):
+    if hasattr(p, "scheduler") and hasattr(p, "sampler_name"):
         if sampler:
             sampler_scheduler = get_sampler_scheduler_str(p.sampler_name, p.scheduler)
         else:
@@ -285,10 +420,10 @@ def get_sampler_scheduler(p, sampler):
 if not shared.cmd_opts.unix_filenames_sanitization:
     invalid_filename_chars = '#<>:"/\\|?*\n\r\t'
 else:
-    invalid_filename_chars = '/'
-invalid_filename_prefix = ' '
-invalid_filename_postfix = ' .'
-re_nonletters = re.compile(r'[\s' + string.punctuation + ']+')
+    invalid_filename_chars = "/"
+invalid_filename_prefix = " "
+invalid_filename_postfix = " ."
+re_nonletters = re.compile(r"[\s" + string.punctuation + "]+")
 re_pattern = re.compile(r"(.*?)(?:\[([^\[\]]+)\]|$)")
 re_pattern_arg = re.compile(r"(.*)<([^>]*)>$")
 max_filename_part_length = shared.cmd_opts.filenames_max_length

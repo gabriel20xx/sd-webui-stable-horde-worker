@@ -764,6 +764,62 @@ def get_news_ui():
 
 
 # Stats UI
+def fetch_status_info():
+    """Fetches the latest status info."""
+    status_info = api.get_status_info(session)
+    return status_info
+
+
+def create_status_ui(status_info):
+    """Creates UI components for the status info."""
+    details = []
+    for key in status_info.keys():
+        with gr.Accordion(key.capitalize()):
+            value = status_info[key]
+            textbox = gr.Textbox(
+                label=f"{value.capitalize()}",
+                value=value,
+                elem_id=f"{tab_prefix}_{value}",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            details.append(textbox)
+    return details
+
+
+def update_status_ui():
+    """Fetches the latest status info and returns updated values for UI components."""
+    status_info = fetch_status_info()
+    # Extract values for each stat in each period and return them as a list
+    updated_values = []
+    for key in status_info.keys():
+        value = status_info[key]
+        updated_values.append(str(value))
+    return updated_values
+
+
+def get_status_ui():
+    """Sets up the status UI with Gradio."""
+    with gr.Blocks() as status_ui:
+        status_info = fetch_status_info()
+
+        gr.Markdown("## Stats", elem_id="status_title")
+        with gr.Row():
+            status_update = gr.Button("Update Stats", elem_id="status-update")
+
+        # Create the initial UI components
+        details = create_status_ui(status_info)
+
+        status_update.click(
+            fn=lambda: update_status_ui(),
+            inputs=[],
+            outputs=details,
+        )
+    return status_ui
+
+
+# Stats UI
 def fetch_stats_info():
     """Fetches the latest stats info."""
     stats_info = api.get_stats_info(session)
@@ -1053,6 +1109,8 @@ def on_ui_tabs():
                 get_kudos_ui()
             with gr.Tab("News"):
                 get_news_ui()
+            with gr.Tab("Status"):
+                get_status_ui()
             with gr.Tab("Stats"):
                 get_stats_ui()
             with gr.Tab("Settings"):

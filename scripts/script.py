@@ -921,9 +921,6 @@ def on_ui_tabs():
                         worker_info = api.get_worker_info(session, apikey, worker)
                         worker_name = worker_info["name"]
                         if worker_name == config.name:
-                            print("\n" + "-" * 64)
-                            print(f"Current Worker: {worker_name}")
-                            print("-" * 64)
                             return worker
 
                 # TODO Move this somewhere else

@@ -154,6 +154,7 @@ class StableHorde:
         await self.get_supported_models()
         self.current_models = self.config.current_models
         print("-" * 64)
+        print("Stable Horde Worker")
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         with requests.Session() as session:

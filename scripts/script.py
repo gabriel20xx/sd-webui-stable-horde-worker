@@ -97,6 +97,8 @@ def apply_stable_horde_settings(
     )
 
 
+tab_prefix = "stable-horde-"
+
 # Generator UI
 def get_generator_ui():
     tab_prefix = "stable-horde-"

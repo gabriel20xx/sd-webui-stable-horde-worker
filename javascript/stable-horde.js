@@ -4,7 +4,7 @@ let globalHordeCurrentId
 function stableHordeStartTimer() {
   if (!globalHordeTimer) {
     globalHordeTimer = setInterval(() => {
-      const currentId = gradioApp().querySelector('#stable-horde #stable-horde-current-id textarea')?.value
+      const currentId = gradioApp().querySelector('#stable-horde #stable-horde-current-id input')?.value
       const refreshBtn = gradioApp().querySelector('#stable-horde #stable-horde-refresh')
       if (refreshBtn) {
         refreshBtn.click()

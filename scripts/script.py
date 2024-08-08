@@ -52,6 +52,7 @@ def horde_thread():
 def apply_stable_horde_apikey(apikey: str):
     config.apikey = apikey
     config.save()
+    gr.Info("API Key Saved")
 
 
 # Settings
@@ -90,6 +91,7 @@ def apply_stable_horde_settings(
     config.save_source_images = save_source_images
     config.save_images_folder = save_images_folder
     config.save()
+    gr.Info("Config Saved")
 
     return (
         f'Status: {"Running" if config.enabled else "Stopped"}',
@@ -174,25 +176,23 @@ def get_generator_ui():
 
                 log = gr.HTML(elem_id=tab_prefix + "log")
 
-                # Click functions
-                if current_id and log and state:
-                    refresh.click(
-                        fn=lambda: on_refresh(),
-                        outputs=[current_id, log, state],
-                        show_progress=False,
-                    )
+            # Click functions
+            refresh.click(
+                fn=lambda: on_refresh(),
+                outputs=[current_id, log, state],
+                show_progress=False,
+            )
 
-                if current_id and log and state and preview:
-                    refresh_image.click(
-                        fn=lambda: on_refresh(True),
-                        outputs=[
-                            current_id,
-                            log,
-                            state,
-                            preview,
-                        ],
-                        show_progress=False,
-                    )
+            refresh_image.click(
+                fn=lambda: on_refresh(True),
+                outputs=[
+                    current_id,
+                    log,
+                    state,
+                    preview,
+                ],
+                show_progress=False,
+            )
 
     return generator_ui
 
@@ -964,6 +964,7 @@ def get_settings_ui(status):
             )
             selected_models = horde.set_current_models(local_selected_models)
             local_selected_models_dropdown.update(value=list(selected_models.values()))
+            gr.Info("Models Applied")
             return f'Status: \
             {"Running" if config.enabled else "Stopped"}, \
             Selected models \
@@ -1031,10 +1032,12 @@ def on_ui_tabs():
                 status.update("Status: Stopped")
                 running_type.update("Running Type: Image Generation")
                 toggle_running.update(value="Enable", variant="primary")
+                gr.Info("Generation Disabled")
             else:
                 config.enabled = True
                 status.update("Status: Running")
                 toggle_running.update(value="Disable", variant="secondary")
+                gr.Info("Generation Enabled")
             config.save()
 
         # General UI

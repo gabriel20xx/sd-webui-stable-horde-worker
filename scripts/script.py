@@ -170,9 +170,7 @@ def get_generator_ui():
                     images = (
                         [horde.state.image] if horde.state.image is not None else []
                     )
-                    print(f"{image} and {show_images}")
                     if image and show_images:
-                        print("Show image")
                         return cid, html, horde.state.status, images
                     return cid, html, horde.state.status
 

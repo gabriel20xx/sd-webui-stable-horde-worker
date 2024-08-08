@@ -178,23 +178,23 @@ def get_generator_ui():
 
                 log = gr.HTML(elem_id=tab_prefix + "log")
 
-            # Click functions
-            refresh.click(
-                fn=lambda: on_refresh(),
-                outputs=[current_id, log, state],
-                show_progress=False,
-            )
+                # Click functions
+                refresh.click(
+                    fn=lambda: on_refresh(),
+                    outputs=[current_id, log, state],
+                    show_progress=False,
+                )
 
-            refresh_image.click(
-                fn=lambda: on_refresh(True),
-                outputs=[
-                    current_id,
-                    log,
-                    state,
-                    preview,
-                ],
-                show_progress=False,
-            )
+                refresh_image.click(
+                    fn=lambda: on_refresh(True),
+                    outputs=[
+                        current_id,
+                        log,
+                        state,
+                        preview,
+                    ],
+                    show_progress=False,
+                )
 
     return generator_ui
 

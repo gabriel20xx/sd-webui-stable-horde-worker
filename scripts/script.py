@@ -520,7 +520,7 @@ def get_team_ui():
 
         with gr.Column():
             # Team ID
-            team_id = gr.Textbox(
+            team_id_input = gr.Textbox(
                 label="Team ID",
                 placeholder="Enter Team ID",
                 elem_id="team_id",
@@ -529,15 +529,16 @@ def get_team_ui():
                 max_lines=1,
             )
             team_update = gr.Button("Update Team Details", elem_id="team-update")
-            details = create_team_ui(team_id)  # Placeholder for dynamic team details
+            details = gr.Column()  # Placeholder for dynamic team details
 
         team_update.click(
             fn=lambda team_id: update_team_ui(team_id),
-            inputs=[team_id],
+            inputs=[team_id_input],
             outputs=[details],
         )
 
     return team_ui
+
 
 
 # Kudos UI

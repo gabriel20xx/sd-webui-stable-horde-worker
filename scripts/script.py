@@ -786,17 +786,16 @@ def create_status_ui(status_info):
     """Creates UI components for the status info."""
     details = []
     for key in status_info.keys():
-        with gr.Accordion(key.replace("_", " ").title()):
-            value = status_info[key]
-            textbox = gr.Textbox(
-                label=f"{key.replace('_', ' ').title()}",
-                value=value,
-                elem_id=f"{tab_prefix}_{key}",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(textbox)
+        value = status_info[key]
+        textbox = gr.Textbox(
+            label=f"{key.replace('_', ' ').title()}",
+            value=value,
+            elem_id=f"{tab_prefix}_{key}",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        details.append(textbox)
     return details
 
 
@@ -1070,6 +1069,8 @@ def on_ui_tabs():
                     label="Stable Horde API Key",
                     elem_id=tab_prefix + "apikey",
                     resizeable=False,
+                    lines=1,
+                    max_lines=1,
                 )
                 save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
 
@@ -1079,6 +1080,8 @@ def on_ui_tabs():
                     label="Status",
                     elem_id=tab_prefix + "status",
                     readonly=True,
+                    lines=1,
+                    max_lines=1,
                 )
 
                 running_type = gr.Textbox(

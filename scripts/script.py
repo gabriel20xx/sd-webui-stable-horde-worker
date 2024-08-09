@@ -1061,6 +1061,7 @@ def on_ui_tabs():
                     toggle_running.update(value="Disable", variant="secondary")
                     gr.Info("Generation Enabled")
                 config.save()
+                return status, running_type, toggle_running
             
             with gr.Column():
                 apikey = gr.Textbox(

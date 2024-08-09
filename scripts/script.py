@@ -55,7 +55,7 @@ def apply_stable_horde_apikey(apikey: str):
     gr.Info("API Key Saved")
 
 
-# Settings
+# Apply Settings
 def apply_stable_horde_settings(
     enable: bool,
     name: str,
@@ -100,6 +100,25 @@ def apply_stable_horde_settings(
 
 
 tab_prefix = "stable-horde-"
+
+# Dictionary transformation
+def transform_key(key, type=None):
+    """Transform a key by replacing underscores with spaces, capitalizing each word, and replacing the id."""
+    if type == "user" and key == "id":
+        key = "user_id"
+    if type == "worker" and key == "id":
+        key = "worker_id"
+    return key.replace("_", " ").title()
+
+
+def transform_dict(d, type=None):
+    """Recursively transform the keys of a dictionary."""
+    if isinstance(d, dict):
+        return {transform_key(k, type): transform_dict(v, type) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [transform_dict(i, type) for i in d]
+    else:
+        return d
 
 
 # Generator UI
@@ -203,7 +222,8 @@ def get_generator_ui():
 def fetch_worker_info(worker):
     """Fetches the latest worker info."""
     worker_info = api.get_worker_info(session, config.apikey, worker)
-    return worker_info
+    type = "worker"
+    return transform_dict(worker_info, type)
 
 
 def create_worker_ui(worker_info):
@@ -211,7 +231,7 @@ def create_worker_ui(worker_info):
     details = []
 
     for key in worker_info.keys():
-        if key.capitalize() in ["Kudos_details", "Team"]:
+        if key.capitalize() in ["Kudos Details", "Team"]:
             with gr.Accordion(key.capitalize()):
                 for secondkey in worker_info[key].keys():
                     value = worker_info[key][secondkey]
@@ -240,8 +260,6 @@ def create_worker_ui(worker_info):
                 max_lines=1,
             )
         else:
-            if worker_info[key] == "id":
-                worker_info[key] = "worker_id"
             value = worker_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(),
@@ -260,7 +278,7 @@ def update_worker_ui(worker):
     worker_info = fetch_worker_info(worker)
     updated_values = []
     for key in worker_info.keys():
-        if key.capitalize() in ["Kudos_details", "Team"]:
+        if key.capitalize() in ["Kudos Details", "Team"]:
             for secondkey in worker_info[key].keys():
                 value = worker_info[key][secondkey]
                 updated_values.append(str(value))
@@ -301,27 +319,11 @@ def get_worker_ui(worker):
 
 
 # User UI
-def transform_key(key):
-    """Transform a key by replacing underscores with spaces, capitalizing each word, and replacing 'id' with 'user id'."""
-    if key == "id":
-        key = "user_id"
-    return key.replace("_", " ").title()
-
-
-def transform_dict(d):
-    """Recursively transform the keys of a dictionary."""
-    if isinstance(d, dict):
-        return {transform_key(k): transform_dict(v) for k, v in d.items()}
-    elif isinstance(d, list):
-        return [transform_dict(i) for i in d]
-    else:
-        return d
-
-
 def fetch_user_info():
     """Fetches the latest user info and formats the keys."""
     user_info = api.get_user_info(session, config.apikey)
-    return transform_dict(user_info)
+    type = "user"
+    return transform_dict(user_info, type)
 
 
 def create_user_ui(user_info):
@@ -360,9 +362,9 @@ def create_user_ui(user_info):
                             details.append(detail)
 
             elif key.capitalize() in [
-                "Kudos_details",
-                "Worker_ids",
-                "Sharedkey_ids",
+                "Kudos Details",
+                "Worker Ids",
+                "Sharedkey Ids",
                 "Usage",
                 "Contributions",
             ]:
@@ -396,8 +398,6 @@ def create_user_ui(user_info):
 
         # Handle other data types
         else:
-            if user_info[key] == "id":
-                user_info[key] = "user_id"
             value = user_info[key]
             detail = gr.Textbox(
                 label=key.capitalize(), value=value, interactive=False, lines=1
@@ -423,9 +423,9 @@ def update_user_ui():
                         value = user_info[key][secondkey]
                         updated_values.append(str(value))
             elif key.capitalize() in [
-                "Kudos_details",
-                "Worker_ids",
-                "Sharedkey_ids",
+                "Kudos Details",
+                "Worker Ids",
+                "Sharedkey Ids",
                 "Usage",
                 "Contributions",
             ]:
@@ -472,7 +472,7 @@ def fetch_team_info(team_id):
     if not team_id:
         return {}
     team_info = api.get_team_info(session, config.apikey, team_id)
-    return team_info
+    return transform_dict(team_info)
 
 
 def create_team_ui(team_info):
@@ -480,7 +480,7 @@ def create_team_ui(team_info):
     details = []
 
     for key in team_info.keys():
-        if key.capitalize() in ["Kudos_details", "Team"]:
+        if key.capitalize() in ["Kudos Details", "Team"]:
             with gr.Accordion(key.capitalize()):
                 for secondkey in team_info[key].keys():
                     value = team_info[key][secondkey]
@@ -689,7 +689,7 @@ def get_kudos_ui():
 def fetch_news_info():
     """Fetches the latest news info."""
     news_info = api.get_news_info(session)
-    return news_info
+    return transform_dict(news_info)
 
 
 def create_news_ui(news_info):
@@ -698,13 +698,13 @@ def create_news_ui(news_info):
 
     for news_item in news_info:
         if isinstance(news_item, dict):
-            importance = news_item.get("importance", "No importance available")
-            title = news_item.get("title", "No title available")
+            importance = news_item.get("Importance", "No importance available")
+            title = news_item.get("Title", "No title available")
             date_published = news_item.get(
                 "date_published", "No published date available"
             )
             with gr.Accordion(f"{importance} - {title} - {date_published}"):
-                value = news_item.get("newspiece", "No message available")
+                value = news_item.get("Newspiece", "No message available")
                 message = gr.TextArea(
                     label="Message",
                     value=value,
@@ -712,7 +712,7 @@ def create_news_ui(news_info):
                 )
                 details.append(message)
 
-                tags_value = news_item.get("tags", [])
+                tags_value = news_item.get("Tags", [])
                 if not isinstance(tags_value, list):
                     tags_value = []
 
@@ -735,10 +735,10 @@ def update_news_ui():
     updated_values = []
     for news_item in news_info:
         if isinstance(news_item, dict):
-            value = news_item.get("newspiece", "No message available")
+            value = news_item.get("Newspiece", "No message available")
             updated_values.append(str(value))
 
-            tags_value = news_item.get("tags", [])
+            tags_value = news_item.get("Tags", [])
             if not isinstance(tags_value, list):
                 tags_value = []
 
@@ -775,7 +775,7 @@ def get_news_ui():
 def fetch_status_info():
     """Fetches the latest status info."""
     status_info = api.get_status_info(session)
-    return status_info
+    return transform_dict(status_info)
 
 
 def create_status_ui(status_info):
@@ -831,7 +831,7 @@ def get_status_ui():
 def fetch_stats_info():
     """Fetches the latest stats info."""
     stats_info = api.get_stats_info(session)
-    return stats_info
+    return transform_dict(stats_info)
 
 
 def create_stats_ui(stats_info):

@@ -1048,7 +1048,7 @@ def on_ui_tabs():
                 apply_stable_horde_apikey(apikey_value)
 
 
-            def toggle_running_fn():
+            def toggle_running_fn(status, running_type, toggle_running):
                 if config.enabled:
                     config.enabled = False
                     status.update("Status: Stopped")
@@ -1135,7 +1135,7 @@ def on_ui_tabs():
                 get_settings_ui(status)
 
         save_apikey.click(fn=save_apikey_value, inputs=[apikey])
-        toggle_running.click(fn=toggle_running_fn, inputs=[], outputs=[status, running_type, toggle_running])
+        toggle_running.click(fn=toggle_running_fn, inputs=[status, running_type, toggle_running], outputs=[status, running_type, toggle_running])
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

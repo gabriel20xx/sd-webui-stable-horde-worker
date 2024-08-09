@@ -135,9 +135,11 @@ def get_generator_ui():
                     "",
                     label="State",
                     elem_id=tab_prefix + "state",
-                    visible=True,
+                    visible=False,
                     readonly=True,
                 )
+
+                log = gr.HTML(elem_id=tab_prefix + "log")
 
             with gr.Column(elem_id="stable-horde"):
                 refresh = gr.Button(
@@ -173,8 +175,6 @@ def get_generator_ui():
                     if image and show_images:
                         return cid, html, horde.state.status, images
                     return cid, html, horde.state.status
-
-                log = gr.HTML(elem_id=tab_prefix + "log")
 
                 # Click functions
                 refresh.click(

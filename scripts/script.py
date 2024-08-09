@@ -98,7 +98,6 @@ def apply_stable_horde_settings(
         "Running Type: Image Generation",
     )
 
-
 tab_prefix = "stable-horde-"
 
 
@@ -1043,26 +1042,26 @@ def on_ui_tabs():
     with gr.Blocks(
         theme=gr.themes.Default(primary_hue="green", secondary_hue="red")
     ) as ui_tabs:
-        # General functions
-        def save_apikey_value(apikey_value: str):
-            apply_stable_horde_apikey(apikey_value)
-
-        def toggle_running_fn():
-            if config.enabled:
-                config.enabled = False
-                status.update("Status: Stopped")
-                running_type.update("Running Type: Image Generation")
-                toggle_running.update(value="Enable", variant="primary")
-                gr.Info("Generation Disabled")
-            else:
-                config.enabled = True
-                status.update("Status: Running")
-                toggle_running.update(value="Disable", variant="secondary")
-                gr.Info("Generation Enabled")
-            config.save()
-
         # General UI
         with gr.Row():
+            def save_apikey_value(apikey_value: str):
+                apply_stable_horde_apikey(apikey_value)
+
+
+            def toggle_running_fn():
+                if config.enabled:
+                    config.enabled = False
+                    status.update("Status: Stopped")
+                    running_type.update("Running Type: Image Generation")
+                    toggle_running.update(value="Enable", variant="primary")
+                    gr.Info("Generation Disabled")
+                else:
+                    config.enabled = True
+                    status.update("Status: Running")
+                    toggle_running.update(value="Disable", variant="secondary")
+                    gr.Info("Generation Enabled")
+                config.save()
+            
             with gr.Column():
                 apikey = gr.Textbox(
                     config.apikey,
@@ -1135,7 +1134,7 @@ def on_ui_tabs():
                 get_settings_ui(status)
 
         save_apikey.click(fn=save_apikey_value, inputs=[apikey])
-        toggle_running.click(fn=toggle_running_fn)
+        toggle_running.click(fn=toggle_running_fn, inputs=[], outputs=[status, running_type, toggle_running])
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

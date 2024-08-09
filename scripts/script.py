@@ -301,10 +301,23 @@ def get_worker_ui(worker):
 
 
 # User UI
+def transform_key(key):
+    """Transform a key by replacing underscores with spaces and capitalizing each word."""
+    return key.replace('_', ' ').title()
+
+def transform_dict(d):
+    """Recursively transform the keys of a dictionary."""
+    if isinstance(d, dict):
+        return {transform_key(k): transform_dict(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [transform_dict(i) for i in d]
+    else:
+        return d
+
 def fetch_user_info():
-    """Fetches the latest user info."""
+    """Fetches the latest user info and formats the keys."""
     user_info = api.get_user_info(session, config.apikey)
-    return user_info
+    return transform_dict(user_info)
 
 
 def create_user_ui(user_info):

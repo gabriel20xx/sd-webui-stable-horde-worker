@@ -302,8 +302,11 @@ def get_worker_ui(worker):
 
 # User UI
 def transform_key(key):
-    """Transform a key by replacing underscores with spaces and capitalizing each word."""
-    return key.replace('_', ' ').title()
+    """Transform a key by replacing underscores with spaces, capitalizing each word, and replacing 'id' with 'user id'."""
+    if key == "id":
+        key = "user_id"
+    return key.replace("_", " ").title()
+
 
 def transform_dict(d):
     """Recursively transform the keys of a dictionary."""
@@ -313,6 +316,7 @@ def transform_dict(d):
         return [transform_dict(i) for i in d]
     else:
         return d
+
 
 def fetch_user_info():
     """Fetches the latest user info and formats the keys."""

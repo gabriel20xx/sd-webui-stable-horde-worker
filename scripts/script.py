@@ -387,7 +387,7 @@ def create_user_ui(user_info):
                 for i, item in enumerate(user_info[key]):
                     value = item
                     detail = gr.Textbox(
-                        label=f"Item {i+1}",
+                        label=f"Worker {i+1}",
                         value=value,
                         elem_id=tab_prefix + "user-info",
                         interactive=False,
@@ -701,9 +701,9 @@ def create_news_ui(news_info):
             importance = news_item.get("Importance", "No importance available")
             title = news_item.get("Title", "No title available")
             date_published = news_item.get(
-                "date_published", "No published date available"
+                "Date Published", "No published date available"
             )
-            with gr.Accordion(f"{importance} - {title} - {date_published}"):
+            with gr.Accordion(f"{date_published} - {importance} - {title}"):
                 value = news_item.get("Newspiece", "No message available")
                 message = gr.TextArea(
                     label="Message",

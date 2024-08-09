@@ -101,6 +101,7 @@ def apply_stable_horde_settings(
 
 tab_prefix = "stable-horde-"
 
+
 # Generator UI
 def get_generator_ui():
     tab_prefix = "stable-horde-"
@@ -121,6 +122,7 @@ def get_generator_ui():
                     max_lines=1,
                 )
 
+                # Running type and state is currently not in use
                 running_type = gr.Textbox(
                     "Image Generation",
                     label="Running Type",
@@ -538,7 +540,6 @@ def get_team_ui():
         )
 
     return team_ui
-
 
 
 # Kudos UI

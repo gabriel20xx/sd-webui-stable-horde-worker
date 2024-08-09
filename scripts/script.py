@@ -108,7 +108,7 @@ def transform_key(key, type=None):
         key = "user_id"
     if type == "worker" and key == "id":
         key = "worker_id"
-    return key.replace("_", " ").title()
+    return key
 
 
 def transform_dict(d, type=None):
@@ -231,12 +231,12 @@ def create_worker_ui(worker_info):
     details = []
 
     for key in worker_info.keys():
-        if key.capitalize() in ["Kudos Details", "Team"]:
-            with gr.Accordion(key.capitalize()):
+        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
+            with gr.Accordion(key.replace("_", " ").title()):
                 for secondkey in worker_info[key].keys():
                     value = worker_info[key][secondkey]
                     detail = gr.Textbox(
-                        label=secondkey.capitalize(),
+                        label=secondkey.replace("_", " ").title(),
                         elem_id=tab_prefix + "worker-info",
                         value=value,
                         interactive=False,
@@ -244,7 +244,7 @@ def create_worker_ui(worker_info):
                         max_lines=1,
                     )
                     details.append(detail)
-        elif key.capitalize() in ["Models"]:
+        elif key.replace("_", " ").title() in ["Models"]:
             pre_value = worker_info[key]
             worker_string = ", ".join(map(str, pre_value))
             stripped_worker_info = (
@@ -252,7 +252,7 @@ def create_worker_ui(worker_info):
             )
             value = stripped_worker_info
             detail = gr.Textbox(
-                label=key.capitalize(),
+                label=key.replace("_", " ").title(),
                 value=value,
                 elem_id=tab_prefix + "worker-info",
                 interactive=False,
@@ -262,7 +262,7 @@ def create_worker_ui(worker_info):
         else:
             value = worker_info[key]
             detail = gr.Textbox(
-                label=key.capitalize(),
+                label=key.replace("_", " ").title(),
                 value=value,
                 elem_id=tab_prefix + "worker-info",
                 interactive=False,
@@ -278,11 +278,11 @@ def update_worker_ui(worker):
     worker_info = fetch_worker_info(worker)
     updated_values = []
     for key in worker_info.keys():
-        if key.capitalize() in ["Kudos Details", "Team"]:
+        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
             for secondkey in worker_info[key].keys():
                 value = worker_info[key][secondkey]
                 updated_values.append(str(value))
-        elif key.capitalize() in ["Models"]:
+        elif key.replace("_", " ").title() in ["Models"]:
             pre_value = worker_info[key]
             worker_string = ", ".join(map(str, pre_value))
             stripped_worker_info = (
@@ -333,15 +333,15 @@ def create_user_ui(user_info):
     for key in user_info.keys():
         # Handle nested dictionaries
         if isinstance(user_info[key], dict):
-            if key.capitalize() in ["Records"]:
-                with gr.Accordion(key.capitalize()):
+            if key.replace("_", " ").title() in ["Records"]:
+                with gr.Accordion(key.replace("_", " ").title()):
                     for secondkey in user_info[key].keys():
                         if isinstance(user_info[key][secondkey], dict):
-                            with gr.Accordion(secondkey.capitalize()):
+                            with gr.Accordion(secondkey.replace("_", " ").title()):
                                 for thirdkey in user_info[key][secondkey].keys():
                                     value = user_info[key][secondkey][thirdkey]
                                     detail = gr.Textbox(
-                                        label=thirdkey.capitalize(),
+                                        label=thirdkey.replace("_", " ").title(),
                                         value=value,
                                         elem_id=tab_prefix + "user-info",
                                         interactive=False,
@@ -352,7 +352,7 @@ def create_user_ui(user_info):
                         else:
                             value = user_info[key][secondkey]
                             detail = gr.Textbox(
-                                label=secondkey.capitalize(),
+                                label=secondkey.replace("_", " ").title(),
                                 value=value,
                                 elem_id=tab_prefix + "user-info",
                                 interactive=False,
@@ -361,18 +361,18 @@ def create_user_ui(user_info):
                             )
                             details.append(detail)
 
-            elif key.capitalize() in [
+            elif key.replace("_", " ").title() in [
                 "Kudos Details",
                 "Worker Ids",
                 "Sharedkey Ids",
                 "Usage",
                 "Contributions",
             ]:
-                with gr.Accordion(key.capitalize()):
+                with gr.Accordion(key.replace("_", " ").title()):
                     for secondkey in user_info[key].keys():
                         value = user_info[key][secondkey]
                         detail = gr.Textbox(
-                            label=secondkey.capitalize(),
+                            label=secondkey.replace("_", " ").title(),
                             value=value,
                             elem_id=tab_prefix + "user-info",
                             interactive=False,
@@ -383,7 +383,7 @@ def create_user_ui(user_info):
 
         # Handle lists or other data structures
         elif isinstance(user_info[key], list):
-            with gr.Accordion(key.capitalize()):
+            with gr.Accordion(key.replace("_", " ").title()):
                 for i, item in enumerate(user_info[key]):
                     value = item
                     detail = gr.Textbox(
@@ -400,7 +400,7 @@ def create_user_ui(user_info):
         else:
             value = user_info[key]
             detail = gr.Textbox(
-                label=key.capitalize(), value=value, interactive=False, lines=1
+                label=key.replace("_", " ").title(), value=value, interactive=False, lines=1
             )
             details.append(detail)
     return details
@@ -413,7 +413,7 @@ def update_user_ui():
     for key in user_info.keys():
         # Handle nested dictionaries
         if isinstance(user_info[key], dict):
-            if key.capitalize() in ["Records"]:
+            if key.replace("_", " ").title() in ["Records"]:
                 for secondkey in user_info[key].keys():
                     if isinstance(user_info[key][secondkey], dict):
                         for thirdkey in user_info[key][secondkey].keys():
@@ -422,7 +422,7 @@ def update_user_ui():
                     else:
                         value = user_info[key][secondkey]
                         updated_values.append(str(value))
-            elif key.capitalize() in [
+            elif key.replace("_", " ").title() in [
                 "Kudos Details",
                 "Worker Ids",
                 "Sharedkey Ids",
@@ -433,7 +433,7 @@ def update_user_ui():
                     value = user_info[key][secondkey]
                     updated_values.append(str(value))
         elif isinstance(user_info[key], list):
-            with gr.Accordion(key.capitalize()):
+            with gr.Accordion(key.replace("_", " ").title()):
                 for i, item in enumerate(user_info[key]):
                     value = item
                     updated_values.append(str(value))
@@ -480,12 +480,12 @@ def create_team_ui(team_info):
     details = []
 
     for key in team_info.keys():
-        if key.capitalize() in ["Kudos Details", "Team"]:
-            with gr.Accordion(key.capitalize()):
+        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
+            with gr.Accordion(key.replace("_", " ").title()):
                 for secondkey in team_info[key].keys():
                     value = team_info[key][secondkey]
                     detail = gr.Textbox(
-                        label=secondkey.capitalize(),
+                        label=secondkey.replace("_", " ").title(),
                         elem_id=tab_prefix + "team-info",
                         value=value,
                         interactive=False,
@@ -493,7 +493,7 @@ def create_team_ui(team_info):
                         max_lines=1,
                     )
                     details.append(detail)
-        elif key.capitalize() in ["Models"]:
+        elif key.replace("_", " ").title() in ["Models"]:
             pre_value = team_info[key]
             team_string = ", ".join(map(str, pre_value))
             stripped_team_info = (
@@ -501,7 +501,7 @@ def create_team_ui(team_info):
             )
             value = stripped_team_info
             detail = gr.Textbox(
-                label=key.capitalize(),
+                label=key.replace("_", " ").title(),
                 value=value,
                 elem_id=tab_prefix + "team-info",
                 interactive=False,
@@ -514,7 +514,7 @@ def create_team_ui(team_info):
                 team_info[key] = "team_id"
             value = team_info[key]
             detail = gr.Textbox(
-                label=key.capitalize(),
+                label=key.replace("_", " ").title(),
                 value=value,
                 elem_id=tab_prefix + "team-info",
                 interactive=False,
@@ -782,10 +782,10 @@ def create_status_ui(status_info):
     """Creates UI components for the status info."""
     details = []
     for key in status_info.keys():
-        with gr.Accordion(key.capitalize()):
+        with gr.Accordion(key.replace("_", " ").title()):
             value = status_info[key]
             textbox = gr.Textbox(
-                label=f"{key.capitalize()}",
+                label=f"{key.replace("_", " ").title()}",
                 value=value,
                 elem_id=f"{tab_prefix}_{key}",
                 interactive=False,
@@ -838,11 +838,11 @@ def create_stats_ui(stats_info):
     """Creates UI components for the stats info."""
     details = []
     for period, stats in stats_info.items():
-        with gr.Accordion(period.capitalize()):
+        with gr.Accordion(period.replace("_", " ").title()):
             for stat_type, value in stats.items():
                 value = str(value)
                 textbox = gr.Textbox(
-                    label=f"{stat_type.capitalize()}",
+                    label=f"{stat_type.replace("_", " ").title()}",
                     value=value,
                     elem_id=f"{tab_prefix}_{period}_{stat_type}",
                     interactive=False,

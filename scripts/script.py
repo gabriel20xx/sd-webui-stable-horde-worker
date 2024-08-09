@@ -795,9 +795,9 @@ def get_status_ui():
     with gr.Blocks() as status_ui:
         status_info = fetch_status_info()
 
-        gr.Markdown("## Stats", elem_id="status_title")
+        gr.Markdown("## Status", elem_id="status_title")
         with gr.Row():
-            status_update = gr.Button("Update Stats", elem_id="status-update")
+            status_update = gr.Button("Update Status", elem_id="status-update")
 
         # Create the initial UI components
         details = create_status_ui(status_info)

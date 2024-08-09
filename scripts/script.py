@@ -844,7 +844,7 @@ def create_stats_ui(stats_info):
                 textbox = gr.Textbox(
                     label=f"{stat_type.replace("_", " ").title()}",
                     value=value,
-                    elem_id=f"{tab_prefix}_{period}_{stat_type}",
+                    elem_id=f"{tab_prefix}_{period}_{stat_type}_{value}",
                     interactive=False,
                     lines=1,
                     max_lines=1,

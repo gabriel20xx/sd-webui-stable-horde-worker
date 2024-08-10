@@ -1099,6 +1099,13 @@ def on_ui_tabs():
                     elem_id=f"{tab_prefix}disable",
                 )
 
+                save_apikey.click(fn=save_apikey_value, inputs=[apikey])
+                toggle_running.click(
+                    fn=toggle_running_fn,
+                    inputs=[status, running_type, toggle_running],
+                    outputs=[status, running_type, toggle_running],
+                )
+
                 def get_worker(session, apikey, worker_ids):
                     for worker in worker_ids:
                         worker_info = api.get_worker_info(session, apikey, worker)
@@ -1134,13 +1141,6 @@ def on_ui_tabs():
                 get_stats_ui()
             with gr.Tab("Settings"):
                 get_settings_ui(status)
-
-        save_apikey.click(fn=save_apikey_value, inputs=[apikey])
-        toggle_running.click(
-            fn=toggle_running_fn,
-            inputs=[status, running_type, toggle_running],
-            outputs=[status, running_type, toggle_running],
-        )
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

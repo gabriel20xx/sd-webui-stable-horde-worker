@@ -98,6 +98,7 @@ def apply_stable_horde_settings(
         "Running Type: Image Generation",
     )
 
+
 tab_prefix = "stable-horde-"
 
 
@@ -701,28 +702,30 @@ def create_news_ui(news_info):
 
     for news_item in news_info:
         if isinstance(news_item, dict):
-            importance = news_item.get("Importance", "No importance available")
-            title = news_item.get("Title", "No title available")
+            importance = news_item.get("importance", "No importance available")
+            title = news_item.get("title", "No title available")
             date_published = news_item.get(
-                "Date Published", "No published date available"
+                "date_published", "No published date available"
             )
-            with gr.Accordion(f"{date_published} - {importance} - {title}"):
-                value = news_item.get("Newspiece", "No message available")
+            with gr.Accordion(
+                f"{date_published.replace('_', ' ').title()} - {importance.replace('_', ' ').title()} - {title.replace('_', ' ').title()}"
+            ):
+                value = news_item.get("newspiece", "No message available")
                 message = gr.TextArea(
                     label="Message",
-                    value=value,
+                    value=value.replace("_", " ").title(),
                     interactive=False,
                 )
                 details.append(message)
 
-                tags_value = news_item.get("Tags", [])
+                tags_value = news_item.get("tags", [])
                 if not isinstance(tags_value, list):
                     tags_value = []
 
                 tags_string = ", ".join(map(str, tags_value))
                 tags = gr.Textbox(
                     label="Tags",
-                    value=tags_string,
+                    value=tags_string.replace("_", " ").title(),
                     interactive=False,
                     lines=1,
                     max_lines=1,
@@ -884,7 +887,6 @@ def get_stats_ui():
     return stats_ui
 
 
-
 # Settings UI
 def get_settings_ui(status):
     with gr.Blocks() as settings_ui:
@@ -1042,9 +1044,9 @@ def on_ui_tabs():
     ) as ui_tabs:
         # General UI
         with gr.Row():
+
             def save_apikey_value(apikey_value: str):
                 apply_stable_horde_apikey(apikey_value)
-
 
             def toggle_running_fn(status, running_type, toggle_running):
                 if config.enabled:
@@ -1060,7 +1062,7 @@ def on_ui_tabs():
                     gr.Info("Generation Enabled")
                 config.save()
                 return status, running_type, toggle_running
-            
+
             with gr.Column():
                 apikey = gr.Textbox(
                     config.apikey,
@@ -1133,7 +1135,11 @@ def on_ui_tabs():
                 get_settings_ui(status)
 
         save_apikey.click(fn=save_apikey_value, inputs=[apikey])
-        toggle_running.click(fn=toggle_running_fn, inputs=[status, running_type, toggle_running], outputs=[status, running_type, toggle_running])
+        toggle_running.click(
+            fn=toggle_running_fn,
+            inputs=[status, running_type, toggle_running],
+            outputs=[status, running_type, toggle_running],
+        )
 
     return ((ui_tabs, "Stable Horde Worker", "stable-horde"),)
 

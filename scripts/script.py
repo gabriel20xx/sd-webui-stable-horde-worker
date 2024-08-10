@@ -1052,13 +1052,13 @@ def on_ui_tabs():
             def toggle_running_fn(status, running_type, toggle_running):
                 if config.enabled:
                     config.enabled = False
-                    status.update("Status: Stopped")
+                    status.value = "Status: Stopped"
                     running_type.update("Running Type: Image Generation")
                     toggle_running.update(value="Enable", variant="primary")
                     gr.Info("Generation Disabled")
                 else:
                     config.enabled = True
-                    status.update("Status: Running")
+                    status.value = "Status: Running"
                     toggle_running.update(value="Disable", variant="secondary")
                     gr.Info("Generation Enabled")
                 config.save()

@@ -1053,7 +1053,7 @@ def on_ui_tabs():
                 if config.enabled:
                     config.enabled = False
                     status.value = "Status: Stopped"
-                    running_type.update("Running Type: Image Generation")
+                    running_type.value = "Running Type: Image Generation"
                     toggle_running.update(value="Enable", variant="primary")
                     gr.Info("Generation Disabled")
                 else:

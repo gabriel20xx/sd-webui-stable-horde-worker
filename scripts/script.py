@@ -741,10 +741,10 @@ def update_news_ui():
     updated_values = []
     for news_item in news_info:
         if isinstance(news_item, dict):
-            value = news_item.get("Newspiece", "No message available")
+            value = news_item.get("newspiece", "No message available")
             updated_values.append(str(value))
 
-            tags_value = news_item.get("Tags", [])
+            tags_value = news_item.get("tags", [])
             if not isinstance(tags_value, list):
                 tags_value = []
 

@@ -841,29 +841,30 @@ def fetch_stats_info():
 
 def create_stats_ui(stats_info):
     """Creates UI components for the stats info."""
-    details = {}
+    details = []
     for period, stats in stats_info.items():
         with gr.Accordion(period.replace("_", " ").title()):
             for stat_type, value in stats.items():
-                value = str(value)
                 textbox = gr.Textbox(
                     label=f"{stat_type.replace('_', ' ').title()}",
-                    value=value,
+                    value=str(value),
                     elem_id=f"{tab_prefix}_{period}_{stat_type}",
                     interactive=False,
                     lines=1,
                     max_lines=1,
                 )
-                details[(period, stat_type)] = textbox
+                details.append(textbox)
     return details
 
 
-def update_stats_ui(stats_info, details):
-    """Updates the values of the UI components."""
+def update_stats_ui():
+    """Fetches the latest stats info and returns updated values for UI components."""
+    stats_info = fetch_stats_info()
+    # Extract values for each stat in each period and return them as a list
     updated_values = []
     for period, stats in stats_info.items():
         for stat_type, value in stats.items():
-            details[(period, stat_type)].update(value=str(value))
+            updated_values.append(str(value))
     return updated_values
 
 
@@ -880,9 +881,9 @@ def get_stats_ui():
         details = create_stats_ui(stats_info)
 
         stats_update.click(
-            fn=lambda: update_stats_ui(fetch_stats_info(), details),
+            fn=lambda: update_stats_ui(),
             inputs=[],
-            outputs=list(details.values()),
+            outputs=details,
         )
     return stats_ui
 

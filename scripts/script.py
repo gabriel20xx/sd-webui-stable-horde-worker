@@ -121,6 +121,19 @@ def transform_dict(d, type=None):
     else:
         return d
 
+# Fetch the api info
+def fetch_api_info(mode: str, arg=None):
+    match mode:
+        case "News" | "Stats" | "Status":
+            data = api.api_get_request(session, mode)
+        case "User" | "Kudos":
+            data = api.api_get_request(session, mode, config.apikey)
+        case "Worker" | "Team":
+            data = api.api_get_request(session, mode, config.apikey, arg)
+
+    transformed_dict = transform_dict(data, mode)
+    return transformed_dict
+
 
 # Generator UI
 def get_generator_ui():
@@ -220,13 +233,6 @@ def get_generator_ui():
 
 
 # Worker UI
-def fetch_worker_info(worker):
-    """Fetches the latest worker info."""
-    worker_info = api.get_worker_info(session, config.apikey, worker)
-    type = "worker"
-    return transform_dict(worker_info, type)
-
-
 def create_worker_ui(worker_info):
     """Creates and returns Gradio UI components based on the worker info."""
     details = []
@@ -276,7 +282,7 @@ def create_worker_ui(worker_info):
 
 def update_worker_ui(worker):
     """Fetches and updates the worker UI."""
-    worker_info = fetch_worker_info(worker)
+    worker_info = fetch_api_info("Worker", worker)
     updated_values = []
     for key in worker_info.keys():
         if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
@@ -302,7 +308,7 @@ def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         details = []
 
-        worker_info = fetch_worker_info(worker)
+        worker_info = fetch_api_info("Worker", worker)
 
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
@@ -320,13 +326,6 @@ def get_worker_ui(worker):
 
 
 # User UI
-def fetch_user_info():
-    """Fetches the latest user info and formats the keys."""
-    user_info = api.get_user_info(session, config.apikey)
-    type = "user"
-    return transform_dict(user_info, type)
-
-
 def create_user_ui(user_info):
     """Creates and returns Gradio UI components based on the user info."""
     details = []
@@ -412,7 +411,7 @@ def create_user_ui(user_info):
 
 def update_user_ui():
     """Fetches and updates the user UI."""
-    user_info = fetch_user_info()
+    user_info = fetch_api_info("User")
     updated_values = []
     for key in user_info.keys():
         # Handle nested dictionaries
@@ -451,7 +450,7 @@ def update_user_ui():
 def get_user_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as user_ui:
-        user_info = fetch_user_info()
+        user_info = fetch_api_info("User")
 
         gr.Markdown("## User Details", elem_id="user_title")
 
@@ -471,14 +470,6 @@ def get_user_ui():
 
 
 # Team UI
-def fetch_team_info(team_id):
-    """Fetches the latest team info."""
-    if not team_id:
-        return {}
-    team_info = api.get_team_info(session, config.apikey, team_id)
-    return transform_dict(team_info)
-
-
 def create_team_ui(team_info):
     """Creates and returns Gradio UI components based on the team info."""
     details = []
@@ -531,7 +522,7 @@ def create_team_ui(team_info):
 
 def update_team_ui(team_id):
     """Fetches and updates the team UI."""
-    team_info = fetch_team_info(team_id)
+    team_info = fetch_api_info("Team", team_id)
     if not team_info:
         return []  # Return an empty list if team_info is empty
     return create_team_ui(team_info)
@@ -565,7 +556,7 @@ def get_team_ui():
 
 # Kudos UI
 def fetch_and_update_kudos():
-    user_info = api.get_user_info(session, config.apikey)
+    user_info = api.fetch_api_info("Kudos")
     if user_info["kudos"]:
         kudos = user_info["kudos"]
         return kudos
@@ -576,7 +567,7 @@ def get_kudos_ui():
         details = []
 
         # Kudos functions
-        user_info = api.get_user_info(session, config.apikey)
+        user_info = api.fetch_api_info("Kudos")
 
         # Kudos UI
         with gr.Row():
@@ -648,7 +639,7 @@ def get_kudos_ui():
 
         def validate_username(username):
             # Todo
-            result = api.transfer_kudos(session, config.apikey, username, 0)
+            result = api.api_post_request(session, config.apikey, username, 0)
             if result == "ValidationError":
                 return "User does not exist"
             elif result == "InvalidAPIKeyError":
@@ -690,12 +681,6 @@ def get_kudos_ui():
 
 
 # News UI
-def fetch_news_info():
-    """Fetches the latest news info."""
-    news_info = api.get_news_info(session)
-    return transform_dict(news_info)
-
-
 def create_news_ui(news_info):
     """Creates and returns Gradio UI components based on the news info."""
     details = []
@@ -737,7 +722,7 @@ def create_news_ui(news_info):
 
 def update_news_ui():
     """Fetches and updates the news UI."""
-    news_info = fetch_news_info()
+    news_info = fetch_api_info("News")
     updated_values = []
     for news_item in news_info:
         if isinstance(news_item, dict):
@@ -757,7 +742,7 @@ def update_news_ui():
 def get_news_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as news_ui:
-        news_info = fetch_news_info()
+        news_info = fetch_api_info("News")
 
         gr.Markdown("## News", elem_id="news_title")
 
@@ -778,12 +763,6 @@ def get_news_ui():
 
 
 # Stats UI
-def fetch_status_info():
-    """Fetches the latest status info."""
-    status_info = api.get_status_info(session)
-    return transform_dict(status_info)
-
-
 def create_status_ui(status_info):
     """Creates UI components for the status info."""
     details = []
@@ -803,7 +782,7 @@ def create_status_ui(status_info):
 
 def update_status_ui():
     """Fetches the latest status info and returns updated values for UI components."""
-    status_info = fetch_status_info()
+    status_info = fetch_api_info("Status")
     # Extract values for each stat in each period and return them as a list
     updated_values = []
     for key in status_info.keys():
@@ -815,7 +794,7 @@ def update_status_ui():
 def get_status_ui():
     """Sets up the status UI with Gradio."""
     with gr.Blocks() as status_ui:
-        status_info = fetch_status_info()
+        status_info = fetch_api_info("Status")
 
         gr.Markdown("## Status", elem_id="status_title")
         with gr.Row():
@@ -833,12 +812,6 @@ def get_status_ui():
 
 
 # Stats UI
-def fetch_stats_info():
-    """Fetches the latest stats info."""
-    stats_info = api.get_stats_info(session)
-    return transform_dict(stats_info)
-
-
 def create_stats_ui(stats_info):
     """Creates UI components for the stats info."""
     details = []
@@ -859,7 +832,7 @@ def create_stats_ui(stats_info):
 
 def update_stats_ui():
     """Fetches the latest stats info and returns updated values for UI components."""
-    stats_info = fetch_stats_info()
+    stats_info = fetch_api_info("Stats")
     # Extract values for each stat in each period and return them as a list
     updated_values = []
     for period, stats in stats_info.items():
@@ -871,7 +844,7 @@ def update_stats_ui():
 def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
-        stats_info = fetch_stats_info()
+        stats_info = fetch_api_info("Stats")
 
         gr.Markdown("## Stats", elem_id="stats_title")
         with gr.Row():

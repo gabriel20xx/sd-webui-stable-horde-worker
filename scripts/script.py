@@ -1227,13 +1227,13 @@ def on_ui_tabs():
 
                 def get_worker(session, apikey, worker_ids):
                     for worker in worker_ids:
-                        worker_info = api.get_worker_info(session, apikey, worker)
+                        worker_info = api.api_get_request(session, "Worker", apikey, worker)
                         worker_name = worker_info["name"]
                         if worker_name == config.name:
                             return worker
 
                 # TODO Move this somewhere else
-                user_info = api.get_user_info(session, config.apikey)
+                user_info = api.api_get_request(session, "User", config.apikey)
                 worker_ids = user_info["worker_ids"]
                 if worker_ids:
                     worker = get_worker(session, config.apikey, worker_ids)

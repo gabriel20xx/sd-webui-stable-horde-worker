@@ -121,6 +121,7 @@ def transform_dict(d, type=None):
     else:
         return d
 
+
 # Fetch the api info
 def fetch_api_info(mode: str, arg=None):
     match mode:
@@ -233,77 +234,6 @@ def get_generator_ui():
 
 
 # Worker UI
-def create_worker_ui(worker_info):
-    """Creates and returns Gradio UI components based on the worker info."""
-    details = []
-
-    for key in worker_info.keys():
-        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
-            with gr.Accordion(key.replace("_", " ").title()):
-                for secondkey in worker_info[key].keys():
-                    value = worker_info[key][secondkey]
-                    detail = gr.Textbox(
-                        label=secondkey.replace("_", " ").title(),
-                        elem_id=tab_prefix + "worker-info",
-                        value=value,
-                        interactive=False,
-                        lines=1,
-                        max_lines=1,
-                    )
-                    details.append(detail)
-        elif key.replace("_", " ").title() in ["Models"]:
-            pre_value = worker_info[key]
-            worker_string = ", ".join(map(str, pre_value))
-            stripped_worker_info = (
-                worker_string.replace("'", "").replace("[", "").replace("]", "")
-            )
-            value = stripped_worker_info
-            detail = gr.Textbox(
-                label=key.replace("_", " ").title(),
-                value=value,
-                elem_id=tab_prefix + "worker-info",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-        else:
-            value = worker_info[key]
-            detail = gr.Textbox(
-                label=key.replace("_", " ").title(),
-                value=value,
-                elem_id=tab_prefix + "worker-info",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(detail)
-    return details
-
-
-def update_worker_ui(worker):
-    """Fetches and updates the worker UI."""
-    worker_info = fetch_api_info("Worker", worker)
-    updated_values = []
-    for key in worker_info.keys():
-        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
-            for secondkey in worker_info[key].keys():
-                value = worker_info[key][secondkey]
-                updated_values.append(str(value))
-        elif key.replace("_", " ").title() in ["Models"]:
-            pre_value = worker_info[key]
-            worker_string = ", ".join(map(str, pre_value))
-            stripped_worker_info = (
-                worker_string.replace("'", "").replace("[", "").replace("]", "")
-            )
-            value = stripped_worker_info
-            updated_values.append(str(value))
-        else:
-            value = worker_info[key]
-            updated_values.append(str(value))
-    # Return a list of updated components
-    return updated_values
-
-
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
         details = []
@@ -313,13 +243,229 @@ def get_worker_ui(worker):
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")
 
-        # Create the initial UI components
-        details = create_worker_ui(worker_info)
+        name = gr.Textbox(
+            value=worker_info.get("name"),
+            label="Name",
+            elem_id="name",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        worker_id = gr.Textbox(
+            value=worker_info.get("worker_id"),
+            label="Worker ID",
+            elem_id="worker_id",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        type = gr.Textbox(
+            value=worker_info.get("type"),
+            label="Type",
+            elem_id="type",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        online = gr.Textbox(
+            value=worker_info.get("online"),
+            label="Online",
+            elem_id="online",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        requests_fulfilled = gr.Textbox(
+            value=worker_info.get("requests_fulfilled"),
+            label="Requests Fulfilled",
+            elem_id="requests_fulfilled",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        kudos_rewards = gr.Textbox(
+            value=worker_info.get("kudos_rewards"),
+            label="Kudos Rewards",
+            elem_id="kudos_rewards",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        performance = gr.Textbox(
+            value=worker_info.get("performance"),
+            label="Performance",
+            elem_id="performance",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        maintenance_mode = gr.Textbox(
+            value=worker_info.get("maintenance_mode"),
+            label="Maintenance Mode",
+            elem_id="maintenance_mode",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        nsfw = gr.Textbox(
+            value=worker_info.get("nsfw"),
+            label="NSFW",
+            elem_id="nsfw",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        trusted = gr.Textbox(
+            value=worker_info.get("trusted"),
+            label="Trusted",
+            elem_id="trusted",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        flagged = gr.Textbox(
+            value=worker_info.get("flagged"),
+            label="Flagged",
+            elem_id="flagged",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        uncompleted_jobs = gr.Textbox(
+            value=worker_info.get("uncompleted_jobs"),
+            label="Uncompleted Jobs",
+            elem_id="uncompleted_jobs",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        models = gr.Textbox(
+            value=worker_info.get("models"),
+            label="Models",
+            elem_id="models",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        max_pixels = gr.Textbox(
+            value=worker_info.get("max_pixels"),
+            label="mMax Pixels",
+            elem_id="max_pixels",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        megapixelsteps_generated = gr.Textbox(
+            value=worker_info.get("megapixelsteps_generated"),
+            label="Megapixelsteps Generated",
+            elem_id="megapixelsteps_generated",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        img2img = gr.Textbox(
+            value=worker_info.get("img2img"),
+            label="Img 2 Img",
+            elem_id="img2img",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        painting = gr.Textbox(
+            value=worker_info.get("painting"),
+            label="Painting",
+            elem_id="painting",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        post_processing = gr.Textbox(
+            value=worker_info.get("post-processing"),
+            label="Post-Processing",
+            elem_id="post_processing",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        lora = gr.Textbox(
+            value=worker_info.get("lora"),
+            label="LoRa",
+            elem_id="lora",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        controlnet = gr.Textbox(
+            value=worker_info.get("controlnet"),
+            label="ControlNet",
+            elem_id="controlnet",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+        sdxl_controlnet = gr.Textbox(
+            value=worker_info.get("sdxl_controlnet"),
+            label="SDXL ControlNet",
+            elem_id="sdxl_controlnet",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        def update_worker_info():
+            worker_info_updated = fetch_api_info("Worker", worker)
+            keys = [
+                "name",
+                "worker_id",
+                "type",
+                "online",
+                "requests_fulfilled",
+                "kudos_rewards",
+                "performance",
+                "maintenance_mode",
+                "nsfw",
+                "trusted",
+                "flagged",
+                "uncompleted_jobs",
+                "models",
+                "max_pixels",
+                "megapixelsteps_generated",
+                "img2img",
+                "painting",
+                "post_processing",
+                "lora",
+                "controlnet",
+                "sdxl_controlnet",
+            ]
+            return [worker_info_updated.get(key) for key in keys]
 
         worker_update.click(
-            fn=lambda: update_worker_ui(worker),
+            fn=update_worker_info,
             inputs=[],
-            outputs=details,
+            outputs=[
+                name,
+                worker_id,
+                type,
+                online,
+                requests_fulfilled,
+                kudos_rewards,
+                performance,
+                maintenance_mode,
+                nsfw,
+                trusted,
+                flagged,
+                uncompleted_jobs,
+                models,
+                max_pixels,
+                megapixelsteps_generated,
+                img2img,
+                painting,
+                post_processing,
+                lora,
+                controlnet,
+                sdxl_controlnet,
+            ],
         )
 
     return worker_ui

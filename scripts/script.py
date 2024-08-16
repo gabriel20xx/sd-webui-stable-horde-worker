@@ -1062,18 +1062,18 @@ def get_stats_ui():
         def update_stats_info():
             stats_info_updated = fetch_api_info("Stats")
             keys = [
-                "minute_images",
-                "minute_ps",
-                "hour_images",
-                "hour_ps",
-                "day_images",
-                "day_ps",
-                "month_images",
-                "month_ps",
-                "total_images",
-                "total_ps",
+                ("minute", "images"),
+                ("minute", "ps"),
+                ("hour", "images"),
+                ("hour", "ps"),
+                ("day", "images"),
+                ("day", "ps"),
+                ("month", "images"),
+                ("month", "ps"),
+                ("total", "images"),
+                ("total", "ps"),
             ]
-            return [stats_info_updated.get(key) for key in keys]
+            return [stats_info_updated.get(period, {}).get(stat) for period, stat in keys]
 
         stats_update.click(
             fn=update_stats_info,

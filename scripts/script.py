@@ -6,7 +6,7 @@ import asyncio
 import requests
 from threading import Thread
 
-from modules import script, script_callbacks, sd_models, shared
+from modules import scripts, script_callbacks, sd_models, shared
 
 from stable_horde import (
     StableHorde,
@@ -14,7 +14,7 @@ from stable_horde import (
     API,
 )
 
-basedir = script.basedir()
+basedir = scripts.basedir()
 config = StableHordeConfig(basedir)
 horde = StableHorde(basedir, config)
 session = requests.Session()

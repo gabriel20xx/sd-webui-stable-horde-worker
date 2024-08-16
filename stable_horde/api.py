@@ -41,11 +41,7 @@ class API:
                 r = session.get(
                     "https://stablehorde.net/api/v2/find_user", headers=headers
                 )
-            case "Worker":
-                r = session.get(
-                    f"https://stablehorde.net/api/v2/workers/{arg}", headers=headers
-                )
-            case "Team":
+            case "Worker" | "Team":
                 r = session.get(
                     f"https://stablehorde.net/api/v2/workers/{arg}", headers=headers
                 )

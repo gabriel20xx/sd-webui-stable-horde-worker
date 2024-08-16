@@ -30,6 +30,8 @@ safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor: Optional[AutoFeatureExtractor] = None
 safety_checker: Optional[StableDiffusionSafetyChecker] = None
 
+session = requests.Session()
+
 
 class State:
     def __init__(self):
@@ -158,7 +160,7 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         api = API()
-        user_info = api.get_request(requests.Session(), "User")
+        user_info = api.get_request(session, "User")
         username = user_info["username"]
         id = user_info["id"]
         worker_ids = user_info["worker_ids"]
@@ -167,7 +169,7 @@ class StableHorde:
         print(f"User ID: {id}")
 
         for worker in worker_ids:
-            worker_info = api.get_request(requests.Session(), "Worker", worker)
+            worker_info = api.get_request(session, "Worker", arg=worker)
             worker_name = worker_info["name"]
             worker_id = worker_info["id"]
             models = worker_info["models"]

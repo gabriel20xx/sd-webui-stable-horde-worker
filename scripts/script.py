@@ -1003,11 +1003,9 @@ def get_status_ui():
 
         def update_status_info():
             status_info_updated = fetch_api_info("Status")
-            filtered_info = {
-                "maintenance_mode": status_info_updated.get("maintenance_mode", "Unknown"),
-                "invite_only_mode": status_info_updated.get("invite_only_mode", "Unknown")
-            }
-            return filtered_info
+            maintenance_mode = status_info_updated.get("maintenance_mode", "Unknown")
+            invite_only_mode = status_info_updated.get("invite_only_mode", "Unknown")
+            return maintenance_mode, invite_only_mode
 
         status_info = update_status_info()
 

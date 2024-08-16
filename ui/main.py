@@ -4,7 +4,6 @@ from fastapi import FastAPI
 import gradio as gr
 import asyncio
 import requests
-import json
 from threading import Thread
 
 from modules import ui, script_callbacks, sd_models, shared

@@ -702,7 +702,7 @@ def get_team_ui():
 
 # Kudos UI
 def fetch_and_update_kudos():
-    user_info = api.fetch_api_info("Kudos")
+    user_info = fetch_api_info("Kudos")
     if user_info["kudos"]:
         kudos = user_info["kudos"]
         return kudos
@@ -713,7 +713,7 @@ def get_kudos_ui():
         details = []
 
         # Kudos functions
-        user_info = api.fetch_api_info("Kudos")
+        user_info = fetch_api_info("Kudos")
 
         # Kudos UI
         with gr.Row():

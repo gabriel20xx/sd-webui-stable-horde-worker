@@ -57,27 +57,33 @@ class API:
         session: requests.Session = requests.Session(),
         mode: str = None,
         apikey: str = None,
-        username: str = None,
-        amount: int = None,
+        arg1: str = None,
+        arg2: int = None,
     ):
         """
         Transfer kudos
         """
         match mode:
-            case "Transfer":
-                payload = {
-                    "username": username,
-                    "amount": amount,
-                }
+            case "TransferKudos" | "CreateTeam":
                 headers = {
                     "accept": "application/json",
                     "apikey": apikey,
                 }
+                payload = {
+                    "username": arg1,
+                    "amount": arg2,
+                }
 
         match mode:
-            case "Transfer":
+            case "TransferKudos":
                 r = session.get(
                     "https://stablehorde.net/api/v2/kudos/transfer",
+                    json=payload,
+                    headers=headers,
+                )
+            case "CreateTeam":
+                r = session.get(
+                    "/v2/teams",
                     json=payload,
                     headers=headers,
                 )
@@ -85,5 +91,9 @@ class API:
         data = r.json()
         if r.status_code == 200:
             return data
+        elif r.status_code == 400:
+            # Validation Error
+            return None
+        elif r.status_code == 
         else:
             return None

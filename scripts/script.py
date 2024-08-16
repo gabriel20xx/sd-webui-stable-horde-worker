@@ -555,7 +555,7 @@ def get_kudos_ui():
 
         def validate_username(username):
             # Todo
-            result = api.post_request(session, "Transfer", config.apikey, username, 0)
+            result = api.post_request(session, "TransferKudos", config.apikey, username, 0)
             if result == "ValidationError":
                 return "User does not exist"
             elif result == "InvalidAPIKeyError":

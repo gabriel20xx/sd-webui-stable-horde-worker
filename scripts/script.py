@@ -236,8 +236,6 @@ def get_generator_ui():
 # Worker UI
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
-        details = []
-
         worker_info = fetch_api_info("Worker", worker)
 
         gr.Markdown("## Worker Details")
@@ -472,229 +470,238 @@ def get_worker_ui(worker):
 
 
 # User UI
-def create_user_ui(user_info):
-    """Creates and returns Gradio UI components based on the user info."""
-    details = []
-
-    for key in user_info.keys():
-        # Handle nested dictionaries
-        if isinstance(user_info[key], dict):
-            if key.replace("_", " ").title() in ["Records"]:
-                with gr.Accordion(key.replace("_", " ").title()):
-                    for secondkey in user_info[key].keys():
-                        if isinstance(user_info[key][secondkey], dict):
-                            with gr.Accordion(secondkey.replace("_", " ").title()):
-                                for thirdkey in user_info[key][secondkey].keys():
-                                    value = user_info[key][secondkey][thirdkey]
-                                    detail = gr.Textbox(
-                                        label=thirdkey.replace("_", " ").title(),
-                                        value=value,
-                                        elem_id=tab_prefix + "user-info",
-                                        interactive=False,
-                                        lines=1,
-                                        max_lines=1,
-                                    )
-                                    details.append(detail)
-                        else:
-                            value = user_info[key][secondkey]
-                            detail = gr.Textbox(
-                                label=secondkey.replace("_", " ").title(),
-                                value=value,
-                                elem_id=tab_prefix + "user-info",
-                                interactive=False,
-                                lines=1,
-                                max_lines=1,
-                            )
-                            details.append(detail)
-
-            elif key.replace("_", " ").title() in [
-                "Kudos Details",
-                "Worker Ids",
-                "Sharedkey Ids",
-                "Usage",
-                "Contributions",
-            ]:
-                with gr.Accordion(key.replace("_", " ").title()):
-                    for secondkey in user_info[key].keys():
-                        value = user_info[key][secondkey]
-                        detail = gr.Textbox(
-                            label=secondkey.replace("_", " ").title(),
-                            value=value,
-                            elem_id=tab_prefix + "user-info",
-                            interactive=False,
-                            lines=1,
-                            max_lines=1,
-                        )
-                        details.append(detail)
-
-        # Handle lists or other data structures
-        elif isinstance(user_info[key], list):
-            with gr.Accordion(key.replace("_", " ").title()):
-                for i, item in enumerate(user_info[key]):
-                    value = item
-                    detail = gr.Textbox(
-                        label=f"Worker {i+1}",
-                        value=value,
-                        elem_id=tab_prefix + "user-info",
-                        interactive=False,
-                        lines=1,
-                        max_lines=1,
-                    )
-                    details.append(detail)
-
-        # Handle other data types
-        else:
-            value = user_info[key]
-            detail = gr.Textbox(
-                label=key.replace("_", " ").title(),
-                value=value,
-                interactive=False,
-                lines=1,
-            )
-            details.append(detail)
-    return details
-
-
-def update_user_ui():
-    """Fetches and updates the user UI."""
-    user_info = fetch_api_info("User")
-    updated_values = []
-    for key in user_info.keys():
-        # Handle nested dictionaries
-        if isinstance(user_info[key], dict):
-            if key.replace("_", " ").title() in ["Records"]:
-                for secondkey in user_info[key].keys():
-                    if isinstance(user_info[key][secondkey], dict):
-                        for thirdkey in user_info[key][secondkey].keys():
-                            value = user_info[key][secondkey][thirdkey]
-                            updated_values.append(str(value))
-                    else:
-                        value = user_info[key][secondkey]
-                        updated_values.append(str(value))
-            elif key.replace("_", " ").title() in [
-                "Kudos Details",
-                "Worker Ids",
-                "Sharedkey Ids",
-                "Usage",
-                "Contributions",
-            ]:
-                for secondkey in user_info[key].keys():
-                    value = user_info[key][secondkey]
-                    updated_values.append(str(value))
-        elif isinstance(user_info[key], list):
-            with gr.Accordion(key.replace("_", " ").title()):
-                for i, item in enumerate(user_info[key]):
-                    value = item
-                    updated_values.append(str(value))
-        else:
-            value = user_info[key]
-            updated_values.append(str(value))
-    # Return a list of updated components
-    return updated_values
-
-
 def get_user_ui():
-    """Creates and returns the Gradio UI with an update button."""
+    """Creates and returns Gradio UI components based on the user info."""
     with gr.Blocks() as user_ui:
-        user_info = fetch_api_info("User")
+        worker_info = fetch_api_info("User")
 
-        gr.Markdown("## User Details", elem_id="user_title")
+        gr.Markdown("## User Details")
+        user_update = gr.Button("Update User Details", elem_id="user-update")
 
-        user_update = gr.Button(
-            "Update User Details", elem_id=f"{tab_prefix}user-update"
+        username = gr.Textbox(
+            value=worker_info.get("username"),
+            label="Username",
+            elem_id="username",
+            interactive=False,
+            lines=1,
+            max_lines=1,
         )
 
-        # Create the initial UI components
-        details = create_user_ui(user_info)
+        id = gr.Textbox(
+            value=worker_info.get("id"),
+            label="ID",
+            elem_id="id",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        kudos = gr.Textbox(
+            value=worker_info.get("kudos"),
+            label="Kudos",
+            elem_id="kudos",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        concurrency = gr.Textbox(
+            value=worker_info.get("concurrency"),
+            label="Concurrency",
+            elem_id="concurrency",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        worker_count = gr.Textbox(
+            value=worker_info.get("worker_count"),
+            label="Worker Count",
+            elem_id="worker_count",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        worker_ids = gr.Textbox(
+            value=worker_info.get("worker_ids"),
+            label="Worker IDs",
+            elem_id="worker_ids",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        trusted = gr.Textbox(
+            value=worker_info.get("trusted"),
+            label="Trusted",
+            elem_id="trusted",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        flagged = gr.Textbox(
+            value=worker_info.get("flagged"),
+            label="Flagged",
+            elem_id="flagged",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        vpn = gr.Textbox(
+            value=worker_info.get("vpn"),
+            label="VPN",
+            elem_id="vpn",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        image_fulfillment = gr.Textbox(
+            value=worker_info.get("image_fulfillment"),
+            label="Image Fulfillment",
+            elem_id="image_fulfillment",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        def update_user_info():
+            user_info_updated = fetch_api_info("User")
+            keys = [
+                "username",
+                "id",
+                "kudos",
+                "concurrency",
+                "worker_count",
+                "worker_ids",
+                "trusted",
+                "flagged",
+                "vpn",
+                "image_fulfillment",
+            ]
+            return [user_info_updated.get(key) for key in keys]
 
         user_update.click(
-            fn=lambda: update_user_ui(),
+            fn=update_user_info,
             inputs=[],
-            outputs=details,
+            outputs=[
+                username,
+                id,
+                kudos,
+                concurrency,
+                worker_count,
+                worker_ids,
+                trusted,
+                flagged,
+                vpn,
+                image_fulfillment,
+            ],
         )
     return user_ui
 
 
 # Team UI
-def create_team_ui(team_info):
-    """Creates and returns Gradio UI components based on the team info."""
-    details = []
-
-    for key in team_info.keys():
-        if key.replace("_", " ").title() in ["Kudos Details", "Team"]:
-            with gr.Accordion(key.replace("_", " ").title()):
-                for secondkey in team_info[key].keys():
-                    value = team_info[key][secondkey]
-                    detail = gr.Textbox(
-                        label=secondkey.replace("_", " ").title(),
-                        elem_id=tab_prefix + "team-info",
-                        value=value,
-                        interactive=False,
-                        lines=1,
-                        max_lines=1,
-                    )
-                    details.append(detail)
-        elif key.replace("_", " ").title() in ["Models"]:
-            pre_value = team_info[key]
-            team_string = ", ".join(map(str, pre_value))
-            stripped_team_info = (
-                team_string.replace("'", "").replace("[", "").replace("]", "")
-            )
-            value = stripped_team_info
-            detail = gr.Textbox(
-                label=key.replace("_", " ").title(),
-                value=value,
-                elem_id=tab_prefix + "team-info",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(detail)
-        else:
-            if team_info[key] == "id":
-                team_info[key] = "team_id"
-            value = team_info[key]
-            detail = gr.Textbox(
-                label=key.replace("_", " ").title(),
-                value=value,
-                elem_id=tab_prefix + "team-info",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-            details.append(detail)
-    return details
-
-
 def update_team_ui(team_id):
     """Fetches and updates the team UI."""
     team_info = fetch_api_info("Team", team_id)
     if not team_info:
         return []  # Return an empty list if team_info is empty
-    return create_team_ui(team_info)
+    return team_info
 
 
 def get_team_ui():
     with gr.Blocks() as team_ui:
         gr.Markdown("## Team Details")
+        team_id = gr.Textbox(
+            label="Team ID",
+            placeholder="Enter Team ID",
+            elem_id="team_id",
+            interactive=True,
+            lines=1,
+            max_lines=1,
+        )
+        team_update = gr.Button("Update Team Details", elem_id="team-update")
+        
+        name = gr.Textbox(
+            value=None,
+            label="Name",
+            elem_id="name",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
 
-        with gr.Column():
-            # Team ID
-            team_id_input = gr.Textbox(
-                label="Team ID",
-                placeholder="Enter Team ID",
-                elem_id="team_id",
-                interactive=True,
-                lines=1,
-                max_lines=1,
-            )
-            team_update = gr.Button("Update Team Details", elem_id="team-update")
-            details = gr.Column()  # Placeholder for dynamic team details
+        id = gr.Textbox(
+            value=None,
+            label="ID",
+            elem_id="id",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        info = gr.Textbox(
+            value=None,
+            label="Info",
+            elem_id="info",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        requests_fulfilled = gr.Textbox(
+            value=None,
+            label="Requests Fulfilled",
+            elem_id="requests_fulfilled",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        kudos = gr.Textbox(
+            value=None,
+            label="Kudos",
+            elem_id="kudos",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        worker_count = gr.Textbox(
+            value=None,
+            label="Worker Count",
+            elem_id="worker_count",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        def update_team_info(team_id):
+            team_info_updated = fetch_api_info("Team", team_id)
+            keys = [
+                "name",
+                "id",
+                "info",
+                "requests_fulfilled",
+                "kudos",
+                "worker_count",
+            ]
+            return [team_info_updated.get(key) for key in keys]
 
         team_update.click(
-            fn=lambda team_id: update_team_ui(team_id),
-            inputs=[team_id_input],
-            outputs=[details],
+            fn=update_team_info,
+            inputs=[team_id],
+            outputs=[
+                name,
+                id,
+                info,
+                requests_fulfilled,
+                kudos,
+                worker_count,
+            ],
         )
 
     return team_ui
@@ -909,100 +916,180 @@ def get_news_ui():
 
 
 # Stats UI
-def create_status_ui(status_info):
-    """Creates UI components for the status info."""
-    details = []
-    for key in status_info.keys():
-        value = status_info[key]
-        textbox = gr.Textbox(
-            label=f"{key.replace('_', ' ').title()}",
-            value=value,
-            elem_id=f"{tab_prefix}_{key}",
-            interactive=False,
-            lines=1,
-            max_lines=1,
-        )
-        details.append(textbox)
-    return details
-
-
-def update_status_ui():
-    """Fetches the latest status info and returns updated values for UI components."""
-    status_info = fetch_api_info("Status")
-    # Extract values for each stat in each period and return them as a list
-    updated_values = []
-    for key in status_info.keys():
-        value = status_info[key]
-        updated_values.append(str(value))
-    return updated_values
-
-
 def get_status_ui():
     """Sets up the status UI with Gradio."""
     with gr.Blocks() as status_ui:
         status_info = fetch_api_info("Status")
 
         gr.Markdown("## Status", elem_id="status_title")
-        with gr.Row():
-            status_update = gr.Button("Update Status", elem_id="status-update")
+        status_update = gr.Button("Update Status", elem_id="status-update")
 
         # Create the initial UI components
-        details = create_status_ui(status_info)
+        
+        maintenance_mode = gr.Textbox(
+            value=status_info.get("maintenance_mode"),
+            label="Maintenance Mode",
+            elem_id="maintenance_mode",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        invite_only_mode = gr.Textbox(
+            value=status_info.get("invite_only_mode"),
+            label="Invite Only Mode",
+            elem_id="invite_only_mode",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
+
+        def update_status_info():
+            status_info_updated = fetch_api_info("Status")
+            keys = [
+                "maintenance_mode",
+                "invite_only_mode",
+            ]
+            return [status_info_updated.get(key) for key in keys]
 
         status_update.click(
-            fn=lambda: update_status_ui(),
+            fn=update_status_info,
             inputs=[],
-            outputs=details,
+            outputs=[
+                maintenance_mode,
+                invite_only_mode,
+            ],
         )
+
     return status_ui
 
 
 # Stats UI
-def create_stats_ui(stats_info):
-    """Creates UI components for the stats info."""
-    details = []
-    for period, stats in stats_info.items():
-        with gr.Accordion(period.replace("_", " ").title()):
-            for stat_type, value in stats.items():
-                textbox = gr.Textbox(
-                    label=f"{stat_type.replace('_', ' ').title()}",
-                    value=str(value),
-                    elem_id=f"{tab_prefix}_{period}_{stat_type}",
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-                details.append(textbox)
-    return details
-
-
-def update_stats_ui():
-    """Fetches the latest stats info and returns updated values for UI components."""
-    stats_info = fetch_api_info("Stats")
-    # Extract values for each stat in each period and return them as a list
-    updated_values = []
-    for period, stats in stats_info.items():
-        for stat_type, value in stats.items():
-            updated_values.append(str(value))
-    return updated_values
-
-
 def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
         stats_info = fetch_api_info("Stats")
 
         gr.Markdown("## Stats", elem_id="stats_title")
-        with gr.Row():
-            stats_update = gr.Button("Update Stats", elem_id="stats-update")
+        stats_update = gr.Button("Update Stats", elem_id="stats-update")
 
-        # Create the initial UI components
-        details = create_stats_ui(stats_info)
+        with gr.Accordion("Minute"):
+            minute_images = gr.Textbox(
+                value=stats_info.get("minute_images"),
+                label="Images",
+                elem_id="minute_images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            minute_ps = gr.Textbox(
+                value=stats_info.get("minute_ps"),
+                label="Pixelsteps",
+                elem_id="minute_ps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion("Hour"):
+            hour_images = gr.Textbox(
+                value=stats_info.get("hour_images"),
+                label="Images",
+                elem_id="hour_images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            hour_ps = gr.Textbox(
+                value=stats_info.get("hour_ps"),
+                label="Pixelsteps",
+                elem_id="hour_ps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion("Day"):
+            day_images = gr.Textbox(
+                value=stats_info.get("day_images"),
+                label="Images",
+                elem_id="day_images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            day_ps = gr.Textbox(
+                value=stats_info.get("day_ps"),
+                label="Pixelsteps",
+                elem_id="day_ps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion("Month"):
+            month_images = gr.Textbox(
+                value=stats_info.get("month_images"),
+                label="Images",
+                elem_id="month_images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            month_ps = gr.Textbox(
+                value=stats_info.get("month_ps"),
+                label="Pixelsteps",
+                elem_id="month_ps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion("Total"):
+            total_images = gr.Textbox(
+                value=stats_info.get("total_images"),
+                label="Images",
+                elem_id="total_images",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            total_ps = gr.Textbox(
+                value=stats_info.get("total_ps"),
+                label="Pixelsteps",
+                elem_id="total_ps",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+
+        def update_stats_info():
+            stats_info_updated = fetch_api_info("Stats")
+            keys = [
+                "minute_images",
+                "minute_ps",
+                "hour_images",
+                "hour_ps",
+                "day_images",
+                "day_ps",
+                "month_images",
+                "month_ps",
+                "total_images",
+                "total_ps",
+            ]
+            return [stats_info_updated.get(key) for key in keys]
 
         stats_update.click(
-            fn=lambda: update_stats_ui(),
+            fn=update_stats_info,
             inputs=[],
-            outputs=details,
+            outputs=[
+                minute_images,
+                minute_ps,
+                hour_images,
+                hour_ps,
+                day_images,
+                day_ps,
+                month_images,
+                month_ps,
+                total_images,
+                total_ps,
+            ],
         )
     return stats_ui
 

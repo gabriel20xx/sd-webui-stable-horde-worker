@@ -175,12 +175,14 @@ class StableHorde:
             worker_name = worker_info["name"]
             worker_id = worker_info["id"]
             models = worker_info["models"]
+            maintenance_mode = worker_info["maintenance_mode"]
 
             if worker_name == self.config.name:
                 print(f"Worker ID: {worker_id}")
                 print(f"Worker Name: {worker_name}")
                 print(f"Worker Models: {models}")
                 print("-" * 64)
+                break
 
         start_time = time.time()
         while True:
@@ -193,8 +195,13 @@ class StableHorde:
                     await asyncio.sleep(10)
                     continue
 
+            if maintenance_mode:
+                self.state.status = "Worker is in maintenance mode"
+                await asyncio.sleep(10)
+                continue
+
             await asyncio.sleep(self.config.interval)
-            if self.config.enabled:
+            if self.config.enabled and not maintenance_mode:
                 self.state.status = "Waiting for a request"
                 try:
                     # Require a queue lock to prevent getting jobs when

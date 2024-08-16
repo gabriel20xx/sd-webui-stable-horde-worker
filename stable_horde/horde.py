@@ -157,7 +157,7 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         api = API()
-        user_info = api.get_request("User", self.config.apikey)
+        user_info = api.get_request("User")
         username = user_info["username"]
         id = user_info["id"]
         worker_ids = user_info["worker_ids"]

@@ -898,8 +898,7 @@ def get_news_ui():
                 label="newspiece",
                 elem_id="first_newspiece",
                 interactive=False,
-                lines=1,
-                max_lines=1,
+                lines=4,
             )
             first_tags = gr.Textbox(
                 value=news_info["tags"][0],
@@ -915,8 +914,7 @@ def get_news_ui():
                 label="newspiece",
                 elem_id="second_newspiece",
                 interactive=False,
-                lines=1,
-                max_lines=1,
+                lines=4,
             )
             second_tags = gr.Textbox(
                 value=news_info["tags"][1],
@@ -932,8 +930,7 @@ def get_news_ui():
                 label="newspiece",
                 elem_id="third_newspiece",
                 interactive=False,
-                lines=1,
-                max_lines=1,
+                lines=4,
             )
             third_tags = gr.Textbox(
                 value=news_info["tags"][2],
@@ -949,8 +946,7 @@ def get_news_ui():
                 label="newspiece",
                 elem_id="fourth_newspiece",
                 interactive=False,
-                lines=1,
-                max_lines=1,
+                lines=4,
             )
             fourth_tags = gr.Textbox(
                 value=news_info["tags"][3],
@@ -966,8 +962,7 @@ def get_news_ui():
                 label="newspiece",
                 elem_id="fifth_newspiece",
                 interactive=False,
-                lines=1,
-                max_lines=1,
+                lines=4,
             )
             fifth_tags = gr.Textbox(
                 value=news_info["tags"][4],

@@ -758,7 +758,7 @@ def get_kudos_ui():
             with gr.Column():
                 # Kudo amount display
                 your_kudos = gr.Textbox(
-                    int(user_info["kudos"].strip("[]").split(".")[0]),
+                    int(str(user_info["kudos"]).strip("[]").split(".")[0]),
                     label="Your Kudos",
                     placeholder="0",
                     elem_id="kudos_display",

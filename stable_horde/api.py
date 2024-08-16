@@ -59,6 +59,7 @@ class API:
     @staticmethod
     def post_request(
         session: requests.Session = requests.Session(),
+        mode: str = None,
         apikey: str = None,
         username: str = None,
         amount: int = None,
@@ -66,16 +67,22 @@ class API:
         """
         Transfer kudos
         """
-        payload = {"username": username, "amount": amount}
-        headers = {
-            "accept": "application/json",
-            "apikey": apikey,
-        }
-        r = session.get(
-            "https://stablehorde.net/api/v2/kudos/transfer",
-            json=payload,
-            headers=headers,
-        )
+        match mode:
+            case "Transfer":
+                payload = {"username": username, "amount": amount}
+                headers = {
+                    "accept": "application/json",
+                    "apikey": apikey,
+                }
+
+        match mode:
+            case "TRansfer":
+                r = session.get(
+                    "https://stablehorde.net/api/v2/kudos/transfer",
+                    json=payload,
+                    headers=headers,
+                )
+                
         data = r.json()
         if r.status_code == 200:
             return data

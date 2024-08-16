@@ -157,27 +157,26 @@ class StableHorde:
         print("Stable Horde Worker")
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
-        with requests.Session() as session:
-            api = API()
-            user_info = api.get_request("User", self.config.apikey)
-            username = user_info["username"]
-            id = user_info["id"]
-            worker_ids = user_info["worker_ids"]
+        api = API()
+        user_info = api.get_request("User", self.config.apikey)
+        username = user_info["username"]
+        id = user_info["id"]
+        worker_ids = user_info["worker_ids"]
 
-            print(f"Username: {username}")
-            print(f"User ID: {id}")
+        print(f"Username: {username}")
+        print(f"User ID: {id}")
 
-            for worker in worker_ids:
-                worker_info = api.get_request("Worker", worker)
-                worker_name = worker_info["name"]
-                worker_id = worker_info["id"]
-                models = worker_info["models"]
+        for worker in worker_ids:
+            worker_info = api.get_request("Worker", worker)
+            worker_name = worker_info["name"]
+            worker_id = worker_info["id"]
+            models = worker_info["models"]
 
-                if worker_name == self.config.name:
-                    print(f"Worker id: {worker_id}")
-                    print(f"Worker name: {worker_name}")
-                    print(f"Worker models: {models}")
-                    print("-" * 64)
+            if worker_name == self.config.name:
+                print(f"Worker id: {worker_id}")
+                print(f"Worker name: {worker_name}")
+                print(f"Worker models: {models}")
+                print("-" * 64)
 
         start_time = time.time()
         while True:

@@ -251,10 +251,10 @@ def get_worker_ui(worker):
             lines=1,
             max_lines=1,
         )
-        worker_id = gr.Textbox(
-            value=worker_info.get("worker_id"),
+        id = gr.Textbox(
+            value=worker_info.get("id"),
             label="Worker ID",
-            elem_id="worker_id",
+            elem_id="id",
             interactive=False,
             lines=1,
             max_lines=1,
@@ -417,7 +417,7 @@ def get_worker_ui(worker):
             worker_info_updated = fetch_api_info("Worker", worker)
             keys = [
                 "name",
-                "worker_id",
+                "id",
                 "type",
                 "online",
                 "requests_fulfilled",
@@ -445,7 +445,7 @@ def get_worker_ui(worker):
             inputs=[],
             outputs=[
                 name,
-                worker_id,
+                id,
                 type,
                 online,
                 requests_fulfilled,

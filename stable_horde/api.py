@@ -1,10 +1,23 @@
 import requests
 
+from stable_horde import (
+    StableHordeConfig,
+)
+
+from modules import scripts
+
+basedir = scripts.basedir()
+config = StableHordeConfig(basedir)
+session = requests.Session()
+
 
 class API:
     @staticmethod
     def get_request(
-        session: requests.Session, mode: str, arg1: str = None, arg2: str = None
+        session: requests.Session = session,
+        mode: str = None,
+        apikey: str = config.apikey,
+        arg: str = None,
     ) -> dict:
         """
         Make API requests
@@ -18,7 +31,7 @@ class API:
             case "User" | "Worker" | "Team" | "Kudos":
                 headers = {
                     "accept": "application/json",
-                    "apikey": arg1,
+                    "apikey": apikey,
                 }
 
         match mode:
@@ -40,11 +53,11 @@ class API:
                 )
             case "Worker":
                 r = session.get(
-                    f"https://stablehorde.net/api/v2/workers/{arg2}", headers=headers
+                    f"https://stablehorde.net/api/v2/workers/{arg}", headers=headers
                 )
             case "Team":
                 r = session.get(
-                    f"https://stablehorde.net/api/v2/workers/{arg2}", headers=headers
+                    f"https://stablehorde.net/api/v2/workers/{arg}", headers=headers
                 )
 
         data = r.json()
@@ -55,7 +68,10 @@ class API:
 
     @staticmethod
     def post_request(
-        session: requests.Session, apikey: str, username: str, amount: int
+        session: requests.Session = session,
+        apikey: str = config.apikey,
+        username: str = None,
+        amount: int = None,
     ):
         """
         Transfer kudos

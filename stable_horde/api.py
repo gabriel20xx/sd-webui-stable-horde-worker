@@ -1,22 +1,12 @@
 import requests
 
-from stable_horde import (
-    StableHordeConfig,
-)
-
-from modules import scripts
-
-basedir = scripts.basedir()
-config = StableHordeConfig(basedir)
-session = requests.Session()
-
 
 class API:
     @staticmethod
     def get_request(
-        session: requests.Session = session,
+        session: requests.Session = requests.Session(),
         mode: str = None,
-        apikey: str = config.apikey,
+        apikey: str = None,
         arg: str = None,
     ) -> dict:
         """
@@ -68,8 +58,8 @@ class API:
 
     @staticmethod
     def post_request(
-        session: requests.Session = session,
-        apikey: str = config.apikey,
+        session: requests.Session = requests.Session(),
+        apikey: str = None,
         username: str = None,
         amount: int = None,
     ):

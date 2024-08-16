@@ -18,7 +18,7 @@ from .job import HordeJob
 from .config import StableHordeConfig
 from .api import API
 from .save_image import save_image
-from modules import shared, call_queue, processing, sd_models, sd_samplers
+from modules import shared, call_queue, processing, sd_models, sd_samplers, scripts
 
 
 stable_horde_supported_models_url = (
@@ -160,7 +160,9 @@ class StableHorde:
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
         api = API()
-        user_info = api.get_request(session, "User")
+        basedir = scripts.basedir()
+        config = StableHordeConfig(basedir)
+        user_info = api.get_request(session, "User", config.apikey)
         username = user_info["username"]
         id = user_info["id"]
         worker_ids = user_info["worker_ids"]
@@ -169,7 +171,7 @@ class StableHorde:
         print(f"User ID: {id}")
 
         for worker in worker_ids:
-            worker_info = api.get_request(session, "Worker", arg=worker)
+            worker_info = api.get_request(session, "Worker", config.apikey, arg=worker)
             worker_name = worker_info["name"]
             worker_id = worker_info["id"]
             models = worker_info["models"]

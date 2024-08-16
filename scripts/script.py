@@ -1390,21 +1390,21 @@ def on_ui_tabs():
                     outputs=[status, running_type, toggle_running],
                 )
 
-                def get_worker(worker_ids):
-                    for worker in worker_ids:
-                        worker_info = fetch_api_info("Worker", worker)
-                        if worker_info:
+                # Get Worker
+                def get_worker() -> str:
+                    user_info = fetch_api_info("User")
+                    worker_ids = user_info["worker_ids"]
+                    if worker_ids:
+                        for worker in worker_ids:
+                            worker_info = fetch_api_info("Worker", worker)
                             worker_name = worker_info["name"]
                             if worker_name == config.name:
                                 return worker
-
-                # TODO Move this somewhere else
-                user_info = fetch_api_info("User")
-                worker_ids = user_info["worker_ids"]
-                if worker_ids:
-                    worker = get_worker(worker_ids)
-                else:
-                    worker = "Unavailable"
+                    else:
+                        worker = "Unavailable"
+                        return worker
+                    
+                worker = get_worker()
 
         # General tabs
         with gr.Row():

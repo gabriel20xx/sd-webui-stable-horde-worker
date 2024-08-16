@@ -58,7 +58,7 @@ class API:
         mode: str = None,
         apikey: str = None,
         arg1: str = None,
-        arg2: int = None,
+        arg2: str | int = None,
     ):
         """
         Transfer kudos
@@ -69,9 +69,17 @@ class API:
                     "accept": "application/json",
                     "apikey": apikey,
                 }
+
+        match mode:
+            case "TransferKudos":
                 payload = {
                     "username": arg1,
                     "amount": arg2,
+                }
+            case "CreateTeam":
+                payload = {
+                    "name": arg1,
+                    "info": arg2,
                 }
 
         match mode:
@@ -94,6 +102,39 @@ class API:
         elif r.status_code == 400:
             # Validation Error
             return None
-        elif r.status_code == 
+        elif r.status_code == 401:
+            # Invalid API Key Error
+            return None
+        elif r.status_code == 403:
+            # Access Denied
+            return None
         else:
             return None
+        
+    @staticmethod
+    def patch_request(
+        session: requests.Session = requests.Session(),
+        mode: str = None,
+        apikey: str = None,
+        arg1: str = None,
+        arg2: str = None,
+        arg3: str = None,
+    ):
+        
+    @staticmethod
+    def put_request(
+        session: requests.Session = requests.Session(),
+        mode: str = None,
+        apikey: str = None,
+        arg1: str = None,
+        arg2: int = None,
+    ):
+        
+    @staticmethod
+    def delete_request(
+        session: requests.Session = requests.Session(),
+        mode: str = None,
+        apikey: str = None,
+        arg1: str = None,
+        arg2: int = None,
+    ):

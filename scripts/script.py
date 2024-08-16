@@ -834,83 +834,168 @@ def get_kudos_ui():
 
 
 # News UI
-def create_news_ui(news_info):
-    """Creates and returns Gradio UI components based on the news info."""
-    details = []
-
-    for news_item in news_info:
-        if isinstance(news_item, dict):
-            importance = news_item.get("importance", "No importance available")
-            title = news_item.get("title", "No title available")
-            date_published = news_item.get(
-                "date_published", "No published date available"
-            )
-            with gr.Accordion(
-                f"{date_published.replace('_', ' ').title()} - {importance.replace('_', ' ').title()} - {title.replace('_', ' ').title()}"
-            ):
-                value = news_item.get("newspiece", "No message available")
-                message = gr.TextArea(
-                    label="Message",
-                    value=value.replace("_", " ").title(),
-                    interactive=False,
-                )
-                details.append(message)
-
-                tags_value = news_item.get("tags", [])
-                if not isinstance(tags_value, list):
-                    tags_value = []
-
-                tags_string = ", ".join(map(str, tags_value))
-                tags = gr.Textbox(
-                    label="Tags",
-                    value=tags_string.replace("_", " ").title(),
-                    interactive=False,
-                    lines=1,
-                    max_lines=1,
-                )
-                details.append(tags)
-
-    return details
-
-
-def update_news_ui():
-    """Fetches and updates the news UI."""
-    news_info = fetch_api_info("News")
-    updated_values = []
-    for news_item in news_info:
-        if isinstance(news_item, dict):
-            value = news_item.get("newspiece", "No message available")
-            updated_values.append(str(value))
-
-            tags_value = news_item.get("tags", [])
-            if not isinstance(tags_value, list):
-                tags_value = []
-
-            tags_string = ", ".join(map(str, tags_value))
-            updated_values.append(str(tags_string))
-
-    return updated_values
-
-
 def get_news_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as news_ui:
-        news_info = fetch_api_info("News")
+        def update_news_info():
+            news_info_updated = fetch_api_info("News")
+
+            # Prepare to store the values for later use
+            extracted_data = {
+                "titles": [],
+                "publish_dates": [],
+                "importances": [],
+                "newspieces": [],
+                "tags": [],
+            }
+
+            # Process the first five news items (or fewer if not available)
+            for i in range(min(5, len(news_info_updated))):
+                news_item = news_info_updated[i]
+                extracted_data["titles"].append(news_item.get("title"))
+                extracted_data["publish_dates"].append(news_item.get("date_published"))
+                extracted_data["importances"].append(news_item.get("importance"))
+                extracted_data["newspieces"].append(news_item.get("newspiece"))
+                extracted_data["tags"].append(news_item.get("tags"))
+
+            # Ensure there are always 5 items by filling with default values
+            while len(extracted_data["titles"]) < 5:
+                extracted_data["titles"].append("No title available")
+                extracted_data["publish_dates"].append("No date available")
+                extracted_data["importances"].append("No importance available")
+                extracted_data["newspieces"].append("No newspiece available")
+                extracted_data["tags"].append([])
+
+            # Return the data, separating what you need externally and what Gradio will display
+            return extracted_data
+
+        # Function that Gradio will use to display newspiece and tags
+        def update_gradio_outputs():
+            news_data = update_news_info()
+
+            # Flatten the lists for Gradio outputs (up to 5 items)
+            gradio_outputs = []
+            for i in range(5):
+                gradio_outputs.append(news_data["newspieces"][i] if i < len(news_data["newspieces"]) else None)
+                gradio_outputs.append(news_data["tags"][i] if i < len(news_data["tags"]) else None)
+
+            return gradio_outputs
+        
+        # Initial data fetch for setting up the UI
+        news_info = update_news_info()
 
         gr.Markdown("## News", elem_id="news_title")
+        news_update = gr.Button("Update News", elem_id="news-update")
 
-        with gr.Row():
-            news_update = gr.Button("Update News", elem_id="news-update")
+        titles = news_info["titles"]
+        publish_dates = news_info["publish_dates"]
+        importances = news_info["importances"]
 
-        # Create the initial UI components
-        details = create_news_ui(news_info)
+        
+        with gr.Accordion(f"{publish_dates[0]} - {importances[0]} - {titles[0]}"):
+            first_newspiece = gr.Textbox(
+                value=news_info["newspieces"][0],
+                label="newspiece",
+                elem_id="first_newspiece",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            first_tags = gr.Textbox(
+                value=news_info["tags"][0],
+                label="Tags",
+                elem_id="first_tags",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion(f"{publish_dates[1]} - {importances[1]} - {titles[1]}"):
+            second_newspiece = gr.Textbox(
+                value=news_info["newspieces"][1],
+                label="newspiece",
+                elem_id="second_newspiece",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            second_tags = gr.Textbox(
+                value=news_info["tags"][1],
+                label="Tags",
+                elem_id="second_tags",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion(f"{publish_dates[2]} - {importances[2]} - {titles[2]}"):
+            third_newspiece = gr.Textbox(
+                value=news_info["newspieces"][2],
+                label="newspiece",
+                elem_id="third_newspiece",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            third_tags = gr.Textbox(
+                value=news_info["tags"][2],
+                label="Tags",
+                elem_id="third_tags",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion(f"{publish_dates[3]} - {importances[3]} - {titles[3]}"):
+            fourth_newspiece = gr.Textbox(
+                value=news_info["newspieces"][3],
+                label="newspiece",
+                elem_id="fourth_newspiece",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            fourth_tags = gr.Textbox(
+                value=news_info["tags"][3],
+                label="Tags",
+                elem_id="fourth_tags",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+        with gr.Accordion(f"{publish_dates[4]} - {importances[4]} - {titles[4]}"):
+            fifth_newspiece = gr.Textbox(
+                value=news_info["newspieces"][4],
+                label="newspiece",
+                elem_id="fifth_newspiece",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+            fifth_tags = gr.Textbox(
+                value=news_info["tags"][4],
+                label="Tags",
+                elem_id="fifth_tags",
+                interactive=False,
+                lines=1,
+                max_lines=1,
+            )
+
 
         # Update button action
         news_update.click(
-            fn=lambda: update_news_ui(),
-            inputs=[],
-            outputs=details,
-        )
+        fn=update_gradio_outputs,
+        inputs=[],
+        outputs=[
+            first_newspiece,
+            first_tags,
+            second_newspiece,
+            second_tags,
+            third_newspiece,
+            third_tags,
+            fourth_newspiece,
+            fourth_tags,
+            fifth_newspiece,
+            fifth_tags,
+        ],
+    )
 
     return news_ui
 
@@ -919,7 +1004,15 @@ def get_news_ui():
 def get_status_ui():
     """Sets up the status UI with Gradio."""
     with gr.Blocks() as status_ui:
-        status_info = fetch_api_info("Status")
+        def update_status_info():
+            status_info_updated = fetch_api_info("Status")
+            keys = [
+                "maintenance_mode",
+                "invite_only_mode",
+            ]
+            return [status_info_updated.get(key) for key in keys]
+
+        status_info = update_status_info()
 
         gr.Markdown("## Status", elem_id="status_title")
         status_update = gr.Button("Update Status", elem_id="status-update")
@@ -943,14 +1036,6 @@ def get_status_ui():
             lines=1,
             max_lines=1,
         )
-
-        def update_status_info():
-            status_info_updated = fetch_api_info("Status")
-            keys = [
-                "maintenance_mode",
-                "invite_only_mode",
-            ]
-            return [status_info_updated.get(key) for key in keys]
 
         status_update.click(
             fn=update_status_info,

@@ -528,7 +528,7 @@ def get_user_ui():
         )
 
         worker_ids = gr.Textbox(
-            value=worker_info.get("worker_ids"),
+            value=worker_info.get("worker_ids").strip("[]").replace("'", ""),
             label="Worker IDs",
             elem_id="worker_ids",
             interactive=False,

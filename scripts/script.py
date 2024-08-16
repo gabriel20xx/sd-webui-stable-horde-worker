@@ -1047,7 +1047,6 @@ def get_status_ui():
 def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
-
         def update_stats_info():
             stats_info_updated = fetch_api_info("Stats")
             keys = [

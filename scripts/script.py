@@ -676,6 +676,10 @@ def get_team_ui():
         )
 
         def update_team_info(team_id):
+            if not team_id or team_id == None:
+                gr.Error("Please provide a Team ID")
+                return [None] * 6
+            
             team_info_updated = fetch_api_info("Team", team_id)
             keys = [
                 "name",

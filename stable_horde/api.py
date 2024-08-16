@@ -50,7 +50,7 @@ class API:
         if r.status_code == 200:
             return data
         else:
-            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
+            return None
 
     @staticmethod
     def post_request(
@@ -85,9 +85,5 @@ class API:
         data = r.json()
         if r.status_code == 200:
             return data
-        elif r.status_code == 400:
-            return "ValidationError"
-        elif r.status_code == 401:
-            return "InvalidAPIKeyError"
         else:
-            raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
+            return None

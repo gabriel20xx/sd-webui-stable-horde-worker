@@ -132,8 +132,11 @@ def fetch_api_info(mode: str, arg=None):
         case "Worker" | "Team":
             data = api.get_request(session, mode, config.apikey, arg)
 
-    transformed_dict = transform_dict(data, mode)
-    return transformed_dict
+    if data:
+        transformed_dict = transform_dict(data, mode)
+        return transformed_dict
+    else:
+        return None
 
 
 # Generator UI
@@ -1006,8 +1009,6 @@ def get_status_ui():
         gr.Markdown("## Status", elem_id="status_title")
         status_update = gr.Button("Update Status", elem_id="status-update")
 
-        # Create the initial UI components
-
         maintenance_mode = gr.Textbox(
             value=status_info["maintenance_mode"],
             label="Maintenance Mode",
@@ -1388,18 +1389,19 @@ def on_ui_tabs():
                     outputs=[status, running_type, toggle_running],
                 )
 
-                def get_worker(session, apikey, worker_ids):
+                def get_worker(worker_ids):
                     for worker in worker_ids:
                         worker_info = fetch_api_info("Worker", worker)
-                        worker_name = worker_info["name"]
-                        if worker_name == config.name:
-                            return worker
+                        if worker_info:
+                            worker_name = worker_info["name"]
+                            if worker_name == config.name:
+                                return worker
 
                 # TODO Move this somewhere else
                 user_info = fetch_api_info("User")
                 worker_ids = user_info["worker_ids"]
                 if worker_ids:
-                    worker = get_worker(session, config.apikey, worker_ids)
+                    worker = get_worker(worker_ids)
                 else:
                     worker = "Unavailable"
 

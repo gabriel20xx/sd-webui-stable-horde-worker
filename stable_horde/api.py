@@ -76,13 +76,13 @@ class API:
                 }
 
         match mode:
-            case "TRansfer":
+            case "Transfer":
                 r = session.get(
                     "https://stablehorde.net/api/v2/kudos/transfer",
                     json=payload,
                     headers=headers,
                 )
-                
+
         data = r.json()
         if r.status_code == 200:
             return data

@@ -110,7 +110,7 @@ class API:
             return None
         else:
             return None
-        
+
     @staticmethod
     def patch_request(
         session: requests.Session = requests.Session(),
@@ -120,21 +120,24 @@ class API:
         arg2: str = None,
         arg3: str = None,
     ):
-        
+        pass
+
     @staticmethod
     def put_request(
         session: requests.Session = requests.Session(),
         mode: str = None,
         apikey: str = None,
         arg1: str = None,
-        arg2: int = None,
+        arg2: str = None,
     ):
-        
+        pass
+
     @staticmethod
     def delete_request(
         session: requests.Session = requests.Session(),
         mode: str = None,
         apikey: str = None,
         arg1: str = None,
-        arg2: int = None,
+        arg2: str = None,
     ):
+        pass

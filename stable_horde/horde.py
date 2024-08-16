@@ -162,7 +162,7 @@ class StableHorde:
         print("Stable Horde Worker")
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
-        user_info = api.get_request(session, "User", config.apikey)
+        user_info = api.request(session, "User", config.apikey)
         username = user_info["username"]
         id = user_info["id"]
         worker_ids = user_info["worker_ids"]
@@ -171,7 +171,7 @@ class StableHorde:
         print(f"User ID: {id}")
 
         for worker in worker_ids:
-            worker_info = api.get_request(session, "Worker", config.apikey, worker)
+            worker_info = api.request(session, "Worker", config.apikey, worker)
             worker_name = worker_info["name"]
             worker_id = worker_info["id"]
             models = worker_info["models"]

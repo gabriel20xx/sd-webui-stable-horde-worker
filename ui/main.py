@@ -125,11 +125,11 @@ def transform_dict(d, type=None):
 def fetch_api_info(mode: str, arg=None):
     match mode:
         case "News" | "Stats" | "Status":
-            data = api.get_request(session, mode)
+            data = api.request(session, mode)
         case "User" | "Kudos":
-            data = api.get_request(session, mode, config.apikey)
+            data = api.request(session, mode, config.apikey)
         case "Worker" | "Team":
-            data = api.get_request(session, mode, config.apikey, arg)
+            data = api.request(session, mode, config.apikey, arg)
 
     if data:
         transformed_dict = transform_dict(data, mode)
@@ -233,6 +233,7 @@ def get_generator_ui():
                 )
 
     return generator_ui
+
 
 # Worker UI
 def get_worker_ui(worker):
@@ -788,7 +789,7 @@ def get_kudos_ui():
 
         def validate_username(username):
             # Todo
-            result = api.post_request(session, "TransferKudos", config.apikey, username, 0)
+            result = api.request(session, "TransferKudos", config.apikey, username, 0)
             if result == "ValidationError":
                 return "User does not exist"
             elif result == "InvalidAPIKeyError":
@@ -801,7 +802,7 @@ def get_kudos_ui():
                 validation = validate_username(username)
                 if validation == "Success":
                     if kudos_amount and kudos_amount != 0:
-                        result = api.post_request(
+                        result = api.request(
                             session, "Transfer", config.apikey, username, kudos_amount
                         )
                         return result

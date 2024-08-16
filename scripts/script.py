@@ -527,7 +527,6 @@ def get_user_ui():
             max_lines=1,
         )
 
-        worker_ids_value = ", ".join(str(model) for model in user_info.get("models", []))
         worker_ids = gr.Textbox(
             value=worker_ids_value,
             label="Worker IDs",
@@ -587,7 +586,18 @@ def get_user_ui():
                 "vpn",
                 "image_fulfillment",
             ]
-            return [user_info_updated.get(key) for key in keys]
+            # Extract values for the keys
+            user_info_values = [user_info_updated.get(key) for key in keys]
+
+            # Process the worker_ids to remove brackets and single quotes
+            worker_ids_index = keys.index("worker_ids")
+            worker_ids = user_info_values[worker_ids_index]
+
+            if isinstance(worker_ids, list):
+                # Convert list to a string, remove brackets, and remove single quotes
+                user_info_values[worker_ids_index] = ", ".join(worker_ids)
+
+            return user_info_values
 
         user_update.click(
             fn=update_user_info,

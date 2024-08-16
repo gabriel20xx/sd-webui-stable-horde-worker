@@ -1007,13 +1007,13 @@ def get_status_ui():
             invite_only_mode = status_info_updated.get("invite_only_mode", "Unknown")
             return maintenance_mode, invite_only_mode
 
-        status_info = update_status_info()
+        maintenance_mode, invite_only_mode = update_status_info()
 
         gr.Markdown("## Status", elem_id="status_title")
         status_update = gr.Button("Update Status", elem_id="status-update")
 
         maintenance_mode = gr.Textbox(
-            value=status_info["maintenance_mode"],
+            value=maintenance_mode,
             label="Maintenance Mode",
             elem_id="maintenance_mode",
             interactive=False,
@@ -1022,7 +1022,7 @@ def get_status_ui():
         )
 
         invite_only_mode = gr.Textbox(
-            value=status_info["invite_only_mode"],
+            value=invite_only_mode,
             label="Invite Only Mode",
             elem_id="invite_only_mode",
             interactive=False,

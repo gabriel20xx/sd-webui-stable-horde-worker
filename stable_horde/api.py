@@ -84,13 +84,13 @@ class API:
 
         match mode:
             case "TransferKudos":
-                r = session.get(
+                r = session.post(
                     "https://stablehorde.net/api/v2/kudos/transfer",
                     json=payload,
                     headers=headers,
                 )
             case "CreateTeam":
-                r = session.get(
+                r = session.post(
                     "https://stablehorde.net/api/v2/teams",
                     json=payload,
                     headers=headers,
@@ -149,13 +149,13 @@ class API:
 
         match mode:
             case "UpdateTeam":
-                r = session.get(
+                r = session.patch(
                     f"https://stablehorde.net/api/v2/teams/{arg0}",
                     json=payload,
                     headers=headers,
                 )
             case "ModifySharedKey":
-                r = session.get(
+                r = session.patch(
                     f"https://stablehorde.net/api/v2/sharedkeys/{arg0}",
                     json=payload,
                     headers=headers,
@@ -221,13 +221,13 @@ class API:
 
         match mode:
             case "CreateSharedKey":
-                r = session.get(
+                r = session.put(
                     "https://stablehorde.net/api/v2/sharedkeys",
                     json=payload,
                     headers=headers,
                 )
             case "ModifyWorker":
-                r = session.get(
+                r = session.put(
                     f"https://stablehorde.net/api/v2/workers/{arg0}",
                     json=payload,
                     headers=headers,
@@ -267,15 +267,15 @@ class API:
 
         match mode:
             case "DeleteSharedKey":
-                r = session.get(
+                r = session.delete(
                     f"https://stablehorde.net/api/v2/sharedkeys/{arg}", headers=headers
                 )
             case "DeleteTeam":
-                r = session.get(
+                r = session.delete(
                     f"https://stablehorde.net/api/v2/teams/{arg}", headers=headers
                 )
             case "DeleteWorker":
-                r = session.get(
+                r = session.delete(
                     f"https://stablehorde.net/api/v2/workers/{arg}", headers=headers
                 )
 

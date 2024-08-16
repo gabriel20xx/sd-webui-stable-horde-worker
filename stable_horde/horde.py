@@ -171,7 +171,7 @@ class StableHorde:
         print(f"User ID: {id}")
 
         for worker in worker_ids:
-            worker_info = api.get_request(session, "Worker", config.apikey, arg=worker)
+            worker_info = api.get_request(session, "Worker", config.apikey, worker)
             worker_name = worker_info["name"]
             worker_id = worker_info["id"]
             models = worker_info["models"]

@@ -881,7 +881,7 @@ def get_news_ui():
 
             return gradio_outputs
         
-        # Initial data fetch for setting up the UI
+
         news_info = update_news_info()
 
         gr.Markdown("## News", elem_id="news_title")

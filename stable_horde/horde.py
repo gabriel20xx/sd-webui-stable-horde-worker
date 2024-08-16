@@ -30,6 +30,9 @@ safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor: Optional[AutoFeatureExtractor] = None
 safety_checker: Optional[StableDiffusionSafetyChecker] = None
 
+api = API()
+basedir = scripts.basedir()
+config = StableHordeConfig(basedir)
 session = requests.Session()
 
 
@@ -159,9 +162,6 @@ class StableHorde:
         print("Stable Horde Worker")
         print(f"Available Models: {list(sorted(self.current_models.keys()))}")
 
-        api = API()
-        basedir = scripts.basedir()
-        config = StableHordeConfig(basedir)
         user_info = api.get_request(session, "User", config.apikey)
         username = user_info["username"]
         id = user_info["id"]

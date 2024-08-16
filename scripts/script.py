@@ -679,7 +679,7 @@ def get_team_ui():
             if not team_id or team_id == None:
                 gr.Error("Please provide a Team ID")
                 return [None] * 6
-            
+
             team_info_updated = fetch_api_info("Team", team_id)
             keys = [
                 "name",
@@ -710,13 +710,14 @@ def get_team_ui():
 # Kudos UI
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
+
         def update_kudos_info():
             kudos_info_updated = fetch_api_info("User")
             keys = [
                 "kudos",
             ]
             return [kudos_info_updated.get(key) for key in keys]
-        
+
         # Kudos functions
         user_info = fetch_api_info("Kudos")
 
@@ -1046,7 +1047,26 @@ def get_status_ui():
 def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
-        stats_info = fetch_api_info("Stats")
+
+        def update_stats_info():
+            stats_info_updated = fetch_api_info("Stats")
+            keys = [
+                ("minute", "images"),
+                ("minute", "ps"),
+                ("hour", "images"),
+                ("hour", "ps"),
+                ("day", "images"),
+                ("day", "ps"),
+                ("month", "images"),
+                ("month", "ps"),
+                ("total", "images"),
+                ("total", "ps"),
+            ]
+            return [
+                stats_info_updated.get(period, {}).get(stat) for period, stat in keys
+            ]
+
+        stats_info = update_stats_info()
 
         gr.Markdown("## Stats", elem_id="stats_title")
         stats_update = gr.Button("Update Stats", elem_id="stats-update")
@@ -1136,24 +1156,6 @@ def get_stats_ui():
                 lines=1,
                 max_lines=1,
             )
-
-        def update_stats_info():
-            stats_info_updated = fetch_api_info("Stats")
-            keys = [
-                ("minute", "images"),
-                ("minute", "ps"),
-                ("hour", "images"),
-                ("hour", "ps"),
-                ("day", "images"),
-                ("day", "ps"),
-                ("month", "images"),
-                ("month", "ps"),
-                ("total", "images"),
-                ("total", "ps"),
-            ]
-            return [
-                stats_info_updated.get(period, {}).get(stat) for period, stat in keys
-            ]
 
         stats_update.click(
             fn=update_stats_info,
@@ -1405,7 +1407,7 @@ def on_ui_tabs():
                     else:
                         worker = "Unavailable"
                         return worker
-                    
+
                 worker = get_worker()
 
         # General tabs

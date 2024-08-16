@@ -1009,7 +1009,7 @@ def get_status_ui():
         # Create the initial UI components
 
         maintenance_mode = gr.Textbox(
-            value=status_info.get("maintenance_mode", "Unknown"),
+            value=status_info["maintenance_mode"],
             label="Maintenance Mode",
             elem_id="maintenance_mode",
             interactive=False,
@@ -1018,7 +1018,7 @@ def get_status_ui():
         )
 
         invite_only_mode = gr.Textbox(
-            value=status_info.get("invite_only_mode", "Unknown"),
+            value=status_info["invite_only_mode"],
             label="Invite Only Mode",
             elem_id="invite_only_mode",
             interactive=False,

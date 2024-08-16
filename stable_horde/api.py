@@ -91,7 +91,7 @@ class API:
                 )
             case "CreateTeam":
                 r = session.get(
-                    "/v2/teams",
+                    "https://stablehorde.net/api/v2/teams",
                     json=payload,
                     headers=headers,
                 )
@@ -116,11 +116,68 @@ class API:
         session: requests.Session = requests.Session(),
         mode: str = None,
         apikey: str = None,
+        arg0: str = None,
         arg1: str = None,
         arg2: str = None,
         arg3: str = None,
+        arg4: str = None,
+        arg5: str = None,
+        arg6: str = None,
     ):
-        pass
+        match mode:
+            case "UpdateTeam" | "ModifySharedKey":
+                headers = {
+                    "accept": "application/json",
+                    "apikey": apikey,
+                }
+
+        match mode:
+            case "UpdateTeam":
+                payload = {
+                    "name": arg1,
+                    "info": arg2,
+                }
+            case "ModifySharedKey":
+                payload = {
+                    "kudos": arg1,
+                    "expiry": arg2,
+                    "name": arg3,
+                    "max_image_pixels": arg4,
+                    "max_image_steps": arg5,
+                    "max_text_tokens": arg6,
+                }
+
+        match mode:
+            case "UpdateTeam":
+                r = session.get(
+                    f"https://stablehorde.net/api/v2/teams/{arg0}",
+                    json=payload,
+                    headers=headers,
+                )
+            case "ModifySharedKey":
+                r = session.get(
+                    f"https://stablehorde.net/api/v2/sharedkeys/{arg0}",
+                    json=payload,
+                    headers=headers,
+                )
+
+        data = r.json()
+        if r.status_code == 200:
+            return data
+        elif r.status_code == 400:
+            # Validation Error
+            return None
+        elif r.status_code == 401:
+            # Invalid API Key Error
+            return None
+        elif r.status_code == 403:
+            # Access Denied
+            return None
+        elif r.status_code == 404:
+            # Team Or Shared Key Not Found
+            return None
+        else:
+            return None
 
     @staticmethod
     def put_request(

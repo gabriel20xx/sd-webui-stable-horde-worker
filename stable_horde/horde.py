@@ -1,5 +1,4 @@
 import asyncio
-import requests
 import json
 from os import path
 from typing import Any, Dict, List, Optional, Tuple

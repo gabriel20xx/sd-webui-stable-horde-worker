@@ -343,7 +343,7 @@ def get_worker_ui(worker):
             max_lines=1,
         )
         models = gr.Textbox(
-            value=worker_info.get("models"),
+            value=worker_info.get("models").strip("[]").replace("'", ""),
             label="Models",
             elem_id="models",
             interactive=False,

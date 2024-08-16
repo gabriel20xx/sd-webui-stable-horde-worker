@@ -1,5 +1,7 @@
 import requests
 
+horde_url = "https://stablehorde.net/api/v2/"
+
 
 class API:
     @staticmethod
@@ -60,16 +62,7 @@ class API:
                     "name": arg1,
                     "info": arg2,
                 }
-            case "ModifySharedKey":
-                payload = {
-                    "kudos": arg1,
-                    "expiry": arg2,
-                    "name": arg3,
-                    "max_image_pixels": arg4,
-                    "max_image_steps": arg5,
-                    "max_text_tokens": arg6,
-                }
-            case "CreateSharedKey":
+            case "ModifySharedKey" | "CreateSharedKey":
                 payload = {
                     "kudos": arg1,
                     "expiry": arg2,
@@ -90,73 +83,57 @@ class API:
 
         match mode:
             case "News":
-                r = session.get(
-                    "https://stablehorde.net/api/v2/status/news", headers=headers
-                )
+                r = session.get(f"{horde_url}status/news", headers=headers)
             case "Stats":
-                r = session.get(
-                    "https://stablehorde.net/api/v2/stats/img/totals", headers=headers
-                )
+                r = session.get(f"{horde_url}stats/img/totals", headers=headers)
             case "Status":
-                r = session.get(
-                    "https://stablehorde.net/api/v2/status/modes", headers=headers
-                )
+                r = session.get(f"{horde_url}status/modes", headers=headers)
             case "User" | "Kudos":
-                r = session.get(
-                    "https://stablehorde.net/api/v2/find_user", headers=headers
-                )
+                r = session.get(f"{horde_url}find_user", headers=headers)
             case "Worker" | "Team":
-                r = session.get(
-                    f"https://stablehorde.net/api/v2/workers/{arg0}", headers=headers
-                )
+                r = session.get(f"{horde_url}workers/{arg0}", headers=headers)
             case "TransferKudos":
                 r = session.post(
-                    "https://stablehorde.net/api/v2/kudos/transfer",
+                    f"{horde_url}kudos/transfer",
                     json=payload,
                     headers=headers,
                 )
             case "CreateTeam":
                 r = session.post(
-                    "https://stablehorde.net/api/v2/teams",
+                    f"{horde_url}teams",
                     json=payload,
                     headers=headers,
                 )
             case "UpdateTeam":
                 r = session.patch(
-                    f"https://stablehorde.net/api/v2/teams/{arg0}",
+                    f"{horde_url}teams/{arg0}",
                     json=payload,
                     headers=headers,
                 )
             case "ModifySharedKey":
                 r = session.patch(
-                    f"https://stablehorde.net/api/v2/sharedkeys/{arg0}",
+                    f"{horde_url}sharedkeys/{arg0}",
                     json=payload,
                     headers=headers,
                 )
             case "CreateSharedKey":
                 r = session.put(
-                    "https://stablehorde.net/api/v2/sharedkeys",
+                    f"{horde_url}sharedkeys",
                     json=payload,
                     headers=headers,
                 )
             case "ModifyWorker":
                 r = session.put(
-                    f"https://stablehorde.net/api/v2/workers/{arg0}",
+                    f"{horde_url}workers/{arg0}",
                     json=payload,
                     headers=headers,
                 )
             case "DeleteSharedKey":
-                r = session.delete(
-                    f"https://stablehorde.net/api/v2/sharedkeys/{arg0}", headers=headers
-                )
+                r = session.delete(f"{horde_url}sharedkeys/{arg0}", headers=headers)
             case "DeleteTeam":
-                r = session.delete(
-                    f"https://stablehorde.net/api/v2/teams/{arg0}", headers=headers
-                )
+                r = session.delete(f"{horde_url}teams/{arg0}", headers=headers)
             case "DeleteWorker":
-                r = session.delete(
-                    f"https://stablehorde.net/api/v2/workers/{arg0}", headers=headers
-                )
+                r = session.delete(f"{horde_url}workers/{arg0}", headers=headers)
 
         data = r.json()
         if r.status_code == 200:

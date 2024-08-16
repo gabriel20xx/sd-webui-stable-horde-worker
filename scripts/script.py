@@ -1072,7 +1072,7 @@ def get_stats_ui():
 
         with gr.Accordion("Minute"):
             minute_images = gr.Textbox(
-                value=stats_info.get("minute_images"),
+                value=stats_info[0],
                 label="Images",
                 elem_id="minute_images",
                 interactive=False,
@@ -1080,7 +1080,7 @@ def get_stats_ui():
                 max_lines=1,
             )
             minute_ps = gr.Textbox(
-                value=stats_info.get("minute_ps"),
+                value=stats_info[1],
                 label="Pixelsteps",
                 elem_id="minute_ps",
                 interactive=False,
@@ -1089,7 +1089,7 @@ def get_stats_ui():
             )
         with gr.Accordion("Hour"):
             hour_images = gr.Textbox(
-                value=stats_info.get("hour_images"),
+                value=stats_info[2],
                 label="Images",
                 elem_id="hour_images",
                 interactive=False,
@@ -1097,7 +1097,7 @@ def get_stats_ui():
                 max_lines=1,
             )
             hour_ps = gr.Textbox(
-                value=stats_info.get("hour_ps"),
+                value=stats_info[3],
                 label="Pixelsteps",
                 elem_id="hour_ps",
                 interactive=False,
@@ -1106,7 +1106,7 @@ def get_stats_ui():
             )
         with gr.Accordion("Day"):
             day_images = gr.Textbox(
-                value=stats_info.get("day_images"),
+                value=stats_info[4],
                 label="Images",
                 elem_id="day_images",
                 interactive=False,
@@ -1114,7 +1114,7 @@ def get_stats_ui():
                 max_lines=1,
             )
             day_ps = gr.Textbox(
-                value=stats_info.get("day_ps"),
+                value=stats_info[5],
                 label="Pixelsteps",
                 elem_id="day_ps",
                 interactive=False,
@@ -1123,7 +1123,7 @@ def get_stats_ui():
             )
         with gr.Accordion("Month"):
             month_images = gr.Textbox(
-                value=stats_info.get("month_images"),
+                value=stats_info[6],
                 label="Images",
                 elem_id="month_images",
                 interactive=False,
@@ -1131,7 +1131,7 @@ def get_stats_ui():
                 max_lines=1,
             )
             month_ps = gr.Textbox(
-                value=stats_info.get("month_ps"),
+                value=stats_info[7],
                 label="Pixelsteps",
                 elem_id="month_ps",
                 interactive=False,
@@ -1140,7 +1140,7 @@ def get_stats_ui():
             )
         with gr.Accordion("Total"):
             total_images = gr.Textbox(
-                value=stats_info.get("total_images"),
+                value=stats_info[8],
                 label="Images",
                 elem_id="total_images",
                 interactive=False,
@@ -1148,7 +1148,7 @@ def get_stats_ui():
                 max_lines=1,
             )
             total_ps = gr.Textbox(
-                value=stats_info.get("total_ps"),
+                value=stats_info[9],
                 label="Pixelsteps",
                 elem_id="total_ps",
                 interactive=False,

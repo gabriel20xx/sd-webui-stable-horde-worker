@@ -126,11 +126,11 @@ def transform_dict(d, type=None):
 def fetch_api_info(mode: str, arg=None):
     match mode:
         case "News" | "Stats" | "Status":
-            data = api.api_get_request(session, mode)
+            data = api.get_request(session, mode)
         case "User" | "Kudos":
-            data = api.api_get_request(session, mode, config.apikey)
+            data = api.get_request(session, mode, config.apikey)
         case "Worker" | "Team":
-            data = api.api_get_request(session, mode, config.apikey, arg)
+            data = api.get_request(session, mode, config.apikey, arg)
 
     transformed_dict = transform_dict(data, mode)
     return transformed_dict
@@ -1227,13 +1227,13 @@ def on_ui_tabs():
 
                 def get_worker(session, apikey, worker_ids):
                     for worker in worker_ids:
-                        worker_info = api.api_get_request(session, "Worker", apikey, worker)
+                        worker_info = fetch_api_info("Worker", worker)
                         worker_name = worker_info["name"]
                         if worker_name == config.name:
                             return worker
 
                 # TODO Move this somewhere else
-                user_info = api.api_get_request(session, "User", config.apikey)
+                user_info = fetch_api_info("User")
                 worker_ids = user_info["worker_ids"]
                 if worker_ids:
                     worker = get_worker(session, config.apikey, worker_ids)

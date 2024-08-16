@@ -3,7 +3,7 @@ import requests
 
 class API:
     @staticmethod
-    def api_get_request(
+    def get_request(
         session: requests.Session, mode: str, arg1: str = None, arg2: str = None
     ) -> dict:
         """
@@ -54,7 +54,7 @@ class API:
             raise Exception(f"Error: {data.get('message'), 'Unknown API error'}")
 
     @staticmethod
-    def api_post_request(
+    def post_request(
         session: requests.Session, apikey: str, username: str, amount: int
     ):
         """

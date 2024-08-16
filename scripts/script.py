@@ -341,8 +341,9 @@ def get_worker_ui(worker):
             lines=1,
             max_lines=1,
         )
+        models_value = ", ".join(str(model) for model in worker_info.get("models", []))
         models = gr.Textbox(
-            value=", ".join(str(model) for model in worker_info.get("models", [])),
+            value=models_value,
             label="Models",
             elem_id="models",
             interactive=False,
@@ -526,8 +527,9 @@ def get_user_ui():
             max_lines=1,
         )
 
+        worker_ids_value = ", ".join(str(model) for model in user_info.get("models", []))
         worker_ids = gr.Textbox(
-            value=", ".join(str(model) for model in user_info.get("models", [])),
+            value=worker_ids_value,
             label="Worker IDs",
             elem_id="worker_ids",
             interactive=False,
@@ -757,8 +759,9 @@ def get_kudos_ui():
         with gr.Row():
             with gr.Column():
                 # Kudo amount display
+                kudos = int(str(user_info["kudos"]).strip("[]").split(".")[0])
                 your_kudos = gr.Textbox(
-                    int(str(user_info["kudos"]).strip("[]").split(".")[0]),
+                    value=kudos,
                     label="Your Kudos",
                     placeholder="0",
                     elem_id="kudos_display",
@@ -897,7 +900,7 @@ def get_news_ui():
         with gr.Accordion(f"{publish_dates[0]} - {importances[0]} - {titles[0]}"):
             first_newspiece = gr.Textbox(
                 value=news_info["newspieces"][0],
-                label="newspiece",
+                label="Newspiece",
                 elem_id="first_newspiece",
                 interactive=False,
                 lines=4,
@@ -913,7 +916,7 @@ def get_news_ui():
         with gr.Accordion(f"{publish_dates[1]} - {importances[1]} - {titles[1]}"):
             second_newspiece = gr.Textbox(
                 value=news_info["newspieces"][1],
-                label="newspiece",
+                label="Newspiece",
                 elem_id="second_newspiece",
                 interactive=False,
                 lines=4,
@@ -929,7 +932,7 @@ def get_news_ui():
         with gr.Accordion(f"{publish_dates[2]} - {importances[2]} - {titles[2]}"):
             third_newspiece = gr.Textbox(
                 value=news_info["newspieces"][2],
-                label="newspiece",
+                label="Newspiece",
                 elem_id="third_newspiece",
                 interactive=False,
                 lines=4,
@@ -945,7 +948,7 @@ def get_news_ui():
         with gr.Accordion(f"{publish_dates[3]} - {importances[3]} - {titles[3]}"):
             fourth_newspiece = gr.Textbox(
                 value=news_info["newspieces"][3],
-                label="newspiece",
+                label="Newspiece",
                 elem_id="fourth_newspiece",
                 interactive=False,
                 lines=4,
@@ -961,7 +964,7 @@ def get_news_ui():
         with gr.Accordion(f"{publish_dates[4]} - {importances[4]} - {titles[4]}"):
             fifth_newspiece = gr.Textbox(
                 value=news_info["newspieces"][4],
-                label="newspiece",
+                label="Newspiece",
                 elem_id="fifth_newspiece",
                 interactive=False,
                 lines=4,

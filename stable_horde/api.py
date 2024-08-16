@@ -65,7 +65,10 @@ class API:
         """
         match mode:
             case "Transfer":
-                payload = {"username": username, "amount": amount}
+                payload = {
+                    "username": username,
+                    "amount": amount,
+                }
                 headers = {
                     "accept": "application/json",
                     "apikey": apikey,

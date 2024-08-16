@@ -604,14 +604,6 @@ def get_user_ui():
 
 
 # Team UI
-def update_team_ui(team_id):
-    """Fetches and updates the team UI."""
-    team_info = fetch_api_info("Team", team_id)
-    if not team_info:
-        return []  # Return an empty list if team_info is empty
-    return team_info
-
-
 def get_team_ui():
     with gr.Blocks() as team_ui:
         gr.Markdown("## Team Details")
@@ -624,7 +616,7 @@ def get_team_ui():
             max_lines=1,
         )
         team_update = gr.Button("Update Team Details", elem_id="team-update")
-        
+
         name = gr.Textbox(
             value=None,
             label="Name",
@@ -708,17 +700,15 @@ def get_team_ui():
 
 
 # Kudos UI
-def fetch_and_update_kudos():
-    user_info = fetch_api_info("Kudos")
-    if user_info["kudos"]:
-        kudos = user_info["kudos"]
-        return kudos
-
-
 def get_kudos_ui():
     with gr.Blocks() as kudos_ui:
-        details = []
-
+        def update_kudos_info():
+            kudos_info_updated = fetch_api_info("User")
+            keys = [
+                "kudos",
+            ]
+            return [kudos_info_updated.get(key) for key in keys]
+        
         # Kudos functions
         user_info = fetch_api_info("Kudos")
 
@@ -768,7 +758,6 @@ def get_kudos_ui():
                     lines=1,
                     max_lines=1,
                 )
-                details.append(your_kudos)
 
             with gr.Column():
                 # Transfer Kudo amount
@@ -817,9 +806,9 @@ def get_kudos_ui():
                 return "No username specified"
 
         update_kudos.click(
-            fn=lambda: fetch_and_update_kudos(),
+            fn=lambda: update_kudos_info(),
             inputs=[],
-            outputs=details,
+            outputs=your_kudos,
         )
 
         validate.click(
@@ -837,6 +826,7 @@ def get_kudos_ui():
 def get_news_ui():
     """Creates and returns the Gradio UI with an update button."""
     with gr.Blocks() as news_ui:
+
         def update_news_info():
             news_info_updated = fetch_api_info("News")
 
@@ -876,11 +866,16 @@ def get_news_ui():
             # Flatten the lists for Gradio outputs (up to 5 items)
             gradio_outputs = []
             for i in range(5):
-                gradio_outputs.append(news_data["newspieces"][i] if i < len(news_data["newspieces"]) else None)
-                gradio_outputs.append(news_data["tags"][i] if i < len(news_data["tags"]) else None)
+                gradio_outputs.append(
+                    news_data["newspieces"][i]
+                    if i < len(news_data["newspieces"])
+                    else None
+                )
+                gradio_outputs.append(
+                    news_data["tags"][i] if i < len(news_data["tags"]) else None
+                )
 
             return gradio_outputs
-        
 
         news_info = update_news_info()
 
@@ -891,7 +886,6 @@ def get_news_ui():
         publish_dates = news_info["publish_dates"]
         importances = news_info["importances"]
 
-        
         with gr.Accordion(f"{publish_dates[0]} - {importances[0]} - {titles[0]}"):
             first_newspiece = gr.Textbox(
                 value=news_info["newspieces"][0],
@@ -973,24 +967,23 @@ def get_news_ui():
                 max_lines=1,
             )
 
-
         # Update button action
         news_update.click(
-        fn=update_gradio_outputs,
-        inputs=[],
-        outputs=[
-            first_newspiece,
-            first_tags,
-            second_newspiece,
-            second_tags,
-            third_newspiece,
-            third_tags,
-            fourth_newspiece,
-            fourth_tags,
-            fifth_newspiece,
-            fifth_tags,
-        ],
-    )
+            fn=update_gradio_outputs,
+            inputs=[],
+            outputs=[
+                first_newspiece,
+                first_tags,
+                second_newspiece,
+                second_tags,
+                third_newspiece,
+                third_tags,
+                fourth_newspiece,
+                fourth_tags,
+                fifth_newspiece,
+                fifth_tags,
+            ],
+        )
 
     return news_ui
 
@@ -999,6 +992,7 @@ def get_news_ui():
 def get_status_ui():
     """Sets up the status UI with Gradio."""
     with gr.Blocks() as status_ui:
+
         def update_status_info():
             status_info_updated = fetch_api_info("Status")
             keys = [
@@ -1013,9 +1007,9 @@ def get_status_ui():
         status_update = gr.Button("Update Status", elem_id="status-update")
 
         # Create the initial UI components
-        
+
         maintenance_mode = gr.Textbox(
-            value=status_info.get("maintenance_mode"),
+            value=status_info.get("maintenance_mode", "Unknown"),
             label="Maintenance Mode",
             elem_id="maintenance_mode",
             interactive=False,
@@ -1024,7 +1018,7 @@ def get_status_ui():
         )
 
         invite_only_mode = gr.Textbox(
-            value=status_info.get("invite_only_mode"),
+            value=status_info.get("invite_only_mode", "Unknown"),
             label="Invite Only Mode",
             elem_id="invite_only_mode",
             interactive=False,
@@ -1153,7 +1147,9 @@ def get_stats_ui():
                 ("total", "images"),
                 ("total", "ps"),
             ]
-            return [stats_info_updated.get(period, {}).get(stat) for period, stat in keys]
+            return [
+                stats_info_updated.get(period, {}).get(stat) for period, stat in keys
+            ]
 
         stats_update.click(
             fn=update_stats_info,

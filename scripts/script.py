@@ -759,7 +759,7 @@ def get_kudos_ui():
             with gr.Column():
                 # Kudo amount display
                 your_kudos = gr.Textbox(
-                    user_info["kudos"],
+                    int(user_info["kudos"].strip("[]").split(".")[0]),
                     label="Your Kudos",
                     placeholder="0",
                     elem_id="kudos_display",
@@ -1047,6 +1047,7 @@ def get_status_ui():
 def get_stats_ui():
     """Sets up the stats UI with Gradio."""
     with gr.Blocks() as stats_ui:
+
         def update_stats_info():
             stats_info_updated = fetch_api_info("Stats")
             keys = [

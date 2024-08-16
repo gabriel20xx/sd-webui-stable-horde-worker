@@ -177,9 +177,9 @@ class StableHorde:
             models = worker_info["models"]
 
             if worker_name == self.config.name:
-                print(f"Worker id: {worker_id}")
-                print(f"Worker name: {worker_name}")
-                print(f"Worker models: {models}")
+                print(f"Worker ID: {worker_id}")
+                print(f"Worker Name: {worker_name}")
+                print(f"Worker Models: {models}")
                 print("-" * 64)
 
         start_time = time.time()

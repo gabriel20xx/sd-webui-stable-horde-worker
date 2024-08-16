@@ -239,7 +239,8 @@ def get_generator_ui():
 # Worker UI
 def get_worker_ui(worker):
     with gr.Blocks() as worker_ui:
-        worker_info = fetch_api_info("Worker", worker)
+        if worker:
+            worker_info = fetch_api_info("Worker", worker)
 
         gr.Markdown("## Worker Details")
         worker_update = gr.Button("Update Worker Details", elem_id="worker-update")

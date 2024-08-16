@@ -342,7 +342,7 @@ def get_worker_ui(worker):
             max_lines=1,
         )
         models = gr.Textbox(
-            value=worker_info.get("models").strip("[]").replace("'", ""),
+            value=", ".join(str(model) for model in worker_info.get("models", [])),
             label="Models",
             elem_id="models",
             interactive=False,
@@ -476,13 +476,13 @@ def get_worker_ui(worker):
 def get_user_ui():
     """Creates and returns Gradio UI components based on the user info."""
     with gr.Blocks() as user_ui:
-        worker_info = fetch_api_info("User")
+        user_info = fetch_api_info("User")
 
         gr.Markdown("## User Details")
         user_update = gr.Button("Update User Details", elem_id="user-update")
 
         username = gr.Textbox(
-            value=worker_info.get("username"),
+            value=user_info.get("username"),
             label="Username",
             elem_id="username",
             interactive=False,
@@ -491,7 +491,7 @@ def get_user_ui():
         )
 
         id = gr.Textbox(
-            value=worker_info.get("id"),
+            value=user_info.get("id"),
             label="ID",
             elem_id="id",
             interactive=False,
@@ -500,7 +500,7 @@ def get_user_ui():
         )
 
         kudos = gr.Textbox(
-            value=worker_info.get("kudos"),
+            value=user_info.get("kudos"),
             label="Kudos",
             elem_id="kudos",
             interactive=False,
@@ -509,7 +509,7 @@ def get_user_ui():
         )
 
         concurrency = gr.Textbox(
-            value=worker_info.get("concurrency"),
+            value=user_info.get("concurrency"),
             label="Concurrency",
             elem_id="concurrency",
             interactive=False,
@@ -519,7 +519,7 @@ def get_user_ui():
 
         worker_count = gr.Textbox(
             value=worker_info.get("worker_count"),
-            label="Worker Count",
+            label="user_info Count",
             elem_id="worker_count",
             interactive=False,
             lines=1,
@@ -527,7 +527,7 @@ def get_user_ui():
         )
 
         worker_ids = gr.Textbox(
-            value=worker_info.get("worker_ids").strip("[]").replace("'", ""),
+            value=", ".join(str(model) for model in user_info.get("models", [])),
             label="Worker IDs",
             elem_id="worker_ids",
             interactive=False,
@@ -536,7 +536,7 @@ def get_user_ui():
         )
 
         trusted = gr.Textbox(
-            value=worker_info.get("trusted"),
+            value=user_info.get("trusted"),
             label="Trusted",
             elem_id="trusted",
             interactive=False,
@@ -545,7 +545,7 @@ def get_user_ui():
         )
 
         flagged = gr.Textbox(
-            value=worker_info.get("flagged"),
+            value=user_info.get("flagged"),
             label="Flagged",
             elem_id="flagged",
             interactive=False,
@@ -554,7 +554,7 @@ def get_user_ui():
         )
 
         vpn = gr.Textbox(
-            value=worker_info.get("vpn"),
+            value=user_info.get("vpn"),
             label="VPN",
             elem_id="vpn",
             interactive=False,
@@ -563,7 +563,7 @@ def get_user_ui():
         )
 
         image_fulfillment = gr.Textbox(
-            value=worker_info.get("image_fulfillment"),
+            value=user_info.get("image_fulfillment"),
             label="Image Fulfillment",
             elem_id="image_fulfillment",
             interactive=False,

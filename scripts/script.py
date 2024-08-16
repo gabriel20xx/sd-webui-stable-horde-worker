@@ -988,18 +988,18 @@ def get_news_ui():
     return news_ui
 
 
-# Stats UI
+# Status UI
 def get_status_ui():
     """Sets up the status UI with Gradio."""
     with gr.Blocks() as status_ui:
 
         def update_status_info():
             status_info_updated = fetch_api_info("Status")
-            keys = [
-                "maintenance_mode",
-                "invite_only_mode",
-            ]
-            return [status_info_updated.get(key) for key in keys]
+            filtered_info = {
+                "maintenance_mode": status_info_updated.get("maintenance_mode", "Unknown"),
+                "invite_only_mode": status_info_updated.get("invite_only_mode", "Unknown")
+            }
+            return filtered_info
 
         status_info = update_status_info()
 

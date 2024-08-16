@@ -518,7 +518,7 @@ def get_user_ui():
         )
 
         worker_count = gr.Textbox(
-            value=worker_info.get("worker_count"),
+            value=user_info.get("worker_count"),
             label="user_info Count",
             elem_id="worker_count",
             interactive=False,

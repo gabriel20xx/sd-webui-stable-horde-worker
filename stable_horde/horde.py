@@ -17,8 +17,11 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 from .job import HordeJob
 from .config import StableHordeConfig
 from .api import API
-from .save_image import save_image
-from modules import shared, call_queue, processing, sd_models, sd_samplers, scripts
+# from .save_image import save_image
+from modules.images import save_image
+from modules import (
+    shared, call_queue, processing, sd_models, sd_samplers, scripts
+)
 
 
 stable_horde_supported_models_url = (

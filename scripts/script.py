@@ -1349,21 +1349,6 @@ def on_ui_tabs():
             def save_apikey_value(apikey_value: str):
                 apply_stable_horde_apikey(apikey_value)
 
-            def toggle_running_fn(status, running_type, toggle_running):
-                if config.enabled:
-                    config.enabled = False
-                    status.value = "Status: Stopped"
-                    running_type.value = "Running Type: Image Generation"
-                    toggle_running.update(value="Enable", variant="primary")
-                    gr.Info("Generation Disabled")
-                else:
-                    config.enabled = True
-                    status.value = "Status: Running"
-                    toggle_running.update(value="Disable", variant="secondary")
-                    gr.Info("Generation Enabled")
-                config.save()
-                return status, running_type, toggle_running
-
             with gr.Column():
                 apikey = gr.Textbox(
                     config.apikey,
@@ -1376,6 +1361,21 @@ def on_ui_tabs():
                 save_apikey = gr.Button("Save", elem_id=f"{tab_prefix}apikey-save")
 
             with gr.Column():
+                def toggle_running_fn(status, running_type, toggle_running):
+                    if config.enabled:
+                        config.enabled = False
+                        status.value = "Status: Stopped"
+                        running_type.value = "Running Type: Image Generation"
+                        toggle_running.update(value="Enable", variant="primary")
+                        gr.Info("Generation Disabled")
+                    else:
+                        config.enabled = True
+                        status.value = "Status: Running"
+                        toggle_running.update(value="Disable", variant="secondary")
+                        gr.Info("Generation Enabled")
+                    config.save()
+                    return status, running_type, toggle_running
+            
                 status = gr.Textbox(
                     f'{"Running" if config.enabled else "Stopped"}',
                     label="Status",
